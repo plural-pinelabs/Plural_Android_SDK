@@ -5,4 +5,7 @@
     <string name="payment_option">Payment Options</string>
     <string name="auto_close">Auto-closing in</string>
     <string name="auto_close_time">5 sec</string>
+    <string name="payment_failed">Payment Failed</string>
+    <string name="please_try_again">Please try again.</string>
+    <string name="cancel_confirmation_message">If you cancel now, the transaction will be stopped.\nAre you sure you want to proceed?</string>
 </resources>

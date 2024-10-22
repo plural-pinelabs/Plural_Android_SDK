@@ -9,6 +9,7 @@ import android.view.LayoutInflater
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
@@ -44,7 +45,7 @@ class LandingActivity : AppCompatActivity() {
         val viewModelFactory= ViewModelFactory(application)
         viewModel = ViewModelProvider(this,viewModelFactory)[FetchDataViewModel::class.java]
 
-        token = intent.getStringExtra(TOKEN).toString()+"abcd"
+        token = intent.getStringExtra(TOKEN).toString()
 
         getViews()
         fetchData(token)
@@ -62,8 +63,18 @@ class LandingActivity : AppCompatActivity() {
         layoutOrginal = findViewById(R.id.layout_orginal)
         layoutShimmer = findViewById(R.id.layout_shimmer)
 
+        showPaymentListingFragment()
+    }
+
+    fun showPaymentListingFragment() {
+        val arguments = Bundle()
+        arguments.putString(TOKEN, token)
+
+        val paymentListingFragment = PaymentOptionListing()
+        paymentListingFragment.arguments = arguments
+
         val transaction = supportFragmentManager.beginTransaction()
-        transaction.replace(R.id.details_fragment, PaymentOptionListing())
+        transaction.replace(R.id.details_fragment, paymentListingFragment)
         transaction.commit()
     }
 

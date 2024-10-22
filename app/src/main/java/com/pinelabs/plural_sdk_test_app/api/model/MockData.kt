@@ -4,7 +4,7 @@ class MockData {
 
     companion object {
 
-        public val tokenRequest = TokenRequest("8ba31498-3eb1-4ac9-8eaf-4fc4620b528f", "206C7795C73E444C9C41359BEBF4B381", "client_credentials")
+        public val tokenRequest = TokenRequest("3e534945-0a11-4496-801c-6eeb8f63ded0", "34e77c1cc8894c84bbfc5ef2b86c2b41", "client_credentials")
 
         private val orderAmount = OrderAmount(
             50000,

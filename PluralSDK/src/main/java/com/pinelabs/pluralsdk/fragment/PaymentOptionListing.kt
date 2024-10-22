@@ -19,6 +19,7 @@ import com.pinelabs.pluralsdk.data.model.FetchResponse
 import com.pinelabs.pluralsdk.data.model.PaymentMode
 import com.pinelabs.pluralsdk.data.model.RecyclerViewPaymentOptionData
 import com.pinelabs.pluralsdk.data.utils.ApiResultHandler
+import com.pinelabs.pluralsdk.utils.Constants.Companion.TOKEN
 import com.pinelabs.pluralsdk.utils.PaymentModes
 import com.pinelabs.pluralsdk.viewmodels.FetchDataViewModel
 
@@ -28,6 +29,8 @@ class PaymentOptionListing : Fragment(), PaymentOptionsAdapter.OnItemClickListen
     private lateinit var shimmerLayout: ShimmerFrameLayout
 
     private val mainViewModel by activityViewModels<FetchDataViewModel>()
+
+    private lateinit var token : String
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -39,6 +42,8 @@ class PaymentOptionListing : Fragment(), PaymentOptionsAdapter.OnItemClickListen
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        token = arguments?.getString(TOKEN).toString()
 
         recyclerPaymentOptions = view.findViewById(R.id.recycler_payment_options)
         shimmerLayout = view.findViewById(R.id.shimmerFrameLayout)
@@ -88,8 +93,15 @@ class PaymentOptionListing : Fragment(), PaymentOptionsAdapter.OnItemClickListen
     }
 
     fun loadFragment() {
+
+        val arguments = Bundle()
+        arguments.putString(TOKEN, token)
+
+        val cardFragment = CardFragment()
+        cardFragment.arguments = arguments
+
         val transaction = requireActivity().supportFragmentManager.beginTransaction()
-        transaction.replace(R.id.details_fragment, CardFragment())
+        transaction.replace(R.id.details_fragment, cardFragment)
         transaction.addToBackStack(null)
         transaction.commit()
     }

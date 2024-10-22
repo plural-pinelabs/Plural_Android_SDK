@@ -1,5 +1,6 @@
 package com.pinelabs.pluralsdk.fragment
 
+import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.InputFilter
@@ -11,11 +12,26 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.TextView
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import com.pinelabs.pluralsdk.R
+import com.pinelabs.pluralsdk.activity.ACSPageActivity
+import com.pinelabs.pluralsdk.data.model.CardData
+import com.pinelabs.pluralsdk.data.model.CardDataExtra
+import com.pinelabs.pluralsdk.data.model.ProcessPaymentRequest
+import com.pinelabs.pluralsdk.data.model.ProcessPaymentResponse
+import com.pinelabs.pluralsdk.data.utils.ApiResultHandler
+import com.pinelabs.pluralsdk.utils.Constants.Companion.REDIRECT_URL
+import com.pinelabs.pluralsdk.utils.Constants.Companion.TOKEN
+import com.pinelabs.pluralsdk.viewmodels.FetchDataViewModel
 
 class CardFragment : Fragment() {
+
+    private lateinit var token : String
+
+    private val mainViewModel by activityViewModels<FetchDataViewModel>()
 
     private val cardTypes = mapOf(
         "amex" to "^3[47]\\d{13}$".toRegex(),
@@ -52,6 +68,8 @@ class CardFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        token = arguments?.getString(TOKEN).toString()
+
         val etCardNumber: EditText = view.findViewById(R.id.etCardNumber)
         val etExpiry: EditText = view.findViewById(R.id.etExpiry)
         val tvExpiryError: TextView = view.findViewById(R.id.tvExpiryError)
@@ -76,6 +94,13 @@ class CardFragment : Fragment() {
 
         btnProceedToPay.setOnClickListener {
             // Handle payment process here
+            val cardNumber = etCardNumber.text.toString()
+            val cvv = etCVV.text.toString()
+            val cardHolderName = etCardHolderName.text.toString()
+            val cardExpiry = etExpiry.text.toString()
+            val cardExpiryMonth = cardExpiry.split("/")[0]
+            val cardExpiryYear = cardExpiry.split("/")[1]
+            payAction(cardNumber, cvv, cardHolderName, cardExpiryMonth, cardExpiryYear)
         }
 
         btnBack.setOnClickListener {
@@ -258,5 +283,30 @@ class CardFragment : Fragment() {
             }
         }.sum()
         return sum % 10 == 0
+    }
+
+    private fun payAction(cardNumber: String, cvv: String, cardHolderName: String, cardExpiryMonth: String, cardExpiryYear: String) {
+        val paymentMode = arrayListOf<String>()
+        paymentMode.add("CREDIT_DEBIT")
+
+        val cardDataExtra = CardDataExtra(paymentMode, "50000", "INR")
+        //val cardData = CardData(cardNumber, cvv, cardHolderName, cardExpiryYear, cardExpiryMonth)
+        val cardData = CardData("4012001037141112", "233", "sss", "2028", "12")
+        val processPaymentRequest = ProcessPaymentRequest(cardData, cardDataExtra)
+        mainViewModel.processPayment(token, processPaymentRequest)
+        mainViewModel.process_payment_response.observe(requireActivity()) { response ->
+            val fetchDataResponseHandler = ApiResultHandler<ProcessPaymentResponse>(requireActivity(),
+                onLoading = {
+                }, onSuccess = { data ->
+                    Toast.makeText(activity,data!!.redirect_url, Toast.LENGTH_SHORT).show()
+                    val i = Intent(activity, ACSPageActivity::class.java)
+                    i.putExtra(REDIRECT_URL, data!!.redirect_url)
+                    startActivity(i)
+                    requireActivity().finish()
+                }, onFailure = {
+
+                })
+            fetchDataResponseHandler.handleApiResult(response)
+        }
     }
 }

@@ -3,9 +3,11 @@
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET"/>
-    <application>
+    <application
+        android:usesCleartextTraffic="true">
     <activity android:name=".activity.SplashActivity"/>
     <activity android:name=".activity.LandingActivity"/>
     <activity android:name=".activity.FailureActivity"/>
+    <activity android:name=".activity.ACSPageActivity"/>
 </application>
 </manifest>

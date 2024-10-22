@@ -116,4 +116,8 @@ class TestAppActivity : AppCompatActivity(), PaymentResultCallBack{
         Toast.makeText(this@TestAppActivity, "Error in app ${message}", Toast.LENGTH_SHORT).show()
     }
 
+    override fun onTransactionResponse() {
+        Toast.makeText(this@TestAppActivity, "Success in app", Toast.LENGTH_SHORT).show()
+    }
+
 }
