@@ -6,6 +6,7 @@ import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import com.pinelabs.pluralsdk.R
+import com.pinelabs.pluralsdk.fragment.PaymentOptionListing
 
 class LandingActivity : AppCompatActivity() {
 
@@ -22,6 +23,10 @@ class LandingActivity : AppCompatActivity() {
     fun getViews() {
         layoutOrginal = findViewById(R.id.layout_orginal)
         layoutShimmer = findViewById(R.id.layout_shimmer)
+
+        val transaction = supportFragmentManager.beginTransaction()
+        transaction.replace(R.id.details_fragment, PaymentOptionListing())
+        transaction.commit()
 
         startShimmer()
         Handler().postDelayed({
