@@ -42,10 +42,21 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.converter.gson)
+    implementation(libs.retrofit.logging.interceptor)
+
     implementation(libs.lottie)
 
     implementation(libs.shimmer)
 
+    implementation(libs.lifecycle.runtime)
+    implementation(libs.lifecycle.extension)
+    implementation(libs.lifecycle.viewmodel)
+    implementation(libs.lifecycle.livedata)
+
+    implementation(libs.activity.ktx)
+    implementation(libs.fragment.ktx)
 }
 
 afterEvaluate {
