@@ -1,5 +1,6 @@
 package com.pinelabs.pluralsdk.activity
 
+import android.content.Intent
 import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.util.Base64
@@ -13,6 +14,7 @@ import com.pinelabs.pluralsdk.R
 import com.pinelabs.pluralsdk.data.model.FetchResponse
 import com.pinelabs.pluralsdk.data.utils.ApiResultHandler
 import com.pinelabs.pluralsdk.fragment.PaymentOptionListing
+import com.pinelabs.pluralsdk.utils.Constants.Companion.ERROR_MESSAGE
 import com.pinelabs.pluralsdk.utils.Constants.Companion.TOKEN
 import com.pinelabs.pluralsdk.viewmodels.FetchDataViewModel
 import com.pinelabs.pluralsdk.viewmodels.ViewModelFactory
@@ -39,7 +41,7 @@ class LandingActivity : AppCompatActivity() {
         val viewModelFactory= ViewModelFactory(application)
         viewModel = ViewModelProvider(this,viewModelFactory)[FetchDataViewModel::class.java]
 
-        token = intent.getStringExtra(TOKEN).toString()
+        token = intent.getStringExtra(TOKEN).toString()+"abcd"
 
         getViews()
         fetchData(token)
@@ -74,7 +76,10 @@ class LandingActivity : AppCompatActivity() {
                     }, onSuccess = { data ->
                         setView(data)
                     }, onFailure = { errorMessage ->
-
+                        val i = Intent(applicationContext, FailureActivity::class.java)
+                        i.putExtra(ERROR_MESSAGE, errorMessage)
+                        startActivity(i)
+                        finish()
                     })
                 fetchDataResponseHandler.handleApiResult(response)
             }

@@ -16,12 +16,13 @@ import com.pinelabs.plural_sdk_test_app.api.model.TokenResponse
 import com.pinelabs.plural_sdk_test_app.utils.Constants.Companion.BEARER
 import com.pinelabs.plural_sdk_test_app.utils.Constants.Companion.ORDER
 import com.pinelabs.pluralsdk.PluralSDKManager
+import com.pinelabs.pluralsdk.callback.PaymentResultCallBack
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import java.util.UUID
 
-class TestAppActivity : AppCompatActivity(){
+class TestAppActivity : AppCompatActivity(), PaymentResultCallBack{
 
     private lateinit var apiInterface: ApiService
 
@@ -109,6 +110,10 @@ class TestAppActivity : AppCompatActivity(){
 
         })
 
+    }
+
+    override fun onErrorOccured(message: String?) {
+        Toast.makeText(this@TestAppActivity, "Error in app ${message}", Toast.LENGTH_SHORT).show()
     }
 
 }

@@ -3,8 +3,10 @@ package com.pinelabs.pluralsdk.utils
 class Constants {
     companion object {
         const val TOKEN = "TOKEN"
+        const val ERROR_MESSAGE = "ERROR_MESSAGE"
 
         const val SPLASH_TIMER:Long = 2300
+        const val FAILURE_TIMER:Long = 5000
 
         const val BASE_URL = "https://pluralqa.pinepg.in/api/v3/checkout-bff/"
 
@@ -15,5 +17,10 @@ class Constants {
         const val NET_BANKING_LABEL = "Netbanking"
         const val UPI_LABEL = "UPI"
         const val WALLET_LABEL = "WALLET"
+
+        const val START_BOLD = "<b>"
+        const val END_BOLD = "</b>"
+        const val SPACE = " "
+
     }
 }

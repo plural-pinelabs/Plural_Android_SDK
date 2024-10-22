@@ -3,4 +3,6 @@
     <string name="rs">\u20B9</string>
     <string name="cancel">Cancel</string>
     <string name="payment_option">Payment Options</string>
+    <string name="auto_close">Auto-closing in</string>
+    <string name="auto_close_time">5 sec</string>
 </resources>
