@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="rs">\u20B9</string>
+    <string name="cancel">Cancel</string>
+    <string name="payment_option">Payment Options</string>
+</resources>
