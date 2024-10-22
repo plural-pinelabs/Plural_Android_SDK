@@ -42,6 +42,7 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
+    implementation(project(":PluralSDK"))
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -50,6 +51,6 @@ dependencies {
     implementation(libs.retrofit.converter.gson)
     implementation(libs.retrofit.logging.interceptor)
 
-    implementation(libs.plural)
+    //implementation(libs.plural)
 
 }

@@ -87,7 +87,7 @@ class TestAppActivity : AppCompatActivity(){
 
                 if (response.isSuccessful && response.body()!=null){
                     token = response.body()!!.token
-                    PluralSDKManager().startPayment()
+                    PluralSDKManager().startPayment(this@TestAppActivity, token)
                 } else {
                     try {
                         if (response.errorBody()!=null) {
