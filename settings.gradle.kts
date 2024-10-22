@@ -16,9 +16,10 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        mavenLocal()
     }
 }
 
 rootProject.name = "Plural_SDK_Test_App"
 include(":app")
- 
+include(":PluralSDK")

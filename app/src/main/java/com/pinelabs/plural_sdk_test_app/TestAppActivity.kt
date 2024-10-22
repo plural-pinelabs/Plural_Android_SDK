@@ -15,6 +15,7 @@ import com.pinelabs.plural_sdk_test_app.api.model.TokenFailure
 import com.pinelabs.plural_sdk_test_app.api.model.TokenResponse
 import com.pinelabs.plural_sdk_test_app.utils.Constants.Companion.BEARER
 import com.pinelabs.plural_sdk_test_app.utils.Constants.Companion.ORDER
+import com.pinelabs.pluralsdk.PluralSDKManager
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -86,6 +87,7 @@ class TestAppActivity : AppCompatActivity(){
 
                 if (response.isSuccessful && response.body()!=null){
                     token = response.body()!!.token
+                    PluralSDKManager().startPayment()
                 } else {
                     try {
                         if (response.errorBody()!=null) {
