@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- Title and Back Button -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingBottom="16dp">
+
+            <ImageButton
+                android:id="@+id/btnBack"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="?android:selectableItemBackground"
+                android:src="@drawable/back_button" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Cards"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:textColor="@android:color/black" />
+        </LinearLayout>
+
+        <!-- Card Number Field -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Card Number"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:fontFamily="@font/robotoregular"
+            android:layout_marginBottom="8dp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="16dp">
+
+            <EditText
+                android:id="@+id/etCardNumber"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:hint="Enter Card Number"
+                android:maxLength="19"
+                android:inputType="number"
+                android:padding="12dp"
+                android:background="@drawable/edittext_default_border" />
+        </LinearLayout>
+
+        <!-- Card Number Error Message -->
+        <TextView
+            android:id="@+id/tvCardNumberError"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="#EB001B"
+            android:layout_marginTop="4dp"
+            android:visibility="gone" /> <!-- Initially hidden -->
+
+        <!-- Expiry and CVV Headers -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="8dp">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Expiry (MM/YY)"
+                android:textSize="12sp"
+                android:fontFamily="@font/robotoregular"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="CVV"
+                android:textSize="12sp"
+                android:fontFamily="@font/robotoregular"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <!-- Expiry and CVV Fields -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="16dp"
+            android:gravity="center_vertical"
+            android:weightSum="2">
+
+            <!-- Expiry Field -->
+            <EditText
+                android:id="@+id/etExpiry"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:hint="MM/YY"
+                android:inputType="date"
+                android:padding="12dp"
+                android:background="@drawable/edittext_default_border"
+                android:layout_marginEnd="8dp" />
+
+            <!-- CVV Field -->
+            <EditText
+                android:id="@+id/etCVV"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:hint="CVV"
+                android:inputType="numberPassword"
+                android:padding="12dp"
+                android:background="@drawable/edittext_default_border" />
+        </LinearLayout>
+
+        <!-- Expiry Error Message -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingTop="5dp">
+            <!-- Expiry Error Message -->
+            <TextView
+                android:id="@+id/tvExpiryError"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:textColor="#EB001B"
+                android:layout_marginTop="2dp"
+                android:layout_marginBottom="2dp"
+                android:text="Invalid Expiry Date"
+                android:layout_weight="1"
+                android:visibility="gone" /> <!-- Initially hidden -->
+
+
+            <!-- CVV Error Message (below the CVV box) -->
+            <TextView
+                android:id="@+id/tvCVVError"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:textColor="#EB001B"
+                android:layout_marginTop="2dp"
+                android:layout_marginBottom="2dp"
+                android:text="Invalid CVV"
+                android:layout_weight="1"
+                android:visibility="gone" /> <!-- Initially hidden -->
+
+
+        </LinearLayout>
+
+        <!-- Card Holder's Name Header -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Card Holder's Name"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp" />
+
+        <!-- Card Holder's Name Field -->
+        <EditText
+            android:id="@+id/etCardHolderName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Full Name on Card"
+            android:padding="12dp"
+            android:background="@drawable/edittext_default_border"
+            android:layout_marginBottom="68dp"
+            android:inputType="textPersonName" />
+
+        <!-- Proceed to Pay Button -->
+        <Button
+            android:id="@+id/btnProceedToPay"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:drawableLeft="@drawable/lock_keyhole_minimalistic"
+            android:drawablePadding="8dp"
+            android:text="Proceed to Pay"
+            android:backgroundTint="@color/colorPrimary"
+            android:textColor="@android:color/white"
+            android:padding="12dp" />
+    </LinearLayout>
+</ScrollView>

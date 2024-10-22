@@ -13,7 +13,7 @@ class Constants {
         const val API_INTERNET_MESSAGE = "No Internet Connection"
         const val API_ERROR = "API_ERROR"
 
-        const val CREDIT_DEBIT_LABEL = "Credit/Debit Cards"
+        const val CREDIT_DEBIT_LABEL = "Cards"
         const val NET_BANKING_LABEL = "Netbanking"
         const val UPI_LABEL = "UPI"
         const val WALLET_LABEL = "WALLET"

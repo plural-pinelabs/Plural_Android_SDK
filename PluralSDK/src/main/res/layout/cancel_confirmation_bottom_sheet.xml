@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:gravity="center_horizontal"
+    android:background="@android:color/white">
+
+    <!-- Warning Icon -->
+    <ImageView
+        android:id="@+id/img_warning_icon"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:src="@drawable/warning_bottomsheet"
+        android:layout_gravity="center"
+        android:layout_marginBottom="16dp" />
+
+    <!-- Cancel Payment Text -->
+    <TextView
+        android:id="@+id/tv_cancel_payment"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Cancel payment?"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:textColor="@android:color/black"
+        android:gravity="center"
+        android:layout_marginBottom="8dp"/>
+
+    <!-- Confirmation Message Text -->
+    <TextView
+        android:id="@+id/tv_confirmation_message"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="If you cancel now, the transaction will be stopped.\nAre you sure you want to proceed?"
+        android:textSize="14sp"
+        android:alpha="0.8"
+        android:textColor="@android:color/black"
+        android:gravity="center"
+        android:layout_marginBottom="32dp"/>
+
+    <!-- Yes, Cancel Button -->
+    <Button
+        android:id="@+id/btn_yes"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Yes, Cancel"
+        android:backgroundTint="#500080"
+        android:background="@drawable/curved_button"
+        android:textColor="@android:color/white"
+        android:paddingTop="12dp"
+        android:paddingBottom="12dp"
+        android:textAllCaps="false"
+        android:layout_marginBottom="16dp"/>
+
+    <!-- No Button -->
+    <Button
+        android:id="@+id/btn_no"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="No"
+        android:background="@drawable/outlined_button"
+        android:textColor="#500080"
+        android:paddingTop="12dp"
+        android:paddingBottom="12dp"
+        android:textAllCaps="false"
+        android:layout_marginTop="8dp"/>
+
+</LinearLayout>

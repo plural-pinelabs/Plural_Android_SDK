@@ -5,11 +5,14 @@ import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.util.Base64
 import android.view.View
+import android.view.LayoutInflater
+import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.pinelabs.pluralsdk.R
 import com.pinelabs.pluralsdk.data.model.FetchResponse
 import com.pinelabs.pluralsdk.data.utils.ApiResultHandler
@@ -45,6 +48,7 @@ class LandingActivity : AppCompatActivity() {
 
         getViews()
         fetchData(token)
+        setupCancelAction()
         observerFetchData()
     }
 
@@ -67,6 +71,48 @@ class LandingActivity : AppCompatActivity() {
         viewModel.fetchData(token)
     }
 
+    private fun setupCancelAction() {
+        val cancelLayout: View = findViewById(R.id.cancel_layout)
+        cancelLayout.setOnClickListener {
+            showCancelConfirmationDialog() // Show popup from cross button
+        }
+    }
+
+    private fun showCancelConfirmationDialog() {
+        val bottomSheetDialog = BottomSheetDialog(this)
+        val view = LayoutInflater.from(this).inflate(R.layout.cancel_confirmation_bottom_sheet, null)
+        bottomSheetDialog.setContentView(view)
+
+        val btnYes: Button = view.findViewById(R.id.btn_yes)
+        val btnNo: Button = view.findViewById(R.id.btn_no)
+
+        btnYes.setOnClickListener {
+            bottomSheetDialog.dismiss()
+            Toast.makeText(this, "Transaction cancelled", Toast.LENGTH_SHORT).show()
+            finish() // Close the activity if the user confirms cancellation
+        }
+
+        btnNo.setOnClickListener {
+            bottomSheetDialog.dismiss()
+        }
+
+        bottomSheetDialog.show()
+    }
+
+    // Override onBackPressed to show the confirmation popup on back press
+    override fun onBackPressed() {
+        if (isCurrentActivity()) {
+            showCancelConfirmationDialog() // Show popup from native back button press
+        } else {
+            super.onBackPressed() // Proceed with normal back press for other activities
+        }
+    }
+
+    // Function to check if the user is on LandingActivity
+    private fun isCurrentActivity(): Boolean {
+        return this@LandingActivity.javaClass.simpleName == "LandingActivity"
+    }
+    
     fun observerFetchData() {
         try {
             viewModel.fetch_response.observe(this) { response ->
