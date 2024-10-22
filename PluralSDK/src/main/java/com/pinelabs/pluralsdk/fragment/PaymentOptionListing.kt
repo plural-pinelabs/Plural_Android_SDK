@@ -4,10 +4,30 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
+import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.facebook.shimmer.ShimmerFrameLayout
 import com.pinelabs.pluralsdk.R
+import com.pinelabs.pluralsdk.adapter.DividerItemDecorator
+import com.pinelabs.pluralsdk.adapter.PaymentOptionsAdapter
+import com.pinelabs.pluralsdk.data.model.FetchResponse
+import com.pinelabs.pluralsdk.data.model.PaymentMode
+import com.pinelabs.pluralsdk.data.model.RecyclerViewPaymentOptionData
+import com.pinelabs.pluralsdk.data.utils.ApiResultHandler
+import com.pinelabs.pluralsdk.utils.PaymentModes
+import com.pinelabs.pluralsdk.viewmodels.FetchDataViewModel
 
-class PaymentOptionListing : Fragment() {
+class PaymentOptionListing : Fragment(), PaymentOptionsAdapter.OnItemClickListener {
+
+    private lateinit var recyclerPaymentOptions: RecyclerView
+    private lateinit var shimmerLayout: ShimmerFrameLayout
+
+    private val mainViewModel by activityViewModels<FetchDataViewModel>()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -15,6 +35,88 @@ class PaymentOptionListing : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         return inflater.inflate(R.layout.fragment_payment_list, container, false)
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        recyclerPaymentOptions = view.findViewById(R.id.recycler_payment_options)
+        shimmerLayout = view.findViewById(R.id.shimmerFrameLayout)
+        startShimmer()
+        mainViewModel.fetch_response.observe(requireActivity()) { response ->
+            val fetchDataResponseHandler = ApiResultHandler<FetchResponse>(requireActivity(),
+                onLoading = {
+                }, onSuccess = { data ->
+                    stopShimmer()
+                    listData(mapPaymentModes(response.data!!.paymentModes!!))
+                }, onFailure = {}
+            )
+            fetchDataResponseHandler.handleApiResult(response)
+        }
+    }
+
+    private fun mapPaymentModes(paymentModes: List<PaymentMode>): List<RecyclerViewPaymentOptionData> {
+        val paymentModeMap = mutableListOf<RecyclerViewPaymentOptionData>()
+        paymentModes.forEach { pm ->
+            var paymentModeData = RecyclerViewPaymentOptionData()
+            when (pm.paymentModeId) {
+                PaymentModes.CREDIT_DEBIT.toString() -> paymentModeData =
+                    RecyclerViewPaymentOptionData(
+                        PaymentModes.CREDIT_DEBIT.paymentModeImage,
+                        PaymentModes.CREDIT_DEBIT.paymentModeName
+                    )
+
+                PaymentModes.NET_BANKING.toString() -> paymentModeData =
+                    RecyclerViewPaymentOptionData(
+                        PaymentModes.NET_BANKING.paymentModeImage,
+                        PaymentModes.NET_BANKING.paymentModeName
+                    )
+
+                PaymentModes.UPI.toString() -> paymentModeData = RecyclerViewPaymentOptionData(
+                    PaymentModes.UPI.paymentModeImage, PaymentModes.UPI.paymentModeName
+                )
+            }
+            if (!paymentModeData.payment_option.isEmpty())
+                paymentModeMap.add(paymentModeData)
+        }
+        return paymentModeMap
+    }
+
+    override fun onItemClick(item: RecyclerViewPaymentOptionData?) {
+        Toast.makeText(activity, item!!.payment_option, Toast.LENGTH_SHORT).show()
+        loadFragment()
+    }
+
+    fun loadFragment() {
+        val transaction = requireActivity().supportFragmentManager.beginTransaction()
+        transaction.replace(R.id.details_fragment, CardFragment())
+        transaction.addToBackStack(null)
+        transaction.commit()
+    }
+
+    fun startShimmer() {
+        shimmerLayout.startShimmer()
+        shimmerLayout.isVisible = true
+        recyclerPaymentOptions.isVisible = false
+    }
+
+    fun stopShimmer() {
+        shimmerLayout.stopShimmer()
+        shimmerLayout.isVisible = false
+        recyclerPaymentOptions.isVisible = true
+    }
+
+    fun listData(paymentData:List<RecyclerViewPaymentOptionData>) {
+        val layoutManager =
+            LinearLayoutManager(activity, LinearLayoutManager.VERTICAL, false)
+        val myRecyclerViewAdapter = PaymentOptionsAdapter(paymentData, this)
+        recyclerPaymentOptions.adapter = myRecyclerViewAdapter
+        recyclerPaymentOptions.layoutManager = layoutManager
+        val dividerItemDecoration: RecyclerView.ItemDecoration = DividerItemDecorator(
+            ContextCompat.getDrawable(requireContext(), R.drawable.divider)!!
+        )
+        recyclerPaymentOptions.addItemDecoration(dividerItemDecoration)
+        myRecyclerViewAdapter.notifyDataSetChanged()
     }
 
 }
