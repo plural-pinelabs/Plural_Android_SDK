@@ -84,10 +84,17 @@ class LandingActivity : AppCompatActivity() {
 
     private fun setupCancelAction() {
         val cancelLayout: View = findViewById(R.id.cancel_layout)
-        cancelLayout.setOnClickListener {
+        val cancelShimmerlayout: View = findViewById(R.id.cancel_layout_shimmer)
+
+        cancelShimmerlayout.setOnClickListener {
             showCancelConfirmationDialog() // Show popup from cross button
         }
+
+        cancelLayout.setOnClickListener {
+            showCancelConfirmationDialog()
+        }
     }
+
 
     private fun showCancelConfirmationDialog() {
         val bottomSheetDialog = BottomSheetDialog(this)
