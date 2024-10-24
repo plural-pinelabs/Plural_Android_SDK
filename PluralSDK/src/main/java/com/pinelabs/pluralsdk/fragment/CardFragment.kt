@@ -76,16 +76,6 @@ class CardFragment : Fragment() {
 
     private lateinit var btnProceedToPay: Button
 
-    private fun updateButtonBackground() {
-        if (isCardNumberValid && isExpiryValid && isCVVValid && isCardHolderNameValid) {
-            btnProceedToPay.isEnabled = true
-            btnProceedToPay.setBackgroundResource(R.color.colorSecondary) // Enabled state with secondary color
-        } else {
-            btnProceedToPay.isEnabled = false
-            btnProceedToPay.setBackgroundResource(R.color.colorPrimary) // Disabled state with primary color
-        }
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
     }
@@ -111,7 +101,7 @@ class CardFragment : Fragment() {
         val etCardHolderName: EditText = view.findViewById(R.id.etCardHolderName)
         val etCVV: EditText = view.findViewById(R.id.etCVV)
         val tvCVVError: TextView = view.findViewById(R.id.tvCVVError)
-        val btnProceedToPay: Button = view.findViewById(R.id.btnProceedToPay)
+        btnProceedToPay = view.findViewById(R.id.btnProceedToPay)
         val tvCardNumberError: TextView = view.findViewById(R.id.tvCardNumberError)
         val btnBack: ImageButton = view.findViewById(R.id.btnBack)
         btnProceedToPay.isEnabled = false
@@ -179,6 +169,16 @@ class CardFragment : Fragment() {
                 }
                 updateButtonBackground() // Update the button background based on validation
             }
+        }
+    }
+
+    private fun updateButtonBackground() {
+        if (isCardNumberValid && isExpiryValid && isCVVValid && isCardHolderNameValid) {
+            btnProceedToPay.isEnabled = true
+            btnProceedToPay.setBackgroundResource(R.color.colorSecondary) // Enabled state with secondary color
+        } else {
+            btnProceedToPay.isEnabled = false
+            btnProceedToPay.setBackgroundResource(R.color.colorPrimary) // Disabled state with primary color
         }
     }
 
@@ -380,31 +380,8 @@ class CardFragment : Fragment() {
         mainViewModel.process_payment_response.observe(requireActivity()) { response ->
             val fetchDataResponseHandler = ApiResultHandler<ProcessPaymentResponse>(requireActivity(),
                 onLoading = {
-//                    showProcessPaymentDialog()
+                    showProcessPaymentDialog()
                 }, onSuccess = { data ->
-                    val i = Intent(activity, ACSPageActivity::class.java)
-                    i.putExtra(REDIRECT_URL, data!!.redirect_url)
-                    startActivity(i)
-                    requireActivity().finish()
-//                    bottomSheetDialog.findViewById<LottieAnimationView>(R.id.img_logo)!!.addAnimatorListener(object : Animator.AnimatorListener{
-//                        override fun onAnimationStart(p0: Animator) {
-//                        }
-//
-//                        override fun onAnimationEnd(p0: Animator) {
-//                            Toast.makeText(activity, "Ended", Toast.LENGTH_SHORT).show()
-//                        }
-//
-//                        override fun onAnimationCancel(p0: Animator) {
-//                        }
-//
-//                        override fun onAnimationRepeat(p0: Animator) {
-//
-//                        }
-//
-//                    })
-
-                }, onFailure = { errorMessage ->
-
                     bottomSheetDialog.findViewById<LottieAnimationView>(R.id.img_logo)!!.addAnimatorListener(object : Animator.AnimatorListener{
                         override fun onAnimationStart(p0: Animator) {
                         }
@@ -417,6 +394,29 @@ class CardFragment : Fragment() {
                         }
 
                         override fun onAnimationRepeat(p0: Animator) {
+                            bottomSheetDialog.dismiss()
+                            val i = Intent(activity, ACSPageActivity::class.java)
+                            i.putExtra(REDIRECT_URL, data!!.redirect_url)
+                            startActivity(i)
+                            requireActivity().finish()
+                        }
+
+                    })
+
+                }, onFailure = { errorMessage ->
+                    bottomSheetDialog.findViewById<LottieAnimationView>(R.id.img_logo)!!.addAnimatorListener(object : Animator.AnimatorListener{
+                        override fun onAnimationStart(p0: Animator) {
+                        }
+
+                        override fun onAnimationEnd(p0: Animator) {
+                            Toast.makeText(activity, "Ended", Toast.LENGTH_SHORT).show()
+                        }
+
+                        override fun onAnimationCancel(p0: Animator) {
+                        }
+
+                        override fun onAnimationRepeat(p0: Animator) {
+                            bottomSheetDialog.dismiss()
                             val i = Intent(requireActivity(), FailureActivity::class.java)
                             i.putExtra(ERROR_MESSAGE, errorMessage)
                             startActivity(i)
@@ -442,10 +442,10 @@ class CardFragment : Fragment() {
         }
     }
 
-//    private fun showProcessPaymentDialog() {
-//        val view = LayoutInflater.from(requireActivity()).inflate(R.layout.process_payment_bottom_sheet, null)
-//        bottomSheetDialog.setContentView(view)
-//
-//        bottomSheetDialog.show()
-//    }
+    private fun showProcessPaymentDialog() {
+        val view = LayoutInflater.from(requireActivity()).inflate(R.layout.process_payment_bottom_sheet, null)
+        bottomSheetDialog.setContentView(view)
+
+        bottomSheetDialog.show()
+    }
 }

@@ -15,27 +15,12 @@ import com.pinelabs.pluralsdk.utils.Constants.Companion.REDIRECT_URL
 import com.pinelabs.pluralsdk.utils.Constants.Companion.SUCCESS_REDIRECT_URL
 
 class ACSPageActivity : AppCompatActivity() {
-
     private lateinit var webAcs: WebView
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.acs_webpage)
 
         webAcs = findViewById(R.id.web_acs)
-
-        webAcs.loadUrl(intent!!.getStringExtra(REDIRECT_URL).toString())
-        webAcs.webViewClient = object : WebViewClient() {
-            override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
-                super.onPageStarted(view, url, favicon)
-                if (url!!.contains(SUCCESS_REDIRECT_URL)){
-
-                }
-            }
-        }
-
-    }
-    public fun setUpWebview(){
         webAcs.settings.javaScriptEnabled = true
         webAcs.settings.loadWithOverviewMode = true
         webAcs.settings.useWideViewPort = true
@@ -58,5 +43,18 @@ class ACSPageActivity : AppCompatActivity() {
                 return false
             }
         })
+
+        webAcs.loadUrl(intent!!.getStringExtra(REDIRECT_URL).toString())
+        webAcs.webViewClient = object : WebViewClient() {
+            override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
+                super.onPageStarted(view, url, favicon)
+                println("URL $url")
+                if (url!!.contains(SUCCESS_REDIRECT_URL)){
+                    /*PluralSDK.getInstance().
+                    PluralSDK.getInstance().callback!!.onTransactionResponse()*/
+                }
+            }
+        }
+
     }
 }
