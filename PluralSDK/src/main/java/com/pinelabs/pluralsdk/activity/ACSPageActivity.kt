@@ -1,5 +1,6 @@
 package com.pinelabs.pluralsdk.activity
 
+import android.content.Intent
 import android.graphics.Bitmap
 import android.os.Build
 import android.os.Bundle
@@ -50,6 +51,11 @@ class ACSPageActivity : AppCompatActivity() {
                 super.onPageStarted(view, url, favicon)
                 println("URL $url")
                 if (url!!.contains(SUCCESS_REDIRECT_URL)){
+                    val intent = Intent(this@ACSPageActivity, SuccessActivity::class.java)
+                    startActivity(intent)
+                    // Create one Activity
+                    // Callback to be passed to test app
+                    finish()
                     /*PluralSDK.getInstance().
                     PluralSDK.getInstance().callback!!.onTransactionResponse()*/
                 }
