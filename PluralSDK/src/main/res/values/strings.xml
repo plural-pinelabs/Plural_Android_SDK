@@ -8,4 +8,6 @@
     <string name="payment_failed">Payment Failed</string>
     <string name="please_try_again">Please try again.</string>
     <string name="cancel_confirmation_message">If you cancel now, the transaction will be stopped.\nAre you sure you want to proceed?</string>
+    <string name="processing_payment">Processing your payment</string>
+    <string name="processing_payment_description">We’ll confirm everything in just a few seconds.</string>
 </resources>
