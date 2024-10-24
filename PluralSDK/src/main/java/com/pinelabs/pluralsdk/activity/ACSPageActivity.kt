@@ -53,11 +53,7 @@ class ACSPageActivity : AppCompatActivity() {
                 if (url!!.contains(SUCCESS_REDIRECT_URL)){
                     val intent = Intent(this@ACSPageActivity, SuccessActivity::class.java)
                     startActivity(intent)
-                    // Create one Activity
-                    // Callback to be passed to test app
                     finish()
-                    /*PluralSDK.getInstance().
-                    PluralSDK.getInstance().callback!!.onTransactionResponse()*/
                 }
             }
         }
