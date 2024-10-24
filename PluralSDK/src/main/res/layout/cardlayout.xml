@@ -63,7 +63,10 @@
                 android:maxLength="19"
                 android:inputType="number"
                 android:padding="12dp"
-                android:background="@drawable/edittext_default_border" />
+                android:background="@drawable/edittext_default_border"
+                android:drawablePadding="8dp" />
+
+
         </LinearLayout>
 
         <!-- Card Number Error Message -->
@@ -129,9 +132,9 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:hint="CVV"
-                android:maxLength="4"
                 android:inputType="numberPassword"
                 android:padding="12dp"
+                android:maxLength="4"
                 android:background="@drawable/edittext_default_border" />
         </LinearLayout>
 
@@ -197,7 +200,7 @@
             android:drawableLeft="@drawable/lock_keyhole_minimalistic"
             android:drawablePadding="8dp"
             android:text="Proceed to Pay"
-            android:backgroundTint="@color/colorPrimary"
+            android:background="@drawable/button_background_selector"
             android:textColor="@android:color/white"
             android:padding="12dp" />
     </LinearLayout>

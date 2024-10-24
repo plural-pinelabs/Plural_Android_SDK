@@ -82,10 +82,10 @@
             android:id="@+id/txt_cancel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/roboto_medium"
+            android:fontFamily="sans-serif-medium"
             android:text="@string/cancel"
             android:textColor="@android:color/white"
-            android:textSize="12sp" />
+            android:textSize="14sp" />
     </LinearLayout>
 
     <FrameLayout

@@ -19,6 +19,7 @@ class Constants {
         const val NET_BANKING_LABEL = "Netbanking"
         const val UPI_LABEL = "UPI"
         const val WALLET_LABEL = "WALLET"
+        const val CREDIT_DEBIT_REF = "CREDIT_DEBIT"
 
         const val START_BOLD = "<b>"
         const val END_BOLD = "</b>"

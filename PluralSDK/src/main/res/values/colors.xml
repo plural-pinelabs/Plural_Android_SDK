@@ -4,5 +4,6 @@
     <color name="header_color">#500080</color>
     <color name="shimmer_grey">#dddddd</color>
     <color name="black">#1C1C1C</color>
-    <color name="colorPrimary">#500080</color>
+    <color name="colorPrimary">#b9b9b9</color>
+    <color name="colorSecondary">#500080</color>
 </resources>
