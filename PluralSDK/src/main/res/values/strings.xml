@@ -9,5 +9,8 @@
     <string name="please_try_again">Please try again.</string>
     <string name="cancel_confirmation_message">If you cancel now, the transaction will be stopped.\nAre you sure you want to proceed?</string>
     <string name="processing_payment">Processing your payment</string>
+    <string name="payment_successfull">Yay! Payment Successful.</string>
     <string name="processing_payment_description">We’ll confirm everything in just a few seconds.</string>
+    <string name="upi_payment_request">Or get payment request on UPI ID</string>
+    <string name="verify_continue">Verify &amp; Continue</string>
 </resources>

@@ -2,54 +2,45 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/white">
 
     <ImageView
         android:id="@+id/imageView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/success_confetti"
-        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginBottom="50dp"
+        android:src="@drawable/plural_logo"
+        app:layout_constraintBottom_toTopOf="@id/txt_error"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginBottom="20dp"
-        app:layout_constraintBottom_toTopOf="@id/txt_error" />
+        app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
         android:id="@+id/txt_error"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:fontFamily="@font/roboto_medium"
-        android:text="Yay! Payment Successful."
+        android:text="@string/payment_successfull"
         android:textColor="@color/black"
-        android:textSize="20sp"
+        android:textSize="18sp"
         android:textStyle="bold"
+        android:layout_marginTop="50dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.646"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <FrameLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="20dp"
+        android:layout_marginBottom="43dp"
+        android:background="@drawable/success_confetti"
+        app:layout_constraintLeft_toLeftOf="@id/txt_error"
+        app:layout_constraintRight_toRightOf="@id/txt_error"
         app:layout_constraintBottom_toTopOf="@id/txt_error"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.537"
         app:layout_constraintStart_toStartOf="parent">
 
-        <ImageView
-            android:id="@+id/success_vector"
-            android:layout_width="54dp"
-            android:layout_height="48dp"
-            android:src="@drawable/success_vector" />
-
-        <ImageView
-            android:id="@+id/overlay_image"
-            android:layout_width="15.98dp"
-            android:layout_height="16.92dp"
-            android:layout_gravity="center"
-            android:src="@drawable/success_vector_small" />
     </FrameLayout>
 
     <ImageView
@@ -58,10 +49,8 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="56dp"
         android:src="@drawable/plural_by_pinelabs"
-        android:text=""
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.563"
         app:layout_constraintStart_toStartOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

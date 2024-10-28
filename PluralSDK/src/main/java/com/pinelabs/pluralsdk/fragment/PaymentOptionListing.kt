@@ -89,22 +89,30 @@ class PaymentOptionListing : Fragment(), PaymentOptionsAdapter.OnItemClickListen
 
     override fun onItemClick(item: RecyclerViewPaymentOptionData?) {
         Toast.makeText(activity, item!!.payment_option, Toast.LENGTH_SHORT).show()
-        loadFragment()
+        loadFragment(item.payment_option)
     }
 
-    fun loadFragment() {
-
+    fun loadFragment(paymentOption: String) {
         val arguments = Bundle()
         arguments.putString(TOKEN, token)
 
-        val cardFragment = CardFragment()
-        cardFragment.arguments = arguments
+        // loading which Payment Option where
+        val selectedFragment = when (paymentOption) {
+            PaymentModes.CREDIT_DEBIT.paymentModeName -> CardFragment()
+            PaymentModes.UPI.paymentModeName -> UPICollectFragment()
+            else -> null
+        }
 
-        val transaction = requireActivity().supportFragmentManager.beginTransaction()
-        transaction.replace(R.id.details_fragment, cardFragment)
-        transaction.addToBackStack(null)
-        transaction.commit()
+        // Fragment Selection
+        selectedFragment?.let { fragment ->
+            fragment.arguments = arguments
+            val transaction = requireActivity().supportFragmentManager.beginTransaction()
+            transaction.replace(R.id.details_fragment, fragment)
+            transaction.addToBackStack(null)
+            transaction.commit()
+        }
     }
+
 
     fun startShimmer() {
         shimmerLayout.startShimmer()

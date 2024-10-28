@@ -42,8 +42,8 @@ class LandingActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.landing)
 
-        val viewModelFactory= ViewModelFactory(application)
-        viewModel = ViewModelProvider(this,viewModelFactory)[FetchDataViewModel::class.java]
+        val viewModelFactory = ViewModelFactory(application)
+        viewModel = ViewModelProvider(this, viewModelFactory)[FetchDataViewModel::class.java]
 
         token = intent.getStringExtra(TOKEN).toString()
 
@@ -78,7 +78,7 @@ class LandingActivity : AppCompatActivity() {
         transaction.commit()
     }
 
-    fun fetchData(token:String){
+    fun fetchData(token: String) {
         viewModel.fetchData(token)
     }
 
@@ -87,14 +87,13 @@ class LandingActivity : AppCompatActivity() {
         val cancelShimmerlayout: View = findViewById(R.id.cancel_layout_shimmer)
 
         cancelShimmerlayout.setOnClickListener {
-            showCancelConfirmationDialog() // Show popup from cross button
+            showCancelConfirmationDialog()
         }
 
         cancelLayout.setOnClickListener {
             showCancelConfirmationDialog()
         }
     }
-
 
     private fun showCancelConfirmationDialog() {
         val bottomSheetDialog = BottomSheetDialog(this)
@@ -107,7 +106,7 @@ class LandingActivity : AppCompatActivity() {
         btnYes.setOnClickListener {
             bottomSheetDialog.dismiss()
             Toast.makeText(this, "Transaction cancelled", Toast.LENGTH_SHORT).show()
-            finish() // Close the activity if the user confirms cancellation
+            finish()
         }
 
         btnNo.setOnClickListener {
@@ -117,20 +116,19 @@ class LandingActivity : AppCompatActivity() {
         bottomSheetDialog.show()
     }
 
-    // Override onBackPressed to show the confirmation popup on back press
     override fun onBackPressed() {
-        if (isCurrentActivity()) {
-            showCancelConfirmationDialog() // Show popup from native back button press
+        if (supportFragmentManager.backStackEntryCount == 0) {
+            showCancelConfirmationDialog()
         } else {
-            super.onBackPressed() // Proceed with normal back press for other activities
+            super.onBackPressed()
         }
     }
 
-    // Function to check if the user is on LandingActivity
+
     private fun isCurrentActivity(): Boolean {
         return this@LandingActivity.javaClass.simpleName == "LandingActivity"
     }
-    
+
     fun observerFetchData() {
         try {
             viewModel.fetch_response.observe(this) { response ->
@@ -147,23 +145,22 @@ class LandingActivity : AppCompatActivity() {
                     })
                 fetchDataResponseHandler.handleApiResult(response)
             }
-        } catch (e:Exception) {
+        } catch (e: Exception) {
             e.printStackTrace()
         }
     }
 
     fun setView(fetchResponse: FetchResponse?) {
-
-        if (fetchResponse!!.merchantBrandingData!=null) {
+        if (fetchResponse?.merchantBrandingData != null) {
             val imageBytes = Base64.decode(fetchResponse.merchantBrandingData!!.logo.imageContent, Base64.DEFAULT)
             val decodedImage = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
             imgMerchantimage.setImageBitmap(decodedImage)
         }
 
-        txtMerchantname.text = fetchResponse.merchantInfo!!.merchantName
-        txtTransactionamount.text = getString(R.string.rs)+fetchResponse.paymentData!!.originalTxnAmount.amount
-        txtMerchantMobileNumber.text = fetchResponse.customerInfo!!.mobileNo
-        txtMerchantEmailId.text = fetchResponse.customerInfo!!.emailId
+        txtMerchantname.text = fetchResponse?.merchantInfo?.merchantName
+        txtTransactionamount.text = getString(R.string.rs) + fetchResponse?.paymentData?.originalTxnAmount?.amount
+        txtMerchantMobileNumber.text = fetchResponse?.customerInfo?.mobileNo
+        txtMerchantEmailId.text = fetchResponse?.customerInfo?.emailId
 
         stopShimmer()
     }
@@ -177,5 +174,4 @@ class LandingActivity : AppCompatActivity() {
         layoutShimmer.isVisible = false
         layoutOrginal.isVisible = true
     }
-
 }
