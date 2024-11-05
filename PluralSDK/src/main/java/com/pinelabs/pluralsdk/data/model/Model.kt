@@ -38,8 +38,9 @@ data class CustomerInfo(
 )
 
 data class ProcessPaymentRequest(
-    val card_data: CardData,
-    val extras: CardDataExtra
+    val card_data: CardData?,
+    val extras: CardDataExtra,
+    val upi_data: UpiData?
 )
 
 data class ProcessPaymentResponse(
@@ -57,7 +58,12 @@ data class CardData(
 )
 
 data class CardDataExtra(
-    val payment_mode: List<String>,
+    val payment_mode: List<String>?,
     val payment_amount: String,
     val payment_currency: String,
+)
+
+data class UpiData(
+    val upi_option: String,
+    val vpa: String
 )

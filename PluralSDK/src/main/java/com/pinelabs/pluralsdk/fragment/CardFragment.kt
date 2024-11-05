@@ -374,8 +374,7 @@ class CardFragment : Fragment() {
 
         val cardDataExtra = CardDataExtra(paymentMode, amount, currency)
         val cardData = CardData(cardNumber, cvv, cardHolderName, cardExpiryYear, cardExpiryMonth)
-        //val cardData = CardData("4012001037141112", "233", "sss", "2028", "12")
-        val processPaymentRequest = ProcessPaymentRequest(cardData, cardDataExtra)
+        val processPaymentRequest = ProcessPaymentRequest(cardData, cardDataExtra, upi_data = null)
         mainViewModel.processPayment(token, processPaymentRequest)
         mainViewModel.process_payment_response.observe(requireActivity()) { response ->
             val fetchDataResponseHandler = ApiResultHandler<ProcessPaymentResponse>(requireActivity(),
