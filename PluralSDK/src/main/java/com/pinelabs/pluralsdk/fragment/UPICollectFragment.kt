@@ -1,8 +1,8 @@
 package com.pinelabs.pluralsdk.fragment
 
-import android.animation.Animator
 import android.content.Intent
 import android.os.Bundle
+import android.os.CountDownTimer
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.LayoutInflater
@@ -27,8 +27,9 @@ import com.pinelabs.pluralsdk.utils.Constants.Companion.UPI_REF
 import com.pinelabs.pluralsdk.utils.Constants.Companion.ERROR_MESSAGE
 import com.pinelabs.pluralsdk.utils.Constants.Companion.TOKEN
 import com.pinelabs.pluralsdk.viewmodels.FetchDataViewModel
-import android.util.Log
-import android.widget.FrameLayout
+import android.widget.ProgressBar
+import android.widget.TextView
+import android.widget.Toast
 
 class UPICollectFragment : Fragment() {
 
@@ -41,6 +42,13 @@ class UPICollectFragment : Fragment() {
     private lateinit var bottomSheetDialog: BottomSheetDialog
     private val mainViewModel by activityViewModels<FetchDataViewModel>()
     private lateinit var token: String
+    private lateinit var cancelPaymentTextView : TextView
+    private lateinit var vpaContext : String
+
+    private lateinit var circularProgressBar: ProgressBar
+    private lateinit var timerTextView: TextView
+    private val totalTime = 600000L
+    private val interval = 1000L
 
     private val UPI_REGEX = Regex("^[\\w.]{1,}-?[\\w.]{0,}-?[\\w.]{1,}@[a-zA-Z]{3,}$")
 
@@ -48,14 +56,14 @@ class UPICollectFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
+        // Inflating the layout
         return inflater.inflate(R.layout.upicollect, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Initialize views
+        // Initializing Views
         etUPIId = view.findViewById(R.id.etUPIId)
         checkCircleIcon = view.findViewById(R.id.check_circle_icon)
         btnVerifyContinue = view.findViewById(R.id.btnVerifyContinue)
@@ -77,6 +85,7 @@ class UPICollectFragment : Fragment() {
         btnBack.setOnClickListener {
             requireActivity().supportFragmentManager.popBackStack()
         }
+
 
         setupUPIIdValidation()
         fetchDataListener()
@@ -107,6 +116,7 @@ class UPICollectFragment : Fragment() {
         val cardDataExtra = CardDataExtra(paymentMode, amount, currency)
         val upiData = UpiData("UPI", vpa)
         val processPaymentRequest = ProcessPaymentRequest(card_data = null, cardDataExtra, upiData)
+        vpaContext = vpa
 
         mainViewModel.processPayment(token, processPaymentRequest)
         mainViewModel.process_payment_response.observe(viewLifecycleOwner) { response ->
@@ -142,19 +152,63 @@ class UPICollectFragment : Fragment() {
 
     private fun showProcessPaymentDialog() {
         val view = LayoutInflater.from(requireActivity()).inflate(R.layout.activity_timer, null)
-        bottomSheetDialog.setContentView(view)
+        cancelPaymentTextView = view.findViewById(R.id.cancelPaymentTextView)
+        var vpaId:TextView = view.findViewById(R.id.upiIdTextView)
+        vpaId.text = vpaContext
 
-        bottomSheetDialog.show() // Show the dialog first
 
-        // Delay the fragment transaction slightly to ensure the view is available
-        view.post {
-            val timerContainer = view.findViewById<FrameLayout>(R.id.timer_container)
-            timerContainer?.visibility = View.VISIBLE
-
-            val timerFragment = TimerFragment()
-            childFragmentManager.beginTransaction()
-                .replace(R.id.timer_container, timerFragment)
-                .commit()
+        cancelPaymentTextView.setOnClickListener {
+            showCancelConfirmationDialog()
+            bottomSheetDialog.dismiss()
         }
+
+
+        circularProgressBar = view.findViewById(R.id.circularProgressBar)
+        timerTextView = view.findViewById(R.id.timerTextView)
+
+        startTimer()
+        bottomSheetDialog.setContentView(view)
+        bottomSheetDialog.show() // Show the dialog first
+    }
+
+    private fun startTimer() {
+        circularProgressBar.progress = 100
+        object : CountDownTimer(totalTime, interval) {
+            override fun onTick(millisUntilFinished: Long) {
+                val secondsRemaining = millisUntilFinished / 1000
+                timerTextView.text = String.format(
+                    "%02d:%02d",
+                    secondsRemaining / 60,
+                    secondsRemaining % 60
+                )
+                val progressPercentage = (millisUntilFinished * 100 / totalTime).toInt()
+                circularProgressBar.progress = progressPercentage
+            }
+
+            override fun onFinish() {
+                timerTextView.text = "00:00"
+                circularProgressBar.progress = 0
+            }
+        }.start()
+    }
+
+    private fun showCancelConfirmationDialog() {
+        val bottomSheetDialog = BottomSheetDialog(requireActivity())
+        val view = LayoutInflater.from(requireActivity()).inflate(R.layout.cancel_confirmation_bottom_sheet, null)
+        bottomSheetDialog.setContentView(view)
+        val btnYes: Button = view.findViewById(R.id.btn_yes)
+        val btnNo: Button = view.findViewById(R.id.btn_no)
+
+        btnYes.setOnClickListener {
+            bottomSheetDialog.dismiss()
+            Toast.makeText(requireActivity(), "Transaction cancelled", Toast.LENGTH_SHORT).show()
+            requireActivity().finish()
+        }
+
+        btnNo.setOnClickListener {
+            bottomSheetDialog.dismiss()
+        }
+
+        bottomSheetDialog.show()
     }
 }

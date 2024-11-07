@@ -125,9 +125,9 @@ class LandingActivity : AppCompatActivity() {
     }
 
 
-    private fun isCurrentActivity(): Boolean {
-        return this@LandingActivity.javaClass.simpleName == "LandingActivity"
-    }
+//    private fun isCurrentActivity(): Boolean {
+//        return this@LandingActivity.javaClass.simpleName == "LandingActivity"
+//    }
 
     fun observerFetchData() {
         try {

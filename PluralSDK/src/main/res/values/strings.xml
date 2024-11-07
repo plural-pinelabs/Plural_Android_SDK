@@ -13,4 +13,8 @@
     <string name="processing_payment_description">We’ll confirm everything in just a few seconds.</string>
     <string name="upi_payment_request">Or get payment request on UPI ID</string>
     <string name="verify_continue">Verify &amp; Continue</string>
+    <string name="vpa_enter">Enter UPI ID</string>
+    <string name="timer_text">Open your UPI app and complete the payment</string>
+    <string name="timer_text2">Please wait while we fetch your payment status</string>
+    <string name="timer_cancel_payment">Cancel Payment</string>
 </resources>

@@ -6,46 +6,98 @@
     android:gravity="center"
     android:padding="16dp">
 
-    <ProgressBar
-        android:id="@+id/circularProgressBar"
-        style="?android:attr/progressBarStyleHorizontal"
+    <!-- Wrapping ProgressBar and Timer TextView with min label in FrameLayout -->
+    <FrameLayout
         android:layout_width="150dp"
-        android:layout_height="150dp"
-        android:indeterminate="false"
-        android:max="100"
-        android:progress="100"
-        android:progressDrawable="@drawable/circular_progress_drawable" />
+        android:layout_marginTop="40dp"
+        android:layout_height="150dp">
 
+        <ProgressBar
+            android:id="@+id/circularProgressBar"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:indeterminate="false"
+            android:max="100"
+            android:progress="100"
+            android:progressDrawable="@drawable/circular_progress_drawable"
+            android:rotation="-90" />
+
+        <!-- Centering Timer and Min label together in a vertical LinearLayout -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:layout_gravity="center">
+
+            <!-- Timer text -->
+            <TextView
+                android:id="@+id/timerTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="10:00"
+                android:textSize="24sp"
+                android:textColor="#333333" />
+
+            <!-- "min" label text, centered with timer -->
+            <TextView
+                android:id="@+id/minTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="min"
+                android:textSize="12sp"
+                android:textColor="#333333" />
+        </LinearLayout>
+    </FrameLayout>
+
+    <!-- Additional TextViews for descriptions below the timer -->
     <TextView
-        android:id="@+id/timerTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="10:00"
-        android:textSize="24sp"
+        android:text="@string/timer_text"
+        android:textSize="18sp"
         android:textColor="#333333"
-        android:layout_marginTop="16dp" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Processing your payment..."
-        android:textSize="16sp"
-        android:textColor="#333333"
-        android:fontFamily="sans-serif-medium"
+        android:fontFamily="@font/roboto_bold"
         android:layout_marginTop="24dp" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Please wait while we fetch your payment status"
+        android:text="@string/timer_text2"
         android:textSize="14sp"
-        android:textColor="#888888"
-        android:fontFamily="sans-serif"
+        android:textColor="#1C1C1C"
+        android:fontFamily="@font/roboto_medium"
         android:layout_marginTop="8dp" />
 
-    <FrameLayout
-        android:id="@+id/timer_container"
-        android:layout_width="match_parent"
+    <TextView
+        android:id="@+id/upiIdTextView"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:visibility="gone" />
+        android:text=""
+        android:textColor="#1C1C1C"
+        android:fontFamily="@font/roboto_medium"
+        android:layout_marginTop="32dp" />
+
+    <!-- Divider line -->
+    <View
+        android:layout_width="wrap_content"
+        android:layout_marginTop="24dp"
+        android:layout_height="1dp"
+        android:background="#C7CBD5" />
+
+    <!-- Cancel Payment TextView -->
+    <TextView
+        android:id="@+id/cancelPaymentTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/timer_cancel_payment"
+        android:textSize="12sp"
+        android:textColor="@color/colorSecondary"
+        android:fontFamily="@font/roboto_medium"
+        android:layout_marginTop="24dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:layout_marginBottom="40dp" />
+
 </LinearLayout>
