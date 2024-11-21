@@ -16,7 +16,7 @@ class PBPBanksAdapter(private val bankList: List<PBPBank>) :
         viewType: Int
     ): PBPBankViewHolder {
         val itemView = LayoutInflater.from(parent.context).inflate(
-            R.layout.bank_list_item,
+            R.layout.pbp_all_bank_list_item,
             parent, false
         )
         return PBPBankViewHolder(itemView)
