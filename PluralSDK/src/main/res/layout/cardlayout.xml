@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp"
+    android:layout_margin="16dp"
     android:fillViewport="true">
 
     <LinearLayout
@@ -15,8 +16,8 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
             android:gravity="center_vertical"
+            android:orientation="horizontal"
             android:paddingBottom="16dp">
 
             <ImageButton
@@ -29,42 +30,44 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Cards"
-                android:textSize="20sp"
-                android:textStyle="bold"
                 android:paddingStart="8dp"
                 android:paddingEnd="8dp"
-                android:textColor="@android:color/black" />
+                android:text="Cards"
+                android:textColor="@android:color/black"
+                android:textSize="20sp"
+                android:textStyle="bold" />
         </LinearLayout>
 
         <!-- Card Number Field -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:fontFamily="@font/robotoregular"
             android:text="Card Number"
             android:textSize="12sp"
-            android:textStyle="bold"
-            android:fontFamily="@font/robotoregular"
-            android:layout_marginBottom="8dp" />
+            android:textStyle="bold" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
+            android:layout_marginBottom="16dp"
             android:gravity="center_vertical"
-            android:layout_marginBottom="16dp">
+            android:orientation="horizontal">
 
             <EditText
                 android:id="@+id/etCardNumber"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:hint="Enter Card Number"
-                android:maxLength="19"
-                android:inputType="number"
-                android:padding="12dp"
                 android:background="@drawable/edittext_default_border"
-                android:drawablePadding="8dp" />
+                android:drawablePadding="8dp"
+                android:hint="Enter Card Number"
+                android:textColor="@color/black"
+                android:inputType="number"
+                android:maxLength="19"
+                android:padding="12dp"
+                android:text="" />
 
 
         </LinearLayout>
@@ -74,33 +77,33 @@
             android:id="@+id/tvCardNumberError"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textColor="#EB001B"
             android:layout_marginTop="4dp"
+            android:textColor="#EB001B"
             android:visibility="gone" /> <!-- Initially hidden -->
 
         <!-- Expiry and CVV Headers -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginBottom="8dp">
+            android:layout_marginBottom="8dp"
+            android:orientation="horizontal">
 
             <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:fontFamily="@font/robotoregular"
                 android:text="Expiry (MM/YY)"
                 android:textSize="12sp"
-                android:fontFamily="@font/robotoregular"
                 android:textStyle="bold" />
 
             <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:fontFamily="@font/robotoregular"
                 android:text="CVV"
                 android:textSize="12sp"
-                android:fontFamily="@font/robotoregular"
                 android:textStyle="bold" />
         </LinearLayout>
 
@@ -108,9 +111,9 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
             android:layout_marginBottom="16dp"
             android:gravity="center_vertical"
+            android:orientation="horizontal"
             android:weightSum="2">
 
             <!-- Expiry Field -->
@@ -118,12 +121,13 @@
                 android:id="@+id/etExpiry"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
                 android:layout_weight="1"
-                android:hint="MM/YY"
-                android:inputType="date"
-                android:padding="12dp"
                 android:background="@drawable/edittext_default_border"
-                android:layout_marginEnd="8dp" />
+                android:hint="MM/YY"
+                android:textColor="@color/black"
+                android:inputType="date"
+                android:padding="12dp" />
 
             <!-- CVV Field -->
             <EditText
@@ -131,11 +135,12 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:background="@drawable/edittext_default_border"
                 android:hint="CVV"
+                android:textColor="@color/black"
                 android:inputType="numberPassword"
-                android:padding="12dp"
                 android:maxLength="4"
-                android:background="@drawable/edittext_default_border" />
+                android:padding="12dp" />
         </LinearLayout>
 
         <!-- Expiry Error Message -->
@@ -149,11 +154,11 @@
                 android:id="@+id/tvExpiryError"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:textColor="#EB001B"
                 android:layout_marginTop="2dp"
                 android:layout_marginBottom="2dp"
-                android:text="Invalid Expiry Date"
                 android:layout_weight="1"
+                android:text="Invalid Expiry Date"
+                android:textColor="#EB001B"
                 android:visibility="gone" /> <!-- Initially hidden -->
 
 
@@ -162,11 +167,11 @@
                 android:id="@+id/tvCVVError"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:textColor="#EB001B"
                 android:layout_marginTop="2dp"
                 android:layout_marginBottom="2dp"
-                android:text="Invalid CVV"
                 android:layout_weight="1"
+                android:text="Invalid CVV"
+                android:textColor="#EB001B"
                 android:visibility="gone" /> <!-- Initially hidden -->
 
 
@@ -176,35 +181,66 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
             android:text="Card Holder's Name"
             android:textSize="16sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="8dp" />
+            android:textStyle="bold" />
 
         <!-- Card Holder's Name Field -->
         <EditText
             android:id="@+id/etCardHolderName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Full Name on Card"
-            android:padding="12dp"
-            android:background="@drawable/edittext_default_border"
             android:layout_marginBottom="68dp"
-            android:inputType="textPersonName" />
+            android:background="@drawable/edittext_default_border"
+            android:hint="Full Name on Card"
+            android:textColor="@color/black"
+            android:inputType="textPersonName"
+            android:padding="12dp" />
+
+        <include
+            layout="@layout/pbp_bank_banner"
+            android:visibility="gone" />
+
+        <include
+            layout="@layout/pbp_default_error"
+            android:visibility="gone" />
+
+        <include
+            layout="@layout/pbp_check_points"
+            android:visibility="gone" />
+
+        <include
+            layout="@layout/pbp_mobile_error"
+            android:visibility="gone" />
+
+        <include
+            layout="@layout/pbp_no_balance"
+            android:visibility="gone" />
+
+        <include
+            layout="@layout/pbp_card_error"
+            android:visibility="gone" />
+
+        <include
+            layout="@layout/pbp_redeem_points"
+            android:visibility="gone" />
 
         <!-- Proceed to Pay Button -->
         <Button
             android:id="@+id/btnProceedToPay"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:backgroundTint="@null"
             android:drawableLeft="@drawable/lock_keyhole_minimalistic"
             android:drawablePadding="8dp"
-            android:text="Proceed to Pay"
-            android:background="@drawable/button_background_selector"
-            android:textColor="@android:color/white"
             android:paddingLeft="81dp"
-            android:paddingRight="81dp"
             android:paddingTop="15dp"
-            android:paddingBottom="15dp" />
+            android:paddingRight="81dp"
+            android:paddingBottom="15dp"
+            android:text="Proceed to Pay"
+            android:textColor="@android:color/white"
+            app:backgroundTint="@null" />
     </LinearLayout>
 </ScrollView>

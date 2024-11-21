@@ -19,5 +19,6 @@ class SuccessActivity : AppCompatActivity() {
         Handler().postDelayed({
             finish() // Close
         }, AUTO_CLOSE_DELAY)
+
     }
 }

@@ -2,13 +2,39 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.INTERNET"/>
-    <application
-        android:usesCleartextTraffic="true">
-    <activity android:name=".activity.SplashActivity"/>
-    <activity android:name=".activity.LandingActivity"/>
-    <activity android:name=".activity.FailureActivity"/>
-        <activity android:name=".activity.SuccessActivity"></activity>
-    <activity android:name=".activity.ACSPageActivity"/>
-</application>
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <application android:usesCleartextTraffic="true">
+        <activity
+            android:name=".activity.SplashActivity"
+            android:launchMode="singleInstance" />
+        <activity
+            android:name=".activity.LandingActivity"
+            android:launchMode="singleInstance" />
+        <activity
+            android:name=".activity.FailureActivity"
+            android:launchMode="singleInstance" />
+        <activity
+            android:name=".activity.SuccessActivity"
+            android:launchMode="singleInstance" />
+        <activity
+            android:name=".activity.ACSPageActivity"
+            android:launchMode="singleInstance" />
+        <activity
+            android:name=".activity.UpiActivity"
+            android:launchMode="singleInstance" />
+        <activity
+            android:name=".activity.UpiIntentActivity"
+            android:launchMode="singleInstance" />
+        <activity
+            android:name=".activity.TestActivity"
+            android:launchMode="singleInstance" />
+        <activity android:name=".fragment.NetBankingFragment"/>
+    </application>
+
+    <queries>
+        <package android:name="com.google.android.apps.nbu.paisa.user" />
+        <package android:name="net.one97.paytm" />
+        <package android:name="com.phonepe.app" />
+    </queries>
 </manifest>

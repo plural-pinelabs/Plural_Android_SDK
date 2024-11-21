@@ -8,17 +8,24 @@ data class FetchResponse(
     val customerInfo: CustomerInfo? = null  // New field for customer information
 )
 
-data class FetchError(val error_code:String, val error_message:String)
+data class FetchError(val error_code: String, val error_message: String)
 
-data class FetchFailure(val status: String, val type: String, val message: String, val traceId: String)
+data class FetchFailure(
+    val status: String,
+    val type: String,
+    val message: String,
+    val traceId: String
+)
 
 data class MerchantInfo(val merchantId: Int, val merchantName: String)
 
-data class OrignalTransactionAmount(val amount: String, val currency: String)
+data class OrignalTransactionAmount(var amount: Int, val currency: String)
 
-data class PaymentData(val originalTxnAmount: OrignalTransactionAmount)
+data class PaymentData(var originalTxnAmount: OrignalTransactionAmount)
 
-data class PaymentMode(val paymentModeId: String)
+data class PaymentMode(val paymentModeId: String, val paymentModeData: PaymentModeData)
+
+data class PaymentModeData(val upi_flows: List<String>)
 
 data class MerchantBranding(val logo: Logo, val brandTheme: BrandTheme)
 
@@ -40,13 +47,18 @@ data class CustomerInfo(
 data class ProcessPaymentRequest(
     val card_data: CardData?,
     val extras: CardDataExtra,
-    val upi_data: UpiData?
+    val upi_data: UpiData?,
+    val txn_data: UpiTransactionData?
 )
 
 data class ProcessPaymentResponse(
-    val redirect_url: String,
+    val redirect_url: String?,
     val response_code: String,
-    val response_message: String
+    val response_message: String,
+    val pg_upi_unique_request_id: String?,
+    val deep_link: String?,
+    val order_id: String?,
+    val short_link: String?,
 )
 
 data class CardData(
@@ -59,11 +71,85 @@ data class CardData(
 
 data class CardDataExtra(
     val payment_mode: List<String>?,
-    val payment_amount: String,
+    val payment_amount: Int?,
     val payment_currency: String,
+    val card_last4: String?,
+    val redeemable_amount: Int?,
+    val registered_mobile_number: String?
+)
+
+data class PBPBank(
+    val bankName: String,
+    val bankLogo: Int
 )
 
 data class UpiData(
     val upi_option: String,
-    val vpa: String
+    val vpa: String?,
+    val txn_mode: String?
+)
+
+data class UpiTransactionData(
+    val SelectedPaymentModeId: Int
+)
+
+data class RewardRequest(
+    val payment_method: String,
+    val payment_option: RewardPaymentOption,
+    val order_details: OrderDetails
+)
+
+data class RewardPaymentOption(
+    val points_card_details: RewardPointsCardDetails
+)
+
+data class RewardPointsCardDetails(
+    val card_last4: String,
+    val card_number: String,
+    val registered_mobile_number: String?
+)
+
+data class OrderDetails(
+    val order_amount: OrderDetailsAmount
+)
+
+data class OrderDetailsAmount(
+    val value: Int,
+    val currency: String
+)
+
+data class RewardResponse(
+    val payment_method: String,
+    val is_eligible: Boolean,
+    val payment_option_metadata: PaymentOptionMetaData,
+    val redeemable_amount: OrderDetailsAmount,
+    val balance: OrderDetailsAmount
+)
+
+data class PaymentOptionMetaData(
+    val pay_by_point_option_data: PBPOptionData
+)
+
+data class PBPOptionData(
+    var redeemable_points: Int
+)
+
+data class TransactionStatusResponse(
+    val data: TransactionStatus
+)
+
+data class TransactionStatus(
+    val order_id: String,
+    val status: String
+)
+
+data class CancelTransactionResponse(
+    val responsePage: String,
+    val responseData: CancelResponseData
+)
+
+data class CancelResponseData(
+    val order_id: String,
+    val status: String,
+    val signature: String
 )

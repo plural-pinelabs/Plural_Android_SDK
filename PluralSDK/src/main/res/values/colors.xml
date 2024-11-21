@@ -6,4 +6,10 @@
     <color name="black">#1C1C1C</color>
     <color name="colorPrimary">#b9b9b9</color>
     <color name="colorSecondary">#500080</color>
+    <color name="pbp_banner">#C7CBD580</color>
+    <color name="pbp_box">#C7CBD533</color>
+    <color name="yellow">#FF8800</color>
+    <color name="grey">#f4f5f7</color>
+    <color name="green">#1AB26B</color>
+    <color name="red">#EB001B</color>
 </resources>

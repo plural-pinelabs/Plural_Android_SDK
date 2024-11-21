@@ -4,4 +4,5 @@ public interface PaymentResultCallBack {
      fun onErrorOccured(message: String?)
      fun onSuccessOccured()
      fun onTransactionResponse()
+     fun onCancelTransaction()
 }

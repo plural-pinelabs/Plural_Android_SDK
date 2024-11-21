@@ -10,7 +10,6 @@ import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.appcompat.app.AppCompatActivity
-import com.pinelabs.pluralsdk.PluralSDK
 import com.pinelabs.pluralsdk.R
 import com.pinelabs.pluralsdk.utils.Constants.Companion.REDIRECT_URL
 import com.pinelabs.pluralsdk.utils.Constants.Companion.SUCCESS_REDIRECT_URL

@@ -10,9 +10,9 @@ class PluralSDK {
         lateinit var pluralSDKObject: PluralSDKObject
 
         @Synchronized
-        fun initializePluralSDK(activity: Activity){
-            val callback: PaymentResultCallBack =   activity as PaymentResultCallBack
-            pluralSDKObject = PluralSDKObject(activity, callback)
+        fun initializePluralSDK(context: Context?, callback: PaymentResultCallBack) {
+            //val callback: PaymentResultCallBack =   activity as PaymentResultCallBack
+            pluralSDKObject = PluralSDKObject(context, callback)
         }
 
         fun getInstance(): PluralSDKObject {

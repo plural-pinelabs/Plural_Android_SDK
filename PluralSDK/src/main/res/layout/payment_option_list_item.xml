@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/relativeLayout"
     android:layout_width="match_parent"
-    android:layout_height="80dp">
+    android:layout_height="70dp">
 
     <ImageView
         android:id="@+id/img_payment_icon"
@@ -27,6 +28,18 @@
         android:textSize="14dp" />
 
     <ImageView
+        android:id="@+id/redeem_points"
+        android:layout_width="50dp"
+        android:layout_height="25sp"
+        android:layout_centerVertical="true"
+        android:layout_marginRight="5dp"
+        android:layout_toLeftOf="@+id/img_arrow"
+        android:src="@drawable/reward"
+        android:visibility="gone"
+        app:tint="@color/header_color" />
+
+    <ImageView
+        android:id="@+id/img_arrow"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"

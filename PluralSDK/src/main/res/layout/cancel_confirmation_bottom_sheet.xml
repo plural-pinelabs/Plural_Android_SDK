@@ -1,74 +1,75 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical"
-    android:padding="24dp"
+    android:background="@drawable/curved_footer"
+    android:backgroundTint="@color/white"
     android:gravity="center_horizontal"
-    android:background="@drawable/curved_footer">
+    android:orientation="vertical"
+    android:padding="24dp">
 
     <!-- Warning Icon -->
     <ImageView
         android:id="@+id/img_warning_icon"
         android:layout_width="48dp"
         android:layout_height="48dp"
-        android:src="@drawable/warning_bottomsheet"
         android:layout_gravity="center"
-        android:layout_marginBottom="16dp" />
+        android:layout_marginBottom="16dp"
+        android:src="@drawable/warning_bottomsheet" />
 
     <!-- Cancel Payment Text -->
     <TextView
         android:id="@+id/tv_cancel_payment"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Cancel payment?"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        android:textColor="@android:color/black"
+        android:layout_marginBottom="8dp"
         android:gravity="center"
-        android:layout_marginBottom="8dp"/>
+        android:text="Cancel payment?"
+        android:textColor="@android:color/black"
+        android:textSize="18sp"
+        android:textStyle="bold" />
 
     <!-- Confirmation Message Text -->
     <TextView
         android:id="@+id/tv_confirmation_message"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="If you cancel now, the transaction will be stopped.\nAre you sure you want to proceed?"
-        android:textSize="14sp"
+        android:layout_marginBottom="32dp"
         android:alpha="0.8"
-        android:textColor="@android:color/black"
         android:gravity="center"
-        android:layout_marginBottom="32dp"/>
+        android:text="If you cancel now, the transaction will be stopped.\nAre you sure you want to proceed?"
+        android:textColor="@android:color/black"
+        android:textSize="14sp" />
 
     <!-- Yes, Cancel Button -->
     <Button
         android:id="@+id/btn_yes"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Yes, Cancel"
-        android:backgroundTint="@null"
-        app:backgroundTint="@null"
+        android:layout_marginBottom="16dp"
         android:background="@drawable/curved_button"
-        android:textColor="@android:color/white"
+        android:backgroundTint="@null"
         android:paddingTop="12dp"
         android:paddingBottom="12dp"
+        android:text="Yes, Cancel"
         android:textAllCaps="false"
-        android:layout_marginBottom="16dp"/>
+        android:textColor="@android:color/white"
+        app:backgroundTint="@null" />
 
     <!-- No Button -->
     <Button
         android:id="@+id/btn_no"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="No"
+        android:layout_marginTop="8dp"
         android:background="@drawable/outlined_button"
         android:backgroundTint="@null"
-        app:backgroundTint="@null"
-        android:textColor="#500080"
         android:paddingTop="12dp"
         android:paddingBottom="12dp"
+        android:text="No"
         android:textAllCaps="false"
-        android:layout_marginTop="8dp"/>
+        android:textColor="#500080"
+        app:backgroundTint="@null" />
 
 </LinearLayout>

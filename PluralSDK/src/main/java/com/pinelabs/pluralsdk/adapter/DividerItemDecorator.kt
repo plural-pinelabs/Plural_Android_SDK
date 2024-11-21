@@ -24,3 +24,23 @@ class DividerItemDecorator(private val mDivider: Drawable) : ItemDecoration() {
         }
     }
 }
+
+class DividerItemDecoratorHorizontal(private val mDivider: Drawable) : ItemDecoration() {
+    override fun onDrawOver(canvas: Canvas, parent: RecyclerView, state: RecyclerView.State) {
+        val dividerTop = parent.paddingTop
+        val dividerBottom = parent.getHeight() - parent.getPaddingBottom()
+
+        val childCount = parent.childCount
+        for (i in 0..childCount - 2) {
+            val child = parent.getChildAt(i)
+
+            val params = child.layoutParams as RecyclerView.LayoutParams
+
+            val dividerRight = child.right + params.rightMargin
+            val dividerLeft = dividerRight - mDivider.intrinsicWidth
+
+            mDivider.setBounds(dividerLeft, dividerTop, dividerRight, dividerBottom)
+            mDivider.draw(canvas)
+        }
+    }
+}

@@ -1,15 +1,16 @@
 package com.pinelabs.pluralsdk
 
-import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import com.pinelabs.pluralsdk.activity.SplashActivity
+import com.pinelabs.pluralsdk.callback.PaymentResultCallBack
 import com.pinelabs.pluralsdk.utils.Constants.Companion.TOKEN
 
 class PluralSDKManager {
-    fun startPayment(activity: Activity, token: String) {
-        PluralSDK.initializePluralSDK(activity)
-        val intent = Intent(activity, SplashActivity::class.java)
+    fun startPayment(context: Context, token: String, callback: PaymentResultCallBack) {
+        PluralSDK.initializePluralSDK(context, callback)
+        val intent = Intent(context, SplashActivity::class.java)
         intent.putExtra(TOKEN, token)
-        activity.startActivity(intent)
+        context.startActivity(intent)
     }
 }

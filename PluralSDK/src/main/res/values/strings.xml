@@ -17,4 +17,73 @@
     <string name="timer_text">Open your UPI app and complete the payment</string>
     <string name="timer_text2">Please wait while we fetch your payment status</string>
     <string name="timer_cancel_payment">Cancel Payment</string>
+    <string name="redeem_points">Redeem points on:</string>
+    <string name="eligible_banks">Eligible bank cards for point redemption</string>
+    <string name="card_may_have_points">Your card may have points.</string>
+    <string name="check_for_points">Check for points!</string>
+    <string name="check_points">Check Points</string>
+    <string name="card_point_redeem">Your card may have points that you can redeem. </string>
+    <string name="pbp_mobile_number">Registered Mobile No. With Bank</string>
+    <string name="zero_points">You have 0 points on this card. </string>
+    <string name="another_card">Try another card or proceed to pay.</string>
+    <string name="checking_point_balance">Checking points balance</string>
+    <string name="mobile_code">+91</string>
+    <string name="unable_to_check_point">Unable to check points at the moment. </string>
+    <string name="please_try_after_some_time">Please try again later or proceed to payment.</string>
+    <string name="card_not_eligible">The entered card is not eligible for points redemption. Try another card or proceed to pay.</string>
+    <string name="no_points">No points available on the entered card and phone number.<font color='#500080'>Try another number</font></string>
+    <string name="try_another">Try another number</string>
+    <string name="pay_by_upi">Pay by any UPI app</string>
+    <string name="required">(Required)</string>
+    <string name="redeem">Redeem</string>
+    <string name="card_points"> Card Points</string>
+    <string name="get">Get </string>
+    <string name="instant_discount">instant discount</string>
+    <string name="more_banks">More Banks</string>
+    <string name="all_banks">All Banks</string>
+    <string name="search_banks">Search for your bank</string>
+
+    <string name="allahabad_bank">Allahabad Bank</string>
+    <string name="andhra_bank">Andhra Bank</string>
+    <string name="au_small_finance_bank">AU Small Finance Bank</string>
+    <string name="bank_of_india">Bank of India</string>
+    <string name="canara_bank">Canara Bank</string>
+    <string name="central_bank">Central Bank</string>
+    <string name="corporation_bank">Corporation Bank</string>
+    <string name="federal_bank">Federal Bank</string>
+    <string name="idbi_bank">IDBI Bank</string>
+    <string name="idfc_first">IDFC FIRST Bank</string>
+    <string name="indian_bank">Indian Bank</string>
+    <string name="karur_vysya_bank">Karur Vysya Bank</string>
+    <string name="punjab_national_bank">Punjab National Bank</string>
+    <string name="south_indian_bank">South Indian Bank</string>
+    <string name="state_bank_of_india">State bank Of India</string>
+    <string name="union_bank_of_india">Union Bank of India</string>
+    <string name="yes_bank">Yes Bank</string>
+    <string name="pay">Pay</string>
+
+    <string-array name="pbp_top_bank">
+        <item>@string/state_bank_of_india</item>
+        <item>@string/punjab_national_bank</item>
+        <item>@string/yes_bank</item>
+    </string-array>
+    <string-array name="pbp_bank">
+        <item>@string/allahabad_bank</item>
+        <item>@string/andhra_bank</item>
+        <item>@string/au_small_finance_bank</item>
+        <item>@string/bank_of_india</item>
+        <item>@string/canara_bank</item>
+        <item>@string/central_bank</item>
+        <item>@string/corporation_bank</item>
+        <item>@string/federal_bank</item>
+        <item>@string/idbi_bank</item>
+        <item>@string/idfc_first</item>
+        <item>@string/indian_bank</item>
+        <item>@string/karur_vysya_bank</item>
+        <item>@string/punjab_national_bank</item>
+        <item>@string/south_indian_bank</item>
+        <item>@string/state_bank_of_india</item>
+        <item>@string/union_bank_of_india</item>
+        <item>@string/yes_bank</item>
+    </string-array>
 </resources>

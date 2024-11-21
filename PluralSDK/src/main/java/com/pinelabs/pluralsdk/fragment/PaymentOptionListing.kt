@@ -19,6 +19,9 @@ import com.pinelabs.pluralsdk.data.model.FetchResponse
 import com.pinelabs.pluralsdk.data.model.PaymentMode
 import com.pinelabs.pluralsdk.data.model.RecyclerViewPaymentOptionData
 import com.pinelabs.pluralsdk.data.utils.ApiResultHandler
+import com.pinelabs.pluralsdk.utils.Constants.Companion.TAG_CARD
+import com.pinelabs.pluralsdk.utils.Constants.Companion.TAG_NETBANKING
+import com.pinelabs.pluralsdk.utils.Constants.Companion.TAG_UPI
 import com.pinelabs.pluralsdk.utils.Constants.Companion.TOKEN
 import com.pinelabs.pluralsdk.utils.PaymentModes
 import com.pinelabs.pluralsdk.viewmodels.FetchDataViewModel
@@ -30,7 +33,8 @@ class PaymentOptionListing : Fragment(), PaymentOptionsAdapter.OnItemClickListen
 
     private val mainViewModel by activityViewModels<FetchDataViewModel>()
 
-    private lateinit var token : String
+    private lateinit var token: String
+    private lateinit var TAG: String
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -48,12 +52,15 @@ class PaymentOptionListing : Fragment(), PaymentOptionsAdapter.OnItemClickListen
         recyclerPaymentOptions = view.findViewById(R.id.recycler_payment_options)
         shimmerLayout = view.findViewById(R.id.shimmerFrameLayout)
         startShimmer()
-        mainViewModel.fetch_response.observe(requireActivity()) { response ->
+        mainViewModel.fetch_response.observe(viewLifecycleOwner) { response ->
             val fetchDataResponseHandler = ApiResultHandler<FetchResponse>(requireActivity(),
                 onLoading = {
                 }, onSuccess = { data ->
                     stopShimmer()
-                    listData(mapPaymentModes(response.data!!.paymentModes!!))
+                    listData(
+                        mapPaymentModes(response.data!!.paymentModes!!),
+                        mapPaymentOptions(response.data!!.paymentModes!!)
+                    )
                 }, onFailure = {}
             )
             fetchDataResponseHandler.handleApiResult(response)
@@ -100,6 +107,14 @@ class PaymentOptionListing : Fragment(), PaymentOptionsAdapter.OnItemClickListen
         val selectedFragment = when (paymentOption) {
             PaymentModes.CREDIT_DEBIT.paymentModeName -> CardFragment()
             PaymentModes.UPI.paymentModeName -> UPICollectFragment()
+            //PaymentModes.NET_BANKING.paymentModeName -> NetBankingFragment()
+            else -> null
+        }
+
+        val TAG = when (paymentOption) {
+            PaymentModes.CREDIT_DEBIT.paymentModeName -> TAG_CARD
+            PaymentModes.UPI.paymentModeName -> TAG_UPI
+            PaymentModes.NET_BANKING.paymentModeName -> TAG_NETBANKING
             else -> null
         }
 
@@ -107,7 +122,7 @@ class PaymentOptionListing : Fragment(), PaymentOptionsAdapter.OnItemClickListen
         selectedFragment?.let { fragment ->
             fragment.arguments = arguments
             val transaction = requireActivity().supportFragmentManager.beginTransaction()
-            transaction.replace(R.id.details_fragment, fragment)
+            transaction.replace(R.id.details_fragment, fragment, TAG)
             transaction.addToBackStack(null)
             transaction.commit()
         }
@@ -126,10 +141,10 @@ class PaymentOptionListing : Fragment(), PaymentOptionsAdapter.OnItemClickListen
         recyclerPaymentOptions.isVisible = true
     }
 
-    fun listData(paymentData:List<RecyclerViewPaymentOptionData>) {
+    fun listData(paymentData: List<RecyclerViewPaymentOptionData>, paymentOption: List<String>) {
         val layoutManager =
             LinearLayoutManager(activity, LinearLayoutManager.VERTICAL, false)
-        val myRecyclerViewAdapter = PaymentOptionsAdapter(paymentData, this)
+        val myRecyclerViewAdapter = PaymentOptionsAdapter(paymentData, paymentOption,this)
         recyclerPaymentOptions.adapter = myRecyclerViewAdapter
         recyclerPaymentOptions.layoutManager = layoutManager
         val dividerItemDecoration: RecyclerView.ItemDecoration = DividerItemDecorator(
@@ -137,6 +152,16 @@ class PaymentOptionListing : Fragment(), PaymentOptionsAdapter.OnItemClickListen
         )
         recyclerPaymentOptions.addItemDecoration(dividerItemDecoration)
         myRecyclerViewAdapter.notifyDataSetChanged()
+    }
+
+    fun mapPaymentOptions(paymentModes: List<PaymentMode>): List<String> {
+        val paymentOption = mutableListOf<String>()
+        paymentModes.forEach { pm ->
+            if (pm.paymentModeData == null) {
+                paymentOption.add(pm.paymentModeId)
+            }
+        }
+        return paymentOption
     }
 
 }

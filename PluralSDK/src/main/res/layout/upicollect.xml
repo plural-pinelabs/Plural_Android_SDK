@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp"
+    android:background="@color/white"
     android:fillViewport="true">
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -15,50 +15,59 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
             android:layout_marginBottom="16dp"
-            android:gravity="center_vertical">
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
             <!-- Back Button -->
             <ImageButton
                 android:id="@+id/upiBtnBack"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:background="?android:selectableItemBackground"
-                android:src="@drawable/back_button"
-                android:contentDescription="Back Button" />
+                android:contentDescription="Back Button"
+                android:src="@drawable/back_button" />
             <!-- UPI Title Text -->
             <TextView
                 android:id="@+id/tvUPITitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="4dp"
-                android:text="UPI"
-                android:textSize="20sp"
-                android:textStyle="bold"
                 android:fontFamily="@font/robotoregular"
-                android:textColor="@android:color/black" />
+                android:text="UPI"
+                android:textColor="@android:color/black"
+                android:textSize="20sp"
+                android:textStyle="bold" />
         </LinearLayout>
+
+        <include layout="@layout/upi_intent" />
+
         <LinearLayout
+            android:id="@+id/linear_divider"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
+            android:layout_marginTop="10dp"
             android:gravity="center"
+            android:orientation="horizontal"
             android:paddingTop="8dp"
+            android:visibility="gone"
             android:paddingBottom="8dp">
+
             <View
                 android:layout_width="0dp"
                 android:layout_height="1dp"
                 android:layout_weight="1"
                 android:background="#D3D3D3" />
+
             <TextView
                 android:id="@+id/or_get_paym"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/upi_payment_request"
-                android:textAppearance="@style/or_get_paym"
                 android:gravity="center"
                 android:paddingStart="8dp"
-                android:paddingEnd="8dp" />
+                android:paddingEnd="8dp"
+                android:text="@string/upi_payment_request"
+                android:textAppearance="@style/or_get_paym" />
+
             <View
                 android:layout_width="0dp"
                 android:layout_height="1dp"
@@ -66,60 +75,70 @@
                 android:background="#D3D3D3" />
         </LinearLayout>
         <!-- UPI ID Input Field -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/vpa_enter"
-            android:textSize="14sp"
-            android:fontFamily="@font/robotoregular"
-            android:textColor="#8A8A8A"
-            android:paddingTop="8dp" />
         <LinearLayout
+            android:id="@+id/linear_upi_collect"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:background="@drawable/edittext_default_border"
-            android:padding="12dp"
-            android:layout_marginTop="4dp">
+            android:orientation="vertical"
+            android:visibility="gone">
 
-            <EditText
-                android:id="@+id/etUPIId"
-                android:layout_width="0dp"
+            <TextView
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:hint="@string/vpa_enter"
-                android:textSize="16sp"
-                android:fontFamily="@font/roboto_bold"
-                android:textColor="@android:color/black"
-                android:background="@android:color/transparent"
-                android:padding="0dp"
-                android:inputType="text" />
+                android:fontFamily="@font/robotoregular"
+                android:paddingTop="8dp"
+                android:text="@string/vpa_enter"
+                android:textColor="#8A8A8A"
+                android:textSize="14sp" />
 
-            <ImageView
-                android:id="@+id/check_circle_icon"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/check_circle"
-                android:layout_gravity="center_vertical"
-                android:visibility="gone" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:background="@drawable/edittext_default_border"
+                android:orientation="horizontal"
+                android:padding="12dp">
+
+                <EditText
+                    android:id="@+id/etUPIId"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@android:color/transparent"
+                    android:fontFamily="@font/roboto_bold"
+                    android:hint="@string/vpa_enter"
+                    android:inputType="text"
+                    android:padding="0dp"
+                    android:textColor="@android:color/black"
+                    android:textSize="16sp" />
+
+                <ImageView
+                    android:id="@+id/check_circle_icon"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_gravity="center_vertical"
+                    android:src="@drawable/check_circle_selected"
+                    android:visibility="gone" />
+            </LinearLayout>
         </LinearLayout>
+
         <Button
             android:id="@+id/btnVerifyContinue"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
-            android:text="@string/verify_continue"
-            android:textSize="16sp"
-            android:textColor="@android:color/white"
-            android:fontFamily="@font/roboto_bold"
+            android:background="@drawable/rounded_button_background"
             android:drawableStart="@drawable/lock_keyhole_minimalistic"
             android:drawablePadding="8dp"
-            android:paddingLeft="81dp"
-            android:paddingRight="81dp"
-            android:paddingTop="15dp"
-            android:paddingBottom="15dp"
-            android:textAllCaps="false"
             android:enabled="false"
-            android:background="@drawable/rounded_button_background" />
+            android:fontFamily="@font/roboto_bold"
+            android:paddingLeft="81dp"
+            android:paddingTop="15dp"
+            android:paddingRight="81dp"
+            android:paddingBottom="15dp"
+            android:text="@string/verify_continue"
+            android:textAllCaps="false"
+            android:textColor="@android:color/white"
+            android:textSize="16sp" />
     </LinearLayout>
 </ScrollView>
