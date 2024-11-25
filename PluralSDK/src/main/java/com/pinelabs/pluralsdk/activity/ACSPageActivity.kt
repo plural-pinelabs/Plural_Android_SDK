@@ -1,18 +1,24 @@
 package com.pinelabs.pluralsdk.activity
 
+import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.MotionEvent
 import android.view.View
+import android.webkit.JavascriptInterface
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.pinelabs.pluralsdk.R
 import com.pinelabs.pluralsdk.utils.Constants.Companion.REDIRECT_URL
 import com.pinelabs.pluralsdk.utils.Constants.Companion.SUCCESS_REDIRECT_URL
+import org.json.JSONObject
+
 
 class ACSPageActivity : AppCompatActivity() {
     private lateinit var webAcs: WebView
@@ -56,6 +62,16 @@ class ACSPageActivity : AppCompatActivity() {
                 }
             }
         }
+       // webAcs.addJavascriptInterface(this,"AndroidListener")
+
 
     }
+
+     /*class WebAppInterface(var mContext: Context) {*/
+        @JavascriptInterface
+        fun message(response:String) {
+            println("Response from java script ${response}")
+            //Toast.makeText(mContext, response, Toast.LENGTH_SHORT ).show()
+        }
+    /*}*//**/
 }
