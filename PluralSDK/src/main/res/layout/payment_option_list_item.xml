@@ -29,12 +29,14 @@
 
     <ImageView
         android:id="@+id/redeem_points"
-        android:layout_width="50dp"
-        android:layout_height="25sp"
+        android:layout_width="106dp"
+        android:layout_height="16dp"
         android:layout_centerVertical="true"
-        android:layout_marginRight="5dp"
-        android:layout_toLeftOf="@+id/img_arrow"
-        android:src="@drawable/reward"
+        android:layout_marginStart="8dp"
+        android:layout_toEndOf="@id/txt_payment_option"
+        android:scaleType="fitXY"
+        android:adjustViewBounds="true"
+        android:src="@drawable/pbp_upfront"
         android:visibility="gone"
         app:tint="@color/header_color" />
 
