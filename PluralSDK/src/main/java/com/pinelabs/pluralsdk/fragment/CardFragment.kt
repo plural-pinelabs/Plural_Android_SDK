@@ -122,7 +122,8 @@ class CardFragment : Fragment() {
         "amex" to R.drawable.amex,
         "Visa" to R.drawable.visa,
         "Mastercard" to R.drawable.mc,
-        "Rupay" to R.drawable.rupay
+        "Rupay" to R.drawable.rupay,
+        "Diners Club" to R.drawable.diners
     )
     private lateinit var token: String
     private var cardLast4: String? = null
@@ -378,6 +379,13 @@ class CardFragment : Fragment() {
                         R.drawable.edittext_error_border
                     )
                     isCardNumberValid = false
+                } else if (cleanedInput.length < 19) {
+                    tvCardNumberError.visibility = View.GONE
+                    etCardNumber.background = ContextCompat.getDrawable(
+                        requireContext(),
+                        R.drawable.edittext_border_focussed
+                    )
+                    isCardNumberValid = false
                 } else {
                     tvCardNumberError.visibility = View.GONE
                     etCardNumber.background = ContextCompat.getDrawable(
@@ -427,14 +435,19 @@ class CardFragment : Fragment() {
 
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
 
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                // Change background to header color while typing
+                etExpiry.background = ContextCompat.getDrawable(
+                    requireContext(),
+                    R.drawable.edittext_border_focussed
+                )
+            }
 
             override fun afterTextChanged(s: Editable?) {
                 if (isEditing) return
                 isEditing = true
 
                 val input = s.toString().replace(Regex("[^\\d]"), "")
-
                 val formattedInput = when {
                     input.length <= 2 -> input
                     input.length <= 4 -> "${input.substring(0, 2)}/${input.substring(2)}"
@@ -448,7 +461,7 @@ class CardFragment : Fragment() {
             }
         })
 
-        // Focus change listener to validate and show errors
+        // Focus change listener to validate and update background
         etExpiry.setOnFocusChangeListener { _, hasFocus ->
             if (!hasFocus) {
                 val parts = etExpiry.text.toString().split("/")
@@ -501,20 +514,53 @@ class CardFragment : Fragment() {
         }
     }
 
+
     private fun setupCVVValidation(etCVV: EditText, tvCVVError: TextView) {
-        etCVV.filters =
-            arrayOf<InputFilter>(InputFilter.LengthFilter(3)) // CVV length is limited to 3 digits
+        etCVV.filters = arrayOf<InputFilter>(InputFilter.LengthFilter(3)) // CVV length is limited to 3 digits
+
         etCVV.addTextChangedListener(object : TextWatcher {
+            private var isEditing = false
+
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
 
             override fun afterTextChanged(s: Editable?) {
-                // No validation logic here, only track changes
+                if (isEditing) return
+
+                isEditing = true
+
+                val cvv = s?.toString() ?: ""
+
+                // Set focused background while typing
+                etCVV.background = ContextCompat.getDrawable(
+                    requireContext(),
+                    R.drawable.edittext_border_focussed
+                )
+
+                // Validate input
+                if (cvv.length > 3) {
+                    tvCVVError.text = "CVV cannot exceed 3 digits"
+                    tvCVVError.visibility = View.VISIBLE
+                    etCVV.background = ContextCompat.getDrawable(
+                        requireContext(),
+                        R.drawable.edittext_error_border
+                    )
+                    isCVVValid = false
+                } else if (cvv.isEmpty() || cvv.length < 3) {
+                    tvCVVError.visibility = View.GONE
+                    isCVVValid = false
+                } else {
+                    tvCVVError.visibility = View.GONE
+                    isCVVValid = true
+                }
+
+                isEditing = false
+                updateButtonBackground()
             }
         })
 
-        // Focus change listener to validate and show errors
+        // Focus change listener to validate and set the final background
         etCVV.setOnFocusChangeListener { _, hasFocus ->
             if (!hasFocus) {
                 val cvv = etCVV.text.toString()
@@ -547,7 +593,26 @@ class CardFragment : Fragment() {
 
             override fun afterTextChanged(s: Editable?) {
                 val name = s?.toString()?.trim()
-                isCardHolderNameValid = !name.isNullOrEmpty()
+
+                // Allow only alphabets and spaces
+                val filteredName = name?.filter { it.isLetter() || it.isWhitespace() }
+
+                if (name != filteredName) {
+                    // Replace invalid characters
+                    etCardHolderName.setText(filteredName)
+                    etCardHolderName.setSelection(filteredName?.length ?: 0)
+                }
+
+                // Update the background while typing
+                etCardHolderName.background = ContextCompat.getDrawable(
+                    requireContext(),
+                    R.drawable.edittext_border_focussed
+                )
+
+                // Validate the input
+                isCardHolderNameValid = !filteredName.isNullOrEmpty()
+
+                // Update button state based on validation
                 updateButtonBackground()
             }
         })
