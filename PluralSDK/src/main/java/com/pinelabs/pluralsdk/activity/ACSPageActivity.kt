@@ -1,30 +1,36 @@
 package com.pinelabs.pluralsdk.activity
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.graphics.Bitmap
+import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.webkit.JavascriptInterface
 import android.webkit.WebSettings
 import android.webkit.WebView
-import android.webkit.WebViewClient
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModelProvider
 import com.pinelabs.pluralsdk.R
+import com.pinelabs.pluralsdk.data.model.FetchResponse
+import com.pinelabs.pluralsdk.data.model.Palette
+import com.pinelabs.pluralsdk.data.utils.ApiResultHandler
 import com.pinelabs.pluralsdk.utils.Constants.Companion.REDIRECT_URL
-import com.pinelabs.pluralsdk.utils.Constants.Companion.SUCCESS_REDIRECT_URL
-import org.json.JSONObject
-
+import com.pinelabs.pluralsdk.viewmodels.FetchDataViewModel
+import com.pinelabs.pluralsdk.viewmodels.ViewModelFactory
 
 class ACSPageActivity : AppCompatActivity() {
     private lateinit var webAcs: WebView
+    private lateinit var viewModel: FetchDataViewModel
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.acs_webpage)
+
+        val viewModelFactory = ViewModelFactory(application)
+        viewModel = ViewModelProvider(this, viewModelFactory)[FetchDataViewModel::class.java]
 
         webAcs = findViewById(R.id.web_acs)
         webAcs.settings.javaScriptEnabled = true
@@ -51,27 +57,53 @@ class ACSPageActivity : AppCompatActivity() {
         })
 
         webAcs.loadUrl(intent!!.getStringExtra(REDIRECT_URL).toString())
-        webAcs.webViewClient = object : WebViewClient() {
+
+        try {
+            viewModel.fetch_response.observe(this) { response ->
+                val fetchDataResponseHandler =
+                    ApiResultHandler<FetchResponse>(this@ACSPageActivity, onLoading = {
+                    }, onSuccess = { data ->
+                        data?.merchantBrandingData?.palette?.let { palette ->
+                            setStatusBarColor(this, palette)
+                        }
+
+                    }, onFailure = { errorMessage ->
+
+                    })
+                fetchDataResponseHandler.handleApiResult(response)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+
+        /*webAcs.webViewClient = object : WebViewClient() {
             override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
                 super.onPageStarted(view, url, favicon)
                 println("URL $url")
-                if (url!!.contains(SUCCESS_REDIRECT_URL)){
-                    val intent = Intent(this@ACSPageActivity, SuccessActivity::class.java)
-                    startActivity(intent)
-                    finish()
+                if (url!!.contains(SUCCESS_REDIRECT_URL)) {
+
                 }
             }
-        }
-       // webAcs.addJavascriptInterface(this,"AndroidListener")
-
-
+        }*/
+        //webAcs.loadUrl("file:///android_asset/x.html");
+        webAcs.addJavascriptInterface(WebAppInterface(this@ACSPageActivity), "AndroidInterface")
     }
 
-     /*class WebAppInterface(var mContext: Context) {*/
+    class WebAppInterface(context: Activity) {
+        private val mContext: Activity = context
+
         @JavascriptInterface
-        fun message(response:String) {
+        fun postMessage(response: String?) {
             println("Response from java script ${response}")
-            //Toast.makeText(mContext, response, Toast.LENGTH_SHORT ).show()
+            val intent = Intent(mContext, SuccessActivity::class.java)
+            mContext.startActivity(intent)
+            mContext.finish()
         }
-    /*}*//**/
+    }
+
+    private fun setStatusBarColor(context: Context, palette: Palette) {
+        val color =
+            if (palette != null) Color.parseColor(palette?.C900) else context.resources.getColor(R.color.header_color)
+        window.setStatusBarColor(color)
+    }
 }

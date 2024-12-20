@@ -1,5 +1,7 @@
 package com.pinelabs.pluralsdk.data.model
 
+import com.google.gson.annotations.SerializedName
+
 data class FetchResponse(
     val merchantInfo: MerchantInfo? = null,
     val paymentData: PaymentData? = null,
@@ -19,19 +21,30 @@ data class FetchFailure(
 
 data class MerchantInfo(val merchantId: Int, val merchantName: String)
 
-data class OrignalTransactionAmount(var amount: Int, val currency: String)
+data class OrignalTransactionAmount(var amount: Int?, val currency: String)
 
-data class PaymentData(var originalTxnAmount: OrignalTransactionAmount)
+data class PaymentData(var originalTxnAmount: OrignalTransactionAmount?)
 
-data class PaymentMode(val paymentModeId: String, val paymentModeData: PaymentModeData)
+data class PaymentMode(val paymentModeId: String, val paymentModeData: Any?)
 
-data class PaymentModeData(val upi_flows: List<String>)
+data class PaymentModeData(
+    val upi_flows: List<String>?,
+    val IssersUIDataList: List<issuerDataList>?
+)
 
-data class MerchantBranding(val logo: Logo, val brandTheme: BrandTheme)
+data class issuerDataList(val bankName: String, val merchantPaymentCode: String)
+
+data class MerchantBranding(val logo: Logo?, val brandTheme: BrandTheme?, val palette: Palette?)
 
 data class Logo(val imageSize: String, val imageContent: String)
 
 data class BrandTheme(val color: String)
+
+data class Palette(@SerializedName("50") val C50: String, @SerializedName("100") val C100: String,
+                   @SerializedName("200") val C200: String, @SerializedName("300") val C300: String,
+                   @SerializedName("400") val C400: String, @SerializedName("500") val C500: String,
+                   @SerializedName("600") val C600: String, @SerializedName("700") val C700: String,
+                   @SerializedName("800") val C800: String, @SerializedName("900") val C900: String)
 
 data class RecyclerViewPaymentOptionData(
     val payment_image: Int = -1,
@@ -46,9 +59,26 @@ data class CustomerInfo(
 
 data class ProcessPaymentRequest(
     val card_data: CardData?,
-    val extras: CardDataExtra,
     val upi_data: UpiData?,
-    val txn_data: UpiTransactionData?
+    val netbanking_data: NetBankingData?,
+    val extras: Extra?,
+    val txn_data: UpiTransactionData?,
+    val convenience_fee_data: ConvenienceFeesData?
+)
+
+data class ConvenienceFeesData(
+    val convenience_fees_amt_in_paise: Int,
+    val convenience_fees_fees_gst_amt_in_paise: Int,
+    val convenience_fees_fees_addition_amt_in_paise: Int,
+    val final_amt_in_paise: Int,
+    val transaction_amount: Int,
+    val convenience_fees_maximum_fee_amount: Int,
+    val convenience_fees_applicable_fee_amount: Int,
+    val currency: String
+)
+
+data class NetBankingData(
+    val pay_code: String
 )
 
 data class ProcessPaymentResponse(
@@ -69,13 +99,20 @@ data class CardData(
     val card_expiry_month: String
 )
 
-data class CardDataExtra(
+data class DeviceInfo(
+    val device_type: String,
+    val browser_user_agent: String
+)
+
+data class Extra(
     val payment_mode: List<String>?,
     val payment_amount: Int?,
     val payment_currency: String,
     val card_last4: String?,
     val redeemable_amount: Int?,
-    val registered_mobile_number: String?
+    val registered_mobile_number: String?,
+    val txn_mode: String?,
+    val device_info: DeviceInfo?
 )
 
 data class PBPBank(

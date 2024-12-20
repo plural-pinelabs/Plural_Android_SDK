@@ -1,5 +1,7 @@
 package com.pinelabs.pluralsdk.adapter
 
+import android.content.res.ColorStateList
+import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -7,13 +9,15 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.pinelabs.pluralsdk.R
+import com.pinelabs.pluralsdk.data.model.Palette
 import com.pinelabs.pluralsdk.data.model.RecyclerViewPaymentOptionData
-import com.pinelabs.pluralsdk.utils.Constants.Companion.PAYBYPOINTS_REF
+import com.pinelabs.pluralsdk.utils.Constants.Companion.PAYBYPOINTS_ID
 import com.pinelabs.pluralsdk.utils.PaymentModes
 
 class PaymentOptionsAdapter(
     private val items: List<RecyclerViewPaymentOptionData>,
     private val paymentOption: List<String>,
+    private val pallete: Palette?,
     private val itemClickListener: OnItemClickListener
 ) :
     RecyclerView.Adapter<PaymentOptionsAdapter.PaymentOptionDataHolder>() {
@@ -36,13 +40,21 @@ class PaymentOptionsAdapter(
         tvPaymentOption.text = currentItem.payment_option
 
         val imgRewardIcon: ImageView = holder.itemView.findViewById(R.id.redeem_points)
+
         if (currentItem.payment_option.equals(PaymentModes.CREDIT_DEBIT.paymentModeName) && paymentOption.contains(
-                PAYBYPOINTS_REF
+                PAYBYPOINTS_ID
             )
         ) {
             imgRewardIcon.visibility = View.VISIBLE
         } else {
             imgRewardIcon.visibility = View.GONE
+        }
+
+        if (pallete!=null){
+            imgPaymentIcon.imageTintList = ColorStateList.valueOf(
+                Color.parseColor(pallete?.C900))
+            imgRewardIcon.imageTintList = ColorStateList.valueOf(
+                Color.parseColor(pallete?.C900))
         }
 
         holder.itemView.setOnClickListener {

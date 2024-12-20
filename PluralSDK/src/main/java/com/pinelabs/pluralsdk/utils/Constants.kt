@@ -2,11 +2,13 @@ package com.pinelabs.pluralsdk.utils
 
 class Constants {
     companion object {
+        const val APP_VERSION="1.0"
+
         const val TOKEN = "TOKEN"
         const val ERROR_MESSAGE = "ERROR_MESSAGE"
         const val ERROR_MESSAGE_DEFAULT = "PAYMENT FAILED"
         const val REDIRECT_URL = "REDIRECT_URL"
-        const val SUCCESS_REDIRECT_URL = "checkout-bff/form/handler"
+        const val SUCCESS_REDIRECT_URL = "savePluralPgTransactionStatus"
 
         const val SPLASH_TIMER: Long = 2300
         const val FAILURE_TIMER: Long = 5000
@@ -14,6 +16,7 @@ class Constants {
         const val UPI_TRANSACTION_STATUS_INTERVAL = 5000L
 
         const val BASE_URL = "https://api-staging.pluralonline.com/api/v3/checkout-bff/"
+        const val BASE_URL_QA = "https://pluralqa.pinepg.in/api/v3/checkout-bff/"
 
         const val API_INTERNET_MESSAGE = "No Internet Connection"
         const val API_ERROR = "API_ERROR"
@@ -22,12 +25,14 @@ class Constants {
         const val NET_BANKING_LABEL = "Netbanking"
         const val UPI_LABEL = "UPI"
         const val WALLET_LABEL = "WALLET"
-        const val CREDIT_DEBIT_REF = "CREDIT_DEBIT"
-        const val PAYBYPOINTS_REF = "PAYBYPOINTS"
 
-        const val NET_BANKING_REF = "NET_BANKING"
-        const val UPI_REF = "UPI"
-        const val WALLET_REF = "WALLET"
+        const val CREDIT_DEBIT_ID = "CREDIT_DEBIT"
+        const val PAYBYPOINTS_ID = "PAYBYPOINTS"
+        const val NET_BANKING_ID = "NET_BANKING"
+        const val UPI_ID = "UPI"
+        const val WALLET_ID = "WALLET"
+
+        const val NET_BANKING_PAYMENT_METHOD = "NETBANKING"
 
         const val START_BOLD = "<b>"
         const val END_BOLD = "</b>"

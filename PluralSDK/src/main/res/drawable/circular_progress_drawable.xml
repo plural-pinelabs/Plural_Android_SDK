@@ -1,4 +1,4 @@
-<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:id="@android:id/background">
         <shape android:shape="ring" android:useLevel="false">
             <size android:width="100dp" android:height="100dp"/>
@@ -9,7 +9,8 @@
 
     <item android:id="@android:id/progress">
         <rotate
-            android:fromDegrees="-90"
+            android:fromDegrees="0"
+            android:toDegrees="0"
             android:pivotX="50%"
             android:pivotY="50%">
             <shape android:shape="ring" android:useLevel="true">

@@ -48,8 +48,8 @@ data class PurchaseDetails(val customer: Customer, val merchant_metadata: Mercha
 data class IntegrationMode(val integration_mode: String)
 
 data class Customer(
-    val email_id: String, val first_name: String, val last_name: String,
-    val customer_id: String, val mobile_number: String, val billing_address: BillingAddress,
+    val email_id: String?, val first_name: String, val last_name: String,
+    val customer_id: String, val mobile_number: String?, val billing_address: BillingAddress,
     val shipping_address: BillingAddress
 )
 

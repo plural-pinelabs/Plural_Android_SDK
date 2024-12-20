@@ -3,55 +3,60 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_margin="16dp"
     android:fillViewport="true">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:paddingLeft="30dp"
+        android:paddingTop="20dp"
+        android:paddingRight="30dp"
+        android:paddingBottom="20dp">
 
         <!-- Title and Back Button -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:paddingBottom="16dp">
+            android:orientation="horizontal">
 
             <ImageButton
                 android:id="@+id/btnBack"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="35dp"
+                android:layout_height="35dp"
                 android:background="?android:selectableItemBackground"
                 android:src="@drawable/back_button" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:paddingStart="8dp"
+                android:fontFamily="@font/roboto_medium"
+                android:paddingStart="4dp"
                 android:paddingEnd="8dp"
                 android:text="Cards"
                 android:textColor="@android:color/black"
-                android:textSize="20sp"
-                android:textStyle="bold" />
+                android:textSize="17sp" />
         </LinearLayout>
 
         <!-- Card Number Field -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
+            android:layout_marginTop="30dp"
+            android:layout_marginBottom="5dp"
+            android:alpha=".6"
             android:fontFamily="@font/robotoregular"
+            android:paddingLeft="5dp"
             android:text="Card Number"
-            android:textSize="12sp"
+            android:textColor="@color/black"
+            android:textSize="14sp"
             android:textStyle="bold" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
+            android:layout_marginBottom="20dp"
             android:gravity="center_vertical"
             android:orientation="horizontal">
 
@@ -62,12 +67,15 @@
                 android:layout_weight="1"
                 android:background="@drawable/edittext_default_border"
                 android:drawablePadding="8dp"
+                android:fontFamily="@font/roboto_medium"
                 android:hint="Enter Card Number"
-                android:textColor="@color/black"
                 android:inputType="number"
                 android:maxLength="23"
                 android:padding="12dp"
-                android:text="" />
+                android:text=""
+                android:textColor="@color/black"
+                android:textColorHint="@color/shimmer_grey"
+                android:textSize="16sp" />
 
 
         </LinearLayout>
@@ -78,6 +86,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
+            android:gravity="top"
             android:textColor="#EB001B"
             android:visibility="gone" /> <!-- Initially hidden -->
 
@@ -85,25 +94,31 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
+            android:layout_marginBottom="5dp"
             android:orientation="horizontal">
 
             <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:alpha=".6"
                 android:fontFamily="@font/robotoregular"
+                android:paddingLeft="5dp"
                 android:text="Expiry (MM/YY)"
-                android:textSize="12sp"
+                android:textColor="@color/black"
+                android:textSize="14sp"
                 android:textStyle="bold" />
 
             <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:alpha=".6"
                 android:fontFamily="@font/robotoregular"
+                android:paddingLeft="15dp"
                 android:text="CVV"
-                android:textSize="12sp"
+                android:textColor="@color/black"
+                android:textSize="14sp"
                 android:textStyle="bold" />
         </LinearLayout>
 
@@ -111,7 +126,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
+            android:layout_marginBottom="20dp"
             android:gravity="center_vertical"
             android:orientation="horizontal"
             android:weightSum="2">
@@ -121,13 +136,16 @@
                 android:id="@+id/etExpiry"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
+                android:layout_marginEnd="25dp"
                 android:layout_weight="1"
                 android:background="@drawable/edittext_default_border"
+                android:fontFamily="@font/roboto_medium"
                 android:hint="MM/YY"
-                android:textColor="@color/black"
                 android:inputType="date"
-                android:padding="12dp" />
+                android:padding="12dp"
+                android:textColor="@color/black"
+                android:textColorHint="@color/shimmer_grey"
+                android:textSize="16sp" />
 
             <!-- CVV Field -->
             <EditText
@@ -136,11 +154,14 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:background="@drawable/edittext_default_border"
+                android:fontFamily="@font/roboto_medium"
                 android:hint="CVV"
-                android:textColor="@color/black"
                 android:inputType="numberPassword"
                 android:maxLength="4"
-                android:padding="12dp" />
+                android:padding="12dp"
+                android:textColor="@color/black"
+                android:textColorHint="@color/shimmer_grey"
+                android:textSize="16sp" />
         </LinearLayout>
 
         <!-- Expiry Error Message -->
@@ -181,9 +202,13 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
+            android:layout_marginBottom="5dp"
+            android:alpha=".6"
+            android:fontFamily="@font/robotoregular"
+            android:paddingLeft="5dp"
             android:text="Card Holder's Name"
-            android:textSize="16sp"
+            android:textColor="@color/black"
+            android:textSize="14sp"
             android:textStyle="bold" />
 
         <!-- Card Holder's Name Field -->
@@ -193,10 +218,13 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="68dp"
             android:background="@drawable/edittext_default_border"
+            android:fontFamily="@font/roboto_medium"
             android:hint="Full Name on Card"
-            android:textColor="@color/black"
             android:inputType="textPersonName"
-            android:padding="12dp" />
+            android:padding="12dp"
+            android:textColor="@color/black"
+            android:textColorHint="@color/shimmer_grey"
+            android:textSize="16sp" />
 
         <include
             layout="@layout/pbp_bank_banner"
@@ -226,6 +254,10 @@
             layout="@layout/pbp_redeem_points"
             android:visibility="gone" />
 
+        <include
+            layout="@layout/pbp_checking_points"
+            android:visibility="gone" />
+
         <!-- Proceed to Pay Button -->
         <Button
             android:id="@+id/btnProceedToPay"
@@ -235,12 +267,14 @@
             android:backgroundTint="@null"
             android:drawableLeft="@drawable/lock_keyhole_minimalistic"
             android:drawablePadding="8dp"
+            android:fontFamily="@font/roboto_medium"
             android:paddingLeft="81dp"
-            android:paddingTop="15dp"
+            android:paddingTop="10dp"
             android:paddingRight="81dp"
-            android:paddingBottom="15dp"
+            android:paddingBottom="10dp"
             android:text="Proceed to Pay"
             android:textColor="@android:color/white"
+            android:textSize="18sp"
             app:backgroundTint="@null" />
     </LinearLayout>
 </ScrollView>

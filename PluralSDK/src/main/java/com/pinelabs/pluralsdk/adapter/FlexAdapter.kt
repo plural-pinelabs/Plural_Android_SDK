@@ -10,7 +10,7 @@ import com.google.android.flexbox.FlexboxLayoutManager
 import com.pinelabs.pluralsdk.R
 import com.pinelabs.pluralsdk.data.model.PBPBank
 
-class FlexAdapter(private val bankList: List<PBPBank>) :
+class FlexAdapter(private val bankList: List<PBPBank>, private val count: Int) :
     RecyclerView.Adapter<FlexAdapter.PBPBankViewHolder>() {
     override fun onCreateViewHolder(
         parent: ViewGroup,
@@ -34,7 +34,7 @@ class FlexAdapter(private val bankList: List<PBPBank>) :
     }
 
     override fun getItemCount(): Int {
-        return bankList.size
+        return (if (count >= bankList.size) bankList.size else count)
     }
 
     class PBPBankViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {

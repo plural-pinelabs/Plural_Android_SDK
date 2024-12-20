@@ -1,9 +1,15 @@
 package com.pinelabs.pluralsdk.fragment
 
 import android.animation.Animator
+import android.content.Context
 import android.content.Intent
-import android.graphics.drawable.ColorDrawable
+import android.content.res.Resources
+import android.graphics.Color
 import android.graphics.drawable.Drawable
+import android.graphics.drawable.GradientDrawable
+import android.graphics.drawable.LayerDrawable
+import android.graphics.drawable.StateListDrawable
+import android.graphics.drawable.VectorDrawable
 import android.os.Bundle
 import android.text.Editable
 import android.text.InputFilter
@@ -15,11 +21,9 @@ import android.text.TextWatcher
 import android.text.method.LinkMovementMethod
 import android.text.style.ClickableSpan
 import android.text.style.ForegroundColorSpan
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.WindowManager
 import android.widget.Button
 import android.widget.CheckBox
 import android.widget.EditText
@@ -27,6 +31,7 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ProgressBar
+import android.widget.RelativeLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -41,7 +46,6 @@ import com.google.android.flexbox.AlignItems
 import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexWrap
 import com.google.android.flexbox.FlexboxLayoutManager
-import com.google.android.flexbox.JustifyContent
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.pinelabs.pluralsdk.R
@@ -50,11 +54,12 @@ import com.pinelabs.pluralsdk.activity.FailureActivity
 import com.pinelabs.pluralsdk.adapter.FlexAdapter
 import com.pinelabs.pluralsdk.adapter.PBPBanksAdapter
 import com.pinelabs.pluralsdk.data.model.CardData
-import com.pinelabs.pluralsdk.data.model.CardDataExtra
+import com.pinelabs.pluralsdk.data.model.Extra
 import com.pinelabs.pluralsdk.data.model.FetchResponse
 import com.pinelabs.pluralsdk.data.model.OrderDetails
 import com.pinelabs.pluralsdk.data.model.OrderDetailsAmount
 import com.pinelabs.pluralsdk.data.model.PBPBank
+import com.pinelabs.pluralsdk.data.model.Palette
 import com.pinelabs.pluralsdk.data.model.ProcessPaymentRequest
 import com.pinelabs.pluralsdk.data.model.ProcessPaymentResponse
 import com.pinelabs.pluralsdk.data.model.RewardPaymentOption
@@ -67,12 +72,10 @@ import com.pinelabs.pluralsdk.data.utils.ColumnUtil
 import com.pinelabs.pluralsdk.utils.Constants.Companion.BANK_ALLAHABAD
 import com.pinelabs.pluralsdk.utils.Constants.Companion.BANK_ANDHRA
 import com.pinelabs.pluralsdk.utils.Constants.Companion.BANK_AU_SMALL
-import com.pinelabs.pluralsdk.utils.Constants.Companion.BANK_AXIS
 import com.pinelabs.pluralsdk.utils.Constants.Companion.BANK_CANARA
 import com.pinelabs.pluralsdk.utils.Constants.Companion.BANK_CENTRAL
 import com.pinelabs.pluralsdk.utils.Constants.Companion.BANK_CORPORATION
 import com.pinelabs.pluralsdk.utils.Constants.Companion.BANK_FEDERAL
-import com.pinelabs.pluralsdk.utils.Constants.Companion.BANK_ICICI
 import com.pinelabs.pluralsdk.utils.Constants.Companion.BANK_IDBI
 import com.pinelabs.pluralsdk.utils.Constants.Companion.BANK_IDFC
 import com.pinelabs.pluralsdk.utils.Constants.Companion.BANK_IDIAN
@@ -86,9 +89,9 @@ import com.pinelabs.pluralsdk.utils.Constants.Companion.BANK_STATE_BANK
 import com.pinelabs.pluralsdk.utils.Constants.Companion.BANK_UNION
 import com.pinelabs.pluralsdk.utils.Constants.Companion.BANK_YES
 import com.pinelabs.pluralsdk.utils.Constants.Companion.BANK_YES_BANK
-import com.pinelabs.pluralsdk.utils.Constants.Companion.CREDIT_DEBIT_REF
+import com.pinelabs.pluralsdk.utils.Constants.Companion.CREDIT_DEBIT_ID
 import com.pinelabs.pluralsdk.utils.Constants.Companion.ERROR_MESSAGE
-import com.pinelabs.pluralsdk.utils.Constants.Companion.PAYBYPOINTS_REF
+import com.pinelabs.pluralsdk.utils.Constants.Companion.PAYBYPOINTS_ID
 import com.pinelabs.pluralsdk.utils.Constants.Companion.REDIRECT_URL
 import com.pinelabs.pluralsdk.utils.Constants.Companion.TOKEN
 import com.pinelabs.pluralsdk.viewmodels.FetchDataViewModel
@@ -130,6 +133,7 @@ class CardFragment : Fragment() {
     private var redeemableAmount: Int? = null
     private var mobileNumber: String? = null
     private var amount: Int? = null
+    private var pbpCardNumber: String? = null
     private lateinit var currency: String
     private lateinit var bottomSheetDialog: BottomSheetDialog
     private lateinit var bottomSheetBanks: BottomSheetDialog
@@ -140,6 +144,7 @@ class CardFragment : Fragment() {
     private var isCardHolderNameValid = false
     private var isPBPChecked = false
     private var isPBPEnabled = false
+    private var palette: Palette? = null
 
     private lateinit var etCardNumber: EditText
     private lateinit var btnProceedToPay: Button
@@ -150,6 +155,7 @@ class CardFragment : Fragment() {
     private lateinit var constraintLayoutAnotherCard: ConstraintLayout
     private lateinit var constraintLayoutNoBalance: ConstraintLayout
     private lateinit var constraintLayoutRedeemPoints: ConstraintLayout
+    private lateinit var constraintLayoutCheckingPoints: ConstraintLayout
     private lateinit var linearCheckPoint: LinearLayout
     private lateinit var textCheckPoints: TextView
     private lateinit var textTryAnotherNumber: TextView
@@ -215,7 +221,9 @@ class CardFragment : Fragment() {
         val tvCardNumberError: TextView = view.findViewById(R.id.tvCardNumberError)
         val btnBack: ImageButton = view.findViewById(R.id.btnBack)
         btnProceedToPay.isEnabled = false
-        btnProceedToPay.setBackgroundColor(resources.getColor(R.color.shimmer_grey))
+        btnProceedToPay.alpha = 0.3f
+
+        //btnProceedToPay.setBackgroundColor(resources.getColor(R.color.shimmer_grey))
 
         // Set up card number validation
         setupCardNumberValidation(etCardNumber, tvCardNumberError)
@@ -231,13 +239,6 @@ class CardFragment : Fragment() {
 
         btnProceedToPay.setOnClickListener {
 
-            val background: Drawable = btnProceedToPay.getBackground()
-
-            if (background is ColorDrawable) {
-                val colorDrawable = background as ColorDrawable
-                val color = colorDrawable.color // This returns the color as an integer
-                Log.d("ButtonColor", "Button background color: $color")
-            }
             // Handle payment process here
             val cardNumber = etCardNumber.text.toString().filter { !it.isWhitespace() }
             val cvv = etCVV.text.toString()
@@ -287,7 +288,7 @@ class CardFragment : Fragment() {
                             tvCardNumberError.visibility = View.GONE
                             etCardNumber.background = ContextCompat.getDrawable(
                                 requireContext(),
-                                R.drawable.edittext_custom_background
+                                R.drawable.edittext_default_border
                             )
                             isCardNumberValid = true
                             // Set the brand icon based on the card type
@@ -308,31 +309,34 @@ class CardFragment : Fragment() {
         }
         //fetchDataListener()
         allViewsInvisible()
-
         observeListener()
     }
 
-     fun getView(view: View){
-         recyclerView = view.findViewById(R.id.recycler_banks)
-         constraintLayoutPBPBanner = view.findViewById(R.id.constrain_pbp)
-         constraintLayoutCannotCheck = view.findViewById(R.id.constrain_unable_to_check)
-         constraintLayoutNoBalance = view.findViewById(R.id.constrain_no_balance)
-         constraintLayoutRedeemPoints = view.findViewById(R.id.constrain_redeem_points)
-         constraintLayoutAnotherCard = view.findViewById(R.id.constrain_try_another_card)
-         constraintLayoutAnotherNumber = view.findViewById(R.id.constrain_try_another_number)
-         textTryAnotherNumber = constraintLayoutAnotherNumber.findViewById(R.id.txt_try_another_number)
-         linearCheckPoint = view.findViewById(R.id.linear_check_points)
-         textCheckPoints = linearCheckPoint.findViewById(R.id.txt_check_points)
+    fun getView(view: View) {
+        recyclerView = view.findViewById(R.id.recycler_banks)
+        constraintLayoutPBPBanner = view.findViewById(R.id.constrain_pbp)
+        constraintLayoutCannotCheck = view.findViewById(R.id.constrain_unable_to_check)
+        constraintLayoutNoBalance = view.findViewById(R.id.constrain_no_balance)
+        constraintLayoutRedeemPoints = view.findViewById(R.id.constrain_redeem_points)
+        constraintLayoutAnotherCard = view.findViewById(R.id.constrain_try_another_card)
+        constraintLayoutAnotherNumber = view.findViewById(R.id.constrain_try_another_number)
+        constraintLayoutCheckingPoints = view.findViewById(R.id.constrain_checking_points)
+        textTryAnotherNumber =
+            constraintLayoutAnotherNumber.findViewById(R.id.txt_try_another_number)
+        linearCheckPoint = view.findViewById(R.id.linear_check_points)
+        textCheckPoints = linearCheckPoint.findViewById(R.id.txt_check_points)
     }
 
     private fun updateButtonBackground() {
         if (isCardNumberValid && isExpiryValid && isCVVValid && isCardHolderNameValid) {
             btnProceedToPay.isEnabled = true
-            btnProceedToPay.setBackgroundColor(resources.getColor(R.color.header_color))
+            btnProceedToPay.alpha = 1f
+            //btnProceedToPay.setBackgroundColor(resources.getColor(R.color.header_color))
             //btnProceedToPay.setBackgroundResource(R.color.header_color) // Enabled state with secondary color
         } else {
             btnProceedToPay.isEnabled = false
-            btnProceedToPay.setBackgroundColor(resources.getColor(R.color.shimmer_grey))
+            btnProceedToPay.alpha = 0.3f
+            //btnProceedToPay.setBackgroundColor(resources.getColor(R.color.shimmer_grey))
             //btnProceedToPay.setBackgroundResource(R.color.colorPrimary) // Disabled state with primary color
         }
     }
@@ -358,7 +362,9 @@ class CardFragment : Fragment() {
 
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
 
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+
+            }
 
             override fun afterTextChanged(s: Editable?) {
                 if (isEditing) return
@@ -371,6 +377,15 @@ class CardFragment : Fragment() {
                 etCardNumber.setText(formattedInput)
                 etCardNumber.setSelection(formattedInput.length)
 
+                if (isPBPEnabled)
+                    if (cleanedInput.length >= 16) {
+                        pbpCardNumber = formattedInput
+                        checkReward(formattedInput, null)
+                    } else {
+                        isPBPChecked = false
+                        pbpBankVisbile()
+                    }
+
                 if (cleanedInput.length > 19) {
                     tvCardNumberError.text = "Your card number cannot exceed 19 digits"
                     tvCardNumberError.visibility = View.VISIBLE
@@ -381,25 +396,16 @@ class CardFragment : Fragment() {
                     isCardNumberValid = false
                 } else if (cleanedInput.length < 19) {
                     tvCardNumberError.visibility = View.GONE
-                    etCardNumber.background = ContextCompat.getDrawable(
-                        requireContext(),
-                        R.drawable.edittext_border_focussed
-                    )
+                    etCardNumber.background = setColor(requireActivity())
                     isCardNumberValid = false
                 } else {
                     tvCardNumberError.visibility = View.GONE
                     etCardNumber.background = ContextCompat.getDrawable(
                         requireContext(),
-                        R.drawable.edittext_custom_background
+                        R.drawable.edittext_default_border
                     )
                     isCardNumberValid = true
-                    if (cleanedInput.length >= 16) {
-                        if (isPBPEnabled) {
-                            checkReward(formattedInput, null)
-                        } else {
-                            pbpBankVisbile()
-                        }
-                    }
+
                 }
 
                 isEditing = false
@@ -422,6 +428,48 @@ class CardFragment : Fragment() {
 
         //token = "S01D5yKritUp4KsG4IVJWyGpa1YQ3A0I6WOqLNdyr%2F6fMc%3D"
         mainViewModel.rewardData(token, rewardRequest)
+        mainViewModel.reward_response.removeObservers(this)
+        mainViewModel.reward_response.observe(viewLifecycleOwner) { response ->
+            val rewardResponseHandler = ApiResultHandler<RewardResponse>(requireActivity(),
+                onLoading = {
+                    LoadingVisbile()
+                }, onSuccess = { data ->
+                    bottomSheetDialog.dismiss()
+                    if (data!!.is_eligible) {
+                        if (data.redeemable_amount != null && data.payment_option_metadata != null) {
+                            //data.payment_option_metadata.pay_by_point_option_data.redeemable_points=0
+                            if (data.payment_option_metadata.pay_by_point_option_data.redeemable_points == 0) {
+                                zeroPoints()
+                            } else {
+                                redeemableAmount = data!!.redeemable_amount.value
+                                pbpPoints(
+                                    data!!.payment_option_metadata.pay_by_point_option_data.redeemable_points,
+                                    data!!.redeemable_amount.value
+                                )
+                            }
+                        } else {
+                            checkPoints()
+                        }
+                    } else {
+                        isPBPChecked = false
+                        if (mobileNumber != null && !mobileNumber!!.isEmpty())
+                            anotherMobileNumber()
+                        else
+                            anotherCardNumber()
+                    }
+                    /*Toast.makeText(
+                        requireActivity(),
+                        data!!.payment_method + " is eligible " + data!!.is_eligible,
+                        Toast.LENGTH_SHORT
+                    ).show()*/
+                }, onFailure = {
+                    isPBPChecked = false
+                    bottomSheetDialog.dismiss()
+                    unableToCheckPoints()
+                }
+            )
+            rewardResponseHandler.handleApiResult(response)
+        }
 
     }
 
@@ -437,10 +485,7 @@ class CardFragment : Fragment() {
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 // Change background to header color while typing
-                etExpiry.background = ContextCompat.getDrawable(
-                    requireContext(),
-                    R.drawable.edittext_border_focussed
-                )
+                etExpiry.background = setColor(requireActivity())
             }
 
             override fun afterTextChanged(s: Editable?) {
@@ -494,7 +539,7 @@ class CardFragment : Fragment() {
                             tvExpiryError.visibility = View.GONE
                             etExpiry.background = ContextCompat.getDrawable(
                                 requireContext(),
-                                R.drawable.edittext_custom_background
+                                R.drawable.edittext_default_border
                             )
                             isExpiryValid = true
                         }
@@ -516,7 +561,8 @@ class CardFragment : Fragment() {
 
 
     private fun setupCVVValidation(etCVV: EditText, tvCVVError: TextView) {
-        etCVV.filters = arrayOf<InputFilter>(InputFilter.LengthFilter(3)) // CVV length is limited to 3 digits
+        etCVV.filters =
+            arrayOf<InputFilter>(InputFilter.LengthFilter(3)) // CVV length is limited to 3 digits
 
         etCVV.addTextChangedListener(object : TextWatcher {
             private var isEditing = false
@@ -533,10 +579,7 @@ class CardFragment : Fragment() {
                 val cvv = s?.toString() ?: ""
 
                 // Set focused background while typing
-                etCVV.background = ContextCompat.getDrawable(
-                    requireContext(),
-                    R.drawable.edittext_border_focussed
-                )
+                etCVV.background = setColor(requireActivity())
 
                 // Validate input
                 if (cvv.length > 3) {
@@ -576,7 +619,7 @@ class CardFragment : Fragment() {
                     tvCVVError.visibility = View.GONE
                     etCVV.background = ContextCompat.getDrawable(
                         requireContext(),
-                        R.drawable.edittext_custom_background
+                        R.drawable.edittext_default_border
                     )
                     isCVVValid = true
                 }
@@ -604,10 +647,7 @@ class CardFragment : Fragment() {
                 }
 
                 // Update the background while typing
-                etCardHolderName.background = ContextCompat.getDrawable(
-                    requireContext(),
-                    R.drawable.edittext_border_focussed
-                )
+                etCardHolderName.background = setColor(requireActivity())
 
                 // Validate the input
                 isCardHolderNameValid = !filteredName.isNullOrEmpty()
@@ -655,18 +695,27 @@ class CardFragment : Fragment() {
         mobileNumber: String?
     ) {
         val paymentMode = arrayListOf<String>()
-        paymentMode.add(CREDIT_DEBIT_REF)
+        paymentMode.add(CREDIT_DEBIT_ID)
         if (isPBPChecked) {
-            paymentMode.add(PAYBYPOINTS_REF)
+            paymentMode.add(PAYBYPOINTS_ID)
             amount = amount!! - redeemableAmount!!
         }
         val last4 = cardNumber.substring(cardNumber.length - 4, cardNumber.length)
 
         val cardDataExtra =
-            CardDataExtra(paymentMode, amount, currency, last4, redeemableAmount, mobileNumber!!.filter {  !mobileNumber!!.isEmpty()  })
+            Extra(
+                paymentMode,
+                amount,
+                currency,
+                last4,
+                redeemableAmount,
+                mobileNumber!!.filter { !mobileNumber!!.isEmpty() },
+                null,
+                null
+            )
         val cardData = CardData(cardNumber, cvv, cardHolderName, cardExpiryYear, cardExpiryMonth)
         val processPaymentRequest =
-            ProcessPaymentRequest(cardData, cardDataExtra, upi_data = null, null)
+            ProcessPaymentRequest(cardData, upi_data = null, null, cardDataExtra, null, null)
         mainViewModel.processPayment(token, processPaymentRequest)
 
     }
@@ -684,16 +733,39 @@ class CardFragment : Fragment() {
         val txt_check_point: TextView = view.findViewById(R.id.txt_check_points)
         val progress_check_points: ProgressBar = view.findViewById(R.id.progress_pbp)
         val edt_mobile_number: EditText = view.findViewById(R.id.edt_mobile_number)
+        val image_icon: ImageView = view.findViewById(R.id.img_icon)
+        val relativeMobile: RelativeLayout = view.findViewById(R.id.layout_mobile_number)
+        if (palette != null) {
+            val layerDrawable = ContextCompat.getDrawable(
+                requireActivity(),
+                R.drawable.pbp_drawable_layer
+            ) as LayerDrawable
+            val gradientDrawable =
+                layerDrawable.findDrawableByLayerId(R.id.icon_bg) as VectorDrawable
+            gradientDrawable.setTint(Color.parseColor(palette?.C900))
+            image_icon.setImageDrawable(layerDrawable)
+        }
         edt_mobile_number.addTextChangedListener { char ->
             if (char != null) {
                 if (char.length > 9) {
                     txt_check_point.isEnabled = true
-                    txt_check_point.setTextColor(resources.getColor(R.color.header_color))
+                    if (palette != null)
+                        txt_check_point.setTextColor(Color.parseColor(palette?.C900))
+                    else
+                        txt_check_point.setTextColor(resources.getColor(R.color.header_color))
                 } else {
+                    isPBPChecked = false
                     txt_check_point.isEnabled = false
                     txt_check_point.setTextColor(resources.getColor(R.color.shimmer_grey))
                 }
                 mobileNumber = char.toString()
+            }
+        }
+        edt_mobile_number.setOnFocusChangeListener { v, hasFocus ->
+            if (hasFocus) {
+                relativeMobile.background = setColor(requireActivity())
+            } else {
+                relativeMobile.background = resources.getDrawable(R.drawable.addcardcurved)
             }
         }
         edt_mobile_number.setText(mobileNumber)
@@ -777,49 +849,33 @@ class CardFragment : Fragment() {
             showMoreBankDialog()
         }
         val layoutManager = FlexboxLayoutManager(requireActivity()).apply {
-            flexWrap = FlexWrap.NOWRAP
+            flexWrap = FlexWrap.WRAP
             flexDirection = FlexDirection.ROW
             alignItems = AlignItems.FLEX_START
         }
-        /* layoutManager.setFlexDirection(FlexDirection.COLUMN)
-         layoutManager.flexWrap = FlexWrap.WRAP
-         layoutManager.setJustifyContent(JustifyContent.CENTER)
-         layoutManager.setAlignItems(AlignItems.CENTER)*/
         recyclerView.layoutManager = layoutManager
-        // val adapter = FlexAdapter(getBankList())
-        /*recyclerView.addOnScrollListener(object: RecyclerView.OnScrollListener(){
-            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                super.onScrolled(recyclerView, dx, dy)
 
-                // For each child item, check its position
-                for (i in 0 until recyclerView.childCount) {
-                    val child = recyclerView.getChildAt(i)
-                    val itemTop = child.top
-                    val itemBottom = child.bottom
-                    val recyclerTop = recyclerView.top
-                    val recyclerBottom = recyclerView.bottom
-
-                    // Check if the item is within the visible area
-                    if (itemTop >= recyclerTop && itemBottom <= recyclerBottom) {
-                        child.visibility = View.VISIBLE // Show item
-                    } else {
-                        child.visibility = View.INVISIBLE // Hide item if off-screen
-                    }
-                }
-            }
-        })*/
-        val mNoOfColumns: Int = ColumnUtil.calculateNoOfColumns(requireActivity(), 130F)
+        val mNoOfColumns: Int = ColumnUtil.calculateNoOfColumns(requireActivity(), 160F)
         println("No of columns ${mNoOfColumns}")
 
-        //val layoutManager = GridLayoutManager(requireActivity(), mNoOfColumns)
-
-        val myRecyclerViewAdapter = FlexAdapter(getBankList().subList(0, mNoOfColumns))
-        //recyclerView.layoutManager = layoutManager
+        val myRecyclerViewAdapter = FlexAdapter(getBankList(), mNoOfColumns)
         recyclerView.adapter = myRecyclerViewAdapter
     }
 
     fun pbpBankVisbile() {
         constraintLayoutPBPBanner.visibility = View.VISIBLE
+        linearCheckPoint.visibility = View.GONE
+        constraintLayoutCannotCheck.visibility = View.GONE
+        constraintLayoutAnotherNumber.visibility = View.GONE
+        constraintLayoutAnotherCard.visibility = View.GONE
+        constraintLayoutNoBalance.visibility = View.GONE
+        constraintLayoutRedeemPoints.visibility = View.GONE
+        constraintLayoutCheckingPoints.visibility = View.GONE
+    }
+
+    fun LoadingVisbile() {
+        constraintLayoutCheckingPoints.visibility = View.VISIBLE
+        constraintLayoutPBPBanner.visibility = View.GONE
         linearCheckPoint.visibility = View.GONE
         constraintLayoutCannotCheck.visibility = View.GONE
         constraintLayoutAnotherNumber.visibility = View.GONE
@@ -836,16 +892,26 @@ class CardFragment : Fragment() {
         constraintLayoutAnotherCard.visibility = View.GONE
         constraintLayoutNoBalance.visibility = View.GONE
         constraintLayoutRedeemPoints.visibility = View.GONE
+        constraintLayoutCheckingPoints.visibility = View.GONE
     }
 
     fun checkPoints() {
         constraintLayoutPBPBanner.visibility = View.GONE
         linearCheckPoint.visibility = View.VISIBLE
+        if (palette != null) {
+            textCheckPoints.setTextColor(Color.parseColor(palette?.C900))
+
+            val layerDrawable = linearCheckPoint.background as LayerDrawable
+            val gradientDrawable =
+                layerDrawable.findDrawableByLayerId(R.id.header) as GradientDrawable
+            gradientDrawable.setColor(Color.parseColor(palette?.C900))
+        }
         constraintLayoutCannotCheck.visibility = View.GONE
         constraintLayoutAnotherNumber.visibility = View.GONE
         constraintLayoutAnotherCard.visibility = View.GONE
         constraintLayoutNoBalance.visibility = View.GONE
         constraintLayoutRedeemPoints.visibility = View.GONE
+        constraintLayoutCheckingPoints.visibility = View.GONE
     }
 
     fun anotherMobileNumber() {
@@ -856,6 +922,7 @@ class CardFragment : Fragment() {
         constraintLayoutAnotherCard.visibility = View.GONE
         constraintLayoutNoBalance.visibility = View.GONE
         constraintLayoutRedeemPoints.visibility = View.GONE
+        constraintLayoutCheckingPoints.visibility = View.GONE
     }
 
     fun anotherCardNumber() {
@@ -866,6 +933,7 @@ class CardFragment : Fragment() {
         constraintLayoutAnotherCard.visibility = View.VISIBLE
         constraintLayoutNoBalance.visibility = View.GONE
         constraintLayoutRedeemPoints.visibility = View.GONE
+        constraintLayoutCheckingPoints.visibility = View.GONE
     }
 
     fun zeroPoints() {
@@ -875,7 +943,19 @@ class CardFragment : Fragment() {
         constraintLayoutAnotherNumber.visibility = View.GONE
         constraintLayoutAnotherCard.visibility = View.GONE
         constraintLayoutNoBalance.visibility = View.VISIBLE
+        if (palette != null) {
+            val icon: ImageView = constraintLayoutNoBalance.findViewById(R.id.img_pbp)
+            val layerDrawable = ContextCompat.getDrawable(
+                requireActivity(),
+                R.drawable.pbp_no_balance_layerlist
+            ) as LayerDrawable
+            val gradientDrawable =
+                layerDrawable.findDrawableByLayerId(R.id.icon_bg) as VectorDrawable
+            gradientDrawable.setTint(Color.parseColor(palette?.C900))
+            icon.setImageDrawable(layerDrawable)
+        }
         constraintLayoutRedeemPoints.visibility = View.GONE
+        constraintLayoutCheckingPoints.visibility = View.GONE
     }
 
     fun allViewsInvisible() {
@@ -886,9 +966,11 @@ class CardFragment : Fragment() {
         constraintLayoutAnotherCard.visibility = View.GONE
         constraintLayoutNoBalance.visibility = View.GONE
         constraintLayoutRedeemPoints.visibility = View.GONE
+        constraintLayoutCheckingPoints.visibility = View.GONE
     }
 
     fun pbpPoints(redeemablePoints: Int, redeemableAmount: Int) {
+        constraintLayoutCheckingPoints.visibility = View.GONE
         constraintLayoutPBPBanner.visibility = View.GONE
         linearCheckPoint.visibility = View.GONE
         constraintLayoutCannotCheck.visibility = View.GONE
@@ -896,6 +978,17 @@ class CardFragment : Fragment() {
         constraintLayoutAnotherCard.visibility = View.GONE
         constraintLayoutNoBalance.visibility = View.GONE
         constraintLayoutRedeemPoints.visibility = View.VISIBLE
+        if (palette != null) {
+            val icon: ImageView = constraintLayoutRedeemPoints.findViewById(R.id.img_pbp)
+            val layerDrawable = ContextCompat.getDrawable(
+                requireActivity(),
+                R.drawable.pbp_no_balance_layerlist
+            ) as LayerDrawable
+            val gradientDrawable =
+                layerDrawable.findDrawableByLayerId(R.id.icon_bg) as VectorDrawable
+            gradientDrawable.setTint(Color.parseColor(palette?.C900))
+            icon.setImageDrawable(layerDrawable)
+        }
         val checkPBP: CheckBox = constraintLayoutRedeemPoints.findViewById(R.id.checkbox_pbp)
         checkPBP.setOnCheckedChangeListener { _, pbpEnabled ->
             if (pbpEnabled) {
@@ -971,13 +1064,15 @@ class CardFragment : Fragment() {
                 }, onSuccess = { data ->
                     amount = data!!.paymentData!!.originalTxnAmount.amount
                     currency = data!!.paymentData!!.originalTxnAmount.currency
+                    palette = data?.merchantBrandingData?.palette
+                    btnProceedToPay.background = buttonBackground(requireActivity())
                     if (data.customerInfo != null && data.customerInfo.mobileNo != null)
                         mobileNumber = data.customerInfo.mobileNo
                     btnProceedToPay.text =
                         getString(R.string.pay) + " " + convertToRupees(requireContext(), amount!!)
                     val paymentModeData = data!!.paymentModes!!.filter { paymentMode ->
                         paymentMode.paymentModeId.equals(
-                            PAYBYPOINTS_REF
+                            PAYBYPOINTS_ID
                         )
                     }
                     if (paymentModeData.size > 0) {
@@ -987,45 +1082,6 @@ class CardFragment : Fragment() {
                 }, onFailure = {}
             )
             fetchDataResponseHandler.handleApiResult(response)
-        }
-
-        mainViewModel.reward_response.observe(viewLifecycleOwner) { response ->
-            val rewardResponseHandler = ApiResultHandler<RewardResponse>(requireActivity(),
-                onLoading = {
-                }, onSuccess = { data ->
-                    bottomSheetDialog.dismiss()
-                    if (data!!.is_eligible) {
-                        if (data.redeemable_amount != null && data.payment_option_metadata != null) {
-                            //data.payment_option_metadata.pay_by_point_option_data.redeemable_points=0
-                            if (data.payment_option_metadata.pay_by_point_option_data.redeemable_points == 0) {
-                                zeroPoints()
-                            } else {
-                                redeemableAmount = data!!.redeemable_amount.value
-                                pbpPoints(
-                                    data!!.payment_option_metadata.pay_by_point_option_data.redeemable_points,
-                                    data!!.redeemable_amount.value
-                                )
-                            }
-                        } else {
-                            checkPoints()
-                        }
-                    } else {
-                        if (mobileNumber != null && !mobileNumber!!.isEmpty())
-                            anotherMobileNumber()
-                        else
-                            anotherCardNumber()
-                    }
-                    Toast.makeText(
-                        requireActivity(),
-                        data!!.payment_method + " is eligible " + data!!.is_eligible,
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }, onFailure = {
-                    bottomSheetDialog.dismiss()
-                    unableToCheckPoints()
-                }
-            )
-            rewardResponseHandler.handleApiResult(response)
         }
 
         mainViewModel.process_payment_response.observe(viewLifecycleOwner) { response ->
@@ -1083,4 +1139,48 @@ class CardFragment : Fragment() {
         }
 
     }
+
+    fun setColor(context: Context): Drawable {
+        val drawable: Drawable
+        if (palette != null) {
+            drawable =
+                ContextCompat.getDrawable(
+                    context,
+                    R.drawable.edittext_border_focussed
+                ) as GradientDrawable
+            drawable.setStroke(convertDpToPx(2), Color.parseColor(palette?.C900))
+        } else {
+            drawable = ContextCompat.getDrawable(
+                requireContext(),
+                R.drawable.edittext_border_focussed
+            )!!
+        }
+        return drawable
+    }
+
+    private fun convertDpToPx(dp: Int): Int {
+        return (dp * Resources.getSystem().displayMetrics.density).toInt()
+    }
+
+    public fun buttonBackground(context: Context): Drawable {
+
+        val stateListDrawable = StateListDrawable()
+
+        // Create different drawables for different states
+        val pressedDrawable = GradientDrawable().apply {
+            if (palette != null) {
+                setColor(Color.parseColor(palette?.C900))
+            } else {
+                setColor(context.resources.getColor(R.color.header_color))
+            }
+            cornerRadius = 16f // Normal corner radius
+        }
+
+        // Add states to the StateListDrawable
+        stateListDrawable.addState(intArrayOf(android.R.attr.state_enabled), pressedDrawable)
+        stateListDrawable.addState(intArrayOf(), pressedDrawable) // Default state
+
+        return stateListDrawable
+    }
+
 }

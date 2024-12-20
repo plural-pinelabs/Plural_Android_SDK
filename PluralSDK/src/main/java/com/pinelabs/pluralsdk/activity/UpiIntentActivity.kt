@@ -43,7 +43,7 @@ class UpiIntentActivity : AppCompatActivity(), UpiIntentAdapter.OnItemClickListe
         stringBuiler.append("Gpay is installed ${isAppInstalled(gpay)}" + "\n")
         stringBuiler.append("Paytm is installed ${isAppInstalled(payTm)}" + "\n")
 
-        Toast.makeText(this, stringBuiler.toString(), Toast.LENGTH_SHORT).show()
+        //Toast.makeText(this, stringBuiler.toString(), Toast.LENGTH_SHORT).show()
     }
 
     private fun isAppInstalled(packageName: String): Boolean {

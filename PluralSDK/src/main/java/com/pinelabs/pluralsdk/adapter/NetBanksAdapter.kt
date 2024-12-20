@@ -7,31 +7,38 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.pinelabs.pluralsdk.R
-import com.pinelabs.pluralsdk.data.model.PBPBank
+import com.pinelabs.pluralsdk.utils.NBBANKS
 
-class NetBanksAdapter(private val bankList: List<PBPBank>) :
-    RecyclerView.Adapter<NetBanksAdapter.PBPBankViewHolder>() {
+class NetBanksAdapter(
+    private val bankList: List<NBBANKS>?,
+    private val itemClickListener: NetBankAllAdapter.OnItemClickListener
+) : RecyclerView.Adapter<NetBanksAdapter.NetBankViewHolder>() {
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int
-    ): PBPBankViewHolder {
-        val itemView = LayoutInflater.from(parent.context).inflate(
-            R.layout.bank_list_item,
-            parent, false
-        )
-        return PBPBankViewHolder(itemView)
+    ): NetBankViewHolder {
+        val itemView =
+            LayoutInflater.from(parent.context).inflate(R.layout.bank_list_item, parent, false)
+        return NetBankViewHolder(itemView)
     }
 
-    override fun onBindViewHolder(holder: PBPBankViewHolder, position: Int) {
-        holder.bankName.text = bankList.get(position).bankName
-        holder.bankImage.setImageResource(bankList.get(position).bankLogo)
+    override fun onBindViewHolder(holder: NetBankViewHolder, position: Int) {
+        val currentItem: NBBANKS? = bankList?.get(position)
+        holder.bankName.text = bankList?.get(position)?.bankName.let { bankName ->
+            if (bankName?.contains(":") == true) bankName?.split(":")
+                ?.get(1) else bankName
+        }?.replace("Bank", "")
+        bankList?.get(position)?.bankImage?.let { holder.bankImage.setImageResource(it) }
+        holder.itemView.setOnClickListener {
+            itemClickListener.onItemClick(currentItem)
+        }
     }
 
     override fun getItemCount(): Int {
-        return bankList.size
+        return bankList!!.size
     }
 
-    class PBPBankViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    class NetBankViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val bankName: TextView = itemView.findViewById(R.id.txt_bank_name)
         val bankImage: ImageView = itemView.findViewById(R.id.img_bank)
     }

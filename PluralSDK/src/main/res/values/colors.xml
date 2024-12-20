@@ -12,4 +12,7 @@
     <color name="grey">#f4f5f7</color>
     <color name="green">#1AB26B</color>
     <color name="red">#EB001B</color>
+
+    <color name="grey_button_border">#808080</color>
+    <color name="grey_button_fill">#C7CBD580</color>
 </resources>

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+  <item android:id="@+id/icon_bg" android:drawable="@drawable/pbp_default_icon_new"/>
+  <item android:drawable="@drawable/pbp_no_balance"/>
+</layer-list>

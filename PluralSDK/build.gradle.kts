@@ -59,6 +59,8 @@ dependencies {
     implementation(libs.fragment.ktx)
 
     implementation(libs.flexbox)
+    implementation(libs.clevertap)
+
 }
 
 afterEvaluate {

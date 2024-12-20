@@ -21,22 +21,21 @@
             <!-- Back Button -->
             <ImageButton
                 android:id="@+id/upiBtnBack"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
+                android:layout_width="35dp"
+                android:layout_height="35dp"
                 android:background="?android:selectableItemBackground"
-                android:contentDescription="Back Button"
                 android:src="@drawable/back_button" />
             <!-- UPI Title Text -->
             <TextView
                 android:id="@+id/tvUPITitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="4dp"
-                android:fontFamily="@font/robotoregular"
+                android:fontFamily="@font/roboto_medium"
+                android:paddingStart="4dp"
+                android:paddingEnd="8dp"
                 android:text="UPI"
                 android:textColor="@android:color/black"
-                android:textSize="20sp"
-                android:textStyle="bold" />
+                android:textSize="17sp" />
         </LinearLayout>
 
         <include layout="@layout/upi_intent" />
@@ -92,6 +91,7 @@
                 android:textSize="14sp" />
 
             <LinearLayout
+                android:id="@+id/upi_collect_border"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
@@ -127,7 +127,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
-            android:background="@drawable/rounded_button_background"
+            android:background="@drawable/button_background_selector"
+            android:backgroundTint="@null"
+            app:backgroundTint="@null"
             android:drawableStart="@drawable/lock_keyhole_minimalistic"
             android:drawablePadding="8dp"
             android:enabled="false"
@@ -136,6 +138,7 @@
             android:paddingTop="15dp"
             android:paddingRight="81dp"
             android:paddingBottom="15dp"
+            android:visibility="gone"
             android:text="@string/verify_continue"
             android:textAllCaps="false"
             android:textColor="@android:color/white"

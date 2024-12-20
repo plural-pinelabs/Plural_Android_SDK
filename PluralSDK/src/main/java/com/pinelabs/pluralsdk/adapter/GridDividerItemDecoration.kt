@@ -14,7 +14,14 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.pinelabs.pluralsdk.R
 
-class GridDividerItemDecoration(context: Context, orientation: Int) : RecyclerView.ItemDecoration() {
+class GridDividerItemDecoration/**
+ * Creates a divider [RecyclerView.ItemDecoration] that can be used with a
+ * [LinearLayoutManager].
+ *
+ * @param context Current context, it will be used to access resources.
+ * @param orientation Divider orientation. Should be [.HORIZONTAL] or [.VERTICAL].
+ */
+    (context: Context, orientation: Int) : RecyclerView.ItemDecoration() {
 
     private var mDivider: Drawable? = null
 
@@ -27,7 +34,7 @@ class GridDividerItemDecoration(context: Context, orientation: Int) : RecyclerVi
 
     init {
         val a = context.obtainStyledAttributes(ATTRS)
-        mDivider = ColorDrawable(context.getColor(R.color.shimmer_grey))//a.getDrawable(0)
+        mDivider = ColorDrawable(context.getColor(R.color.grey_button_border))
         if (mDivider == null) {
             Log.w(
                 TAG,

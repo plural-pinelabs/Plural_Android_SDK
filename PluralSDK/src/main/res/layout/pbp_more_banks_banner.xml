@@ -11,15 +11,17 @@
         android:id="@+id/txt_eligible"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
         android:layout_marginRight="10dp"
         android:fontFamily="@font/roboto_medium"
         android:text="@string/eligible_banks"
         android:textColor="@color/black"
-        android:textSize="18sp"
+        android:textSize="17sp"
         app:layout_constraintBottom_toTopOf="@id/bank_list"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toLeftOf="@+id/img_close"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_goneMarginRight="10dp" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/bank_list"

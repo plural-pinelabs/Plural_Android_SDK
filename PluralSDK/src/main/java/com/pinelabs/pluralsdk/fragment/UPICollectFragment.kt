@@ -1,8 +1,16 @@
 package com.pinelabs.pluralsdk.fragment
 
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
+import android.content.res.ColorStateList
+import android.content.res.Resources
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
+import android.graphics.drawable.Drawable
+import android.graphics.drawable.GradientDrawable
+import android.graphics.drawable.StateListDrawable
 import android.net.Uri
 import android.os.Bundle
 import android.os.CountDownTimer
@@ -22,12 +30,10 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.pinelabs.pluralsdk.R
 import com.pinelabs.pluralsdk.activity.FailureActivity
 import com.pinelabs.pluralsdk.data.model.UpiData
-import com.pinelabs.pluralsdk.data.model.CardDataExtra
 import com.pinelabs.pluralsdk.data.model.FetchResponse
 import com.pinelabs.pluralsdk.data.model.ProcessPaymentRequest
 import com.pinelabs.pluralsdk.data.model.ProcessPaymentResponse
 import com.pinelabs.pluralsdk.data.utils.ApiResultHandler
-import com.pinelabs.pluralsdk.utils.Constants.Companion.UPI_REF
 import com.pinelabs.pluralsdk.utils.Constants.Companion.ERROR_MESSAGE
 import com.pinelabs.pluralsdk.utils.Constants.Companion.TOKEN
 import com.pinelabs.pluralsdk.viewmodels.FetchDataViewModel
@@ -38,10 +44,14 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.pinelabs.pluralsdk.PluralSDK
 import com.pinelabs.pluralsdk.activity.LandingActivity
 import com.pinelabs.pluralsdk.activity.SuccessActivity
 import com.pinelabs.pluralsdk.adapter.DividerItemDecoratorHorizontal
 import com.pinelabs.pluralsdk.adapter.UpiIntentAdapter
+import com.pinelabs.pluralsdk.data.model.Extra
+import com.pinelabs.pluralsdk.data.model.Palette
+import com.pinelabs.pluralsdk.data.model.PaymentModeData
 import com.pinelabs.pluralsdk.data.model.TransactionStatusResponse
 import com.pinelabs.pluralsdk.data.model.UpiTransactionData
 import com.pinelabs.pluralsdk.utils.Constants.Companion.GPAY
@@ -49,6 +59,7 @@ import com.pinelabs.pluralsdk.utils.Constants.Companion.PAYTM
 import com.pinelabs.pluralsdk.utils.Constants.Companion.PHONEPE
 import com.pinelabs.pluralsdk.utils.Constants.Companion.UPI
 import com.pinelabs.pluralsdk.utils.Constants.Companion.UPI_COLLECT
+import com.pinelabs.pluralsdk.utils.Constants.Companion.UPI_ID
 import com.pinelabs.pluralsdk.utils.Constants.Companion.UPI_INTENT
 import com.pinelabs.pluralsdk.utils.Constants.Companion.UPI_INTENT_PREFIX
 import com.pinelabs.pluralsdk.utils.Constants.Companion.UPI_PAY_WITH
@@ -56,6 +67,8 @@ import com.pinelabs.pluralsdk.utils.Constants.Companion.UPI_PROCESSED_FAILED
 import com.pinelabs.pluralsdk.utils.Constants.Companion.UPI_PROCESSED_STATUS
 import com.pinelabs.pluralsdk.utils.Constants.Companion.UPI_TRANSACTION_STATUS_DELAY
 import com.pinelabs.pluralsdk.utils.Constants.Companion.UPI_TRANSACTION_STATUS_INTERVAL
+import com.pinelabs.pluralsdk.utils.PaymentModeId
+import com.pinelabs.pluralsdk.utils.PaymentModes
 import java.util.Timer
 import java.util.TimerTask
 
@@ -77,10 +90,12 @@ class UPICollectFragment : Fragment(), UpiIntentAdapter.OnItemClickListener {
     private lateinit var constrainIntent: ConstraintLayout
     private lateinit var divider: LinearLayout
     private lateinit var linearCollect: LinearLayout
+    private lateinit var linearCollectBorder: LinearLayout
 
     private lateinit var circularProgressBar: ProgressBar
     private lateinit var timerTextView: TextView
     private lateinit var btnPayByUpiApp: Button
+    private var palette: Palette? = null
     private val totalTime = 600000L
     private val interval = 1000L
 
@@ -114,6 +129,7 @@ class UPICollectFragment : Fragment(), UpiIntentAdapter.OnItemClickListener {
         constrainIntent = view.findViewById(R.id.constrain_upi_intent)
         divider = view.findViewById(R.id.linear_divider)
         linearCollect = view.findViewById(R.id.linear_upi_collect)
+        linearCollectBorder = view.findViewById(R.id.upi_collect_border)
 
         bottomSheetDialog = BottomSheetDialog(requireActivity())
 
@@ -195,12 +211,49 @@ class UPICollectFragment : Fragment(), UpiIntentAdapter.OnItemClickListener {
                 checkCircleIcon.visibility = if (isValidUPI) View.VISIBLE else View.GONE
 
                 // Enable/disable button and change color based on validation
-                btnVerifyContinue.background = ContextCompat.getDrawable(requireContext(), R.drawable.button_background_selector)
+                btnVerifyContinue.background = buttonBackground(requireActivity())
 
                 btnVerifyContinue.isEnabled = isValidUPI
+                if (btnVerifyContinue.isEnabled){
+                    btnVerifyContinue.alpha =1F
+                } else {
+                    btnVerifyContinue.alpha =0.3F
+                }
                 //val color = if (isValidUPI) R.color.colorSecondary else R.color.colorPrimary
             }
         })
+        etUPIId.setOnFocusChangeListener { v, hasFocus ->
+            if (hasFocus) {
+                    linearCollectBorder.background = setColor(requireContext())
+            } else {
+                linearCollectBorder.background = ContextCompat.getDrawable(
+                    requireContext(),
+                    R.drawable.edittext_default_border
+                )!!
+            }
+        }
+    }
+
+    fun setColor(context: Context): Drawable {
+        val drawable: Drawable
+        if (palette != null) {
+            drawable =
+                ContextCompat.getDrawable(
+                    context,
+                    R.drawable.edittext_border_focussed
+                ) as GradientDrawable
+            drawable.setStroke(convertDpToPx(2), Color.parseColor(palette?.C900))
+        } else {
+            drawable = ContextCompat.getDrawable(
+                requireContext(),
+                R.drawable.edittext_border_focussed
+            )!!
+        }
+        return drawable
+    }
+
+    private fun convertDpToPx(dp: Int): Int {
+        return (dp * Resources.getSystem().displayMetrics.density).toInt()
     }
 
     private fun payAction(
@@ -208,13 +261,13 @@ class UPICollectFragment : Fragment(), UpiIntentAdapter.OnItemClickListener {
         transactionMode: String?,
         upiAppPackageName: String?
     ) {
-        val paymentMode = arrayListOf(UPI_REF)
-        val cardDataExtra = CardDataExtra(paymentMode, amount, currency, null, null, null)
+        val paymentMode = arrayListOf(UPI_ID)
+        val cardDataExtra = Extra(paymentMode, amount, currency, null, null, null, null, null)
         val upiTxnMode = transactionMode
         val upiData = UpiData(UPI, vpa, upiTxnMode)
-        val upiTxnData = UpiTransactionData(10)
+        val upiTxnData = UpiTransactionData(PaymentModeId.UPI.id)
         val processPaymentRequest =
-            ProcessPaymentRequest(card_data = null, cardDataExtra, upiData, upiTxnData)
+            ProcessPaymentRequest(card_data = null, upiData, null, cardDataExtra, upiTxnData, null)
         vpaContext = vpa
 
         if ((transactionMode.equals(UPI_INTENT) && (activity as LandingActivity).deepLink == null) || transactionMode.equals(
@@ -257,13 +310,15 @@ class UPICollectFragment : Fragment(), UpiIntentAdapter.OnItemClickListener {
             val fetchDataResponseHandler = ApiResultHandler<FetchResponse>(requireActivity(),
                 onLoading = {
                 }, onSuccess = { data ->
+                    palette = data?.merchantBrandingData?.palette
                     val paymentModeData = data!!.paymentModes!!.filter { paymentMode ->
                         paymentMode.paymentModeId.equals(
                             UPI
                         )
                     }.filter { paymentMode -> paymentMode.paymentModeData != null }.toList()
                     if (paymentModeData.size > 0) {
-                        paymentModeData.get(0).paymentModeData.upi_flows.forEach { upiOption ->
+                        val pm = paymentModeData.get(0).paymentModeData as? PaymentModeData
+                        pm?.upi_flows!!.forEach { upiOption ->
                             paymentOptionList.add(upiOption)
                             println(upiOption)
                         }
@@ -284,19 +339,23 @@ class UPICollectFragment : Fragment(), UpiIntentAdapter.OnItemClickListener {
         var vpaId: TextView = view.findViewById(R.id.upiIdTextView)
         vpaId.text = vpaContext
 
-
         cancelPaymentTextView.setOnClickListener {
             bottomSheetDialog.dismiss()
             showCancelConfirmationDialog()
         }
 
-
         circularProgressBar = view.findViewById(R.id.circularProgressBar)
+        if (palette!=null) {
+                circularProgressBar.progressTintList =
+                    ColorStateList.valueOf(Color.parseColor(palette?.C900))
+                cancelPaymentTextView.setTextColor(Color.parseColor(palette?.C900))
+            }
         timerTextView = view.findViewById(R.id.timerTextView)
 
         startTimer()
         // Initialize BottomSheetDialog
         bottomSheetDialog.setContentView(view)
+        bottomSheetDialog.setCancelable(false)
         bottomSheetDialog.setCanceledOnTouchOutside(false)
         bottomSheetDialog.show() // Show the dialog first
     }
@@ -321,6 +380,9 @@ class UPICollectFragment : Fragment(), UpiIntentAdapter.OnItemClickListener {
             override fun onFinish() {
                 timerTextView.text = "00:00"
                 circularProgressBar.progress = 0
+
+                requireActivity().finish()
+                PluralSDK.getInstance().callback!!.onSuccessOccured()
             }
         }.start()
     }
@@ -369,13 +431,7 @@ class UPICollectFragment : Fragment(), UpiIntentAdapter.OnItemClickListener {
         upiPayIntent.data = Uri.parse(deepLink)
         if (upiAppPackageName != null) {
             upiPayIntent.`package` = upiAppPackageName
-            isAppUpiReady(upiAppPackageName)
-            Toast.makeText(
-                requireActivity(),
-                "PACKAGE ${upiAppPackageName} ${isAppUpiReady(upiAppPackageName)}",
-                Toast.LENGTH_SHORT
-            )
-                .show()
+            //isAppUpiReady(upiAppPackageName)
         }
         // will always show a dialog to user to choose an app
         val chooser = Intent.createChooser(upiPayIntent, UPI_PAY_WITH)
@@ -434,9 +490,36 @@ class UPICollectFragment : Fragment(), UpiIntentAdapter.OnItemClickListener {
             }
             if (upiOption.equals(UPI_COLLECT)) {
                 linearCollect.visibility = View.VISIBLE
+                btnVerifyContinue.visibility = View.VISIBLE
             }
         }
         if (upiOptions.size == 2) divider.visibility = View.VISIBLE
+    }
+
+    public fun buttonBackground(context: Context): Drawable {
+
+        val stateListDrawable = StateListDrawable()
+
+        // Create different drawables for different states
+        val pressedDrawable = GradientDrawable().apply {
+            if (palette != null) {
+                setColor(Color.parseColor(palette?.C900))
+            } else {
+                setColor(context.resources.getColor(R.color.header_color))
+            }
+            cornerRadius = 16f // Normal corner radius
+        }
+
+        val normalDrawable = GradientDrawable().apply {
+            setColor(context.resources.getColor(R.color.shimmer_grey))
+            cornerRadius = 16f // Smaller radius when pressed
+        }
+
+        // Add states to the StateListDrawable
+        stateListDrawable.addState(intArrayOf(android.R.attr.state_enabled), pressedDrawable)
+        stateListDrawable.addState(intArrayOf(), normalDrawable) // Default state
+
+        return stateListDrawable
     }
 
 }

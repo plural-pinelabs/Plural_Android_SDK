@@ -1,41 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/constrain_layout"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@drawable/curved_header"
-    android:backgroundTint="@color/header_color">
+    android:backgroundTint="@color/header_color"
+    android:paddingBottom="13dp">
 
     <!-- Merchant Image -->
     <androidx.cardview.widget.CardView
         android:id="@+id/card_pic_orginal"
-        android:layout_width="55dp"
-        android:layout_height="55dp"
-        android:layout_marginLeft="20dp"
-        android:layout_marginTop="30dp"
-        app:cardCornerRadius="10dp"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_marginLeft="26dp"
+        android:layout_marginTop="25dp"
+        app:cardCornerRadius="7dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
         <ImageView
-            android:id="@+id/img_pic"
+            android:id="@+id/img_pic_header"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:src="@drawable/apple_logo" />
+            android:scaleType="fitCenter" />
 
     </androidx.cardview.widget.CardView>
 
     <!-- Merchant Name -->
     <TextView
         android:id="@+id/txt_merchant_name_orginal"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="12dp"
+        android:layout_marginLeft="14dp"
+        android:layout_marginRight="14dp"
+        android:ellipsize="end"
         android:fontFamily="@font/roboto_medium"
-        android:text="Apple"
+        android:singleLine="true"
         android:textColor="@color/white"
         android:textSize="20sp"
         app:layout_constraintBottom_toBottomOf="@id/card_pic_orginal"
+        app:layout_constraintEnd_toStartOf="@id/cancel_layout"
         app:layout_constraintStart_toEndOf="@id/card_pic_orginal"
         app:layout_constraintTop_toTopOf="@id/card_pic_orginal" />
 
@@ -44,9 +49,8 @@
         android:id="@+id/txt_amount"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="12dp"
         android:fontFamily="@font/roboto_bold"
-        android:text="₹ 1,00,999.50"
         android:textColor="@color/white"
         android:textSize="30sp"
         app:layout_constraintStart_toStartOf="@id/card_pic_orginal"
@@ -61,8 +65,8 @@
         android:textColor="@color/white"
         android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="@+id/txt_amount"
-        app:layout_constraintTop_toTopOf="@+id/txt_amount"
-        app:layout_constraintLeft_toRightOf="@+id/txt_amount" />
+        app:layout_constraintLeft_toRightOf="@+id/txt_amount"
+        app:layout_constraintTop_toTopOf="@+id/txt_amount" />
 
     <!-- Cancel Layout (X icon and Cancel Text) -->
     <!-- Box Layout -->
@@ -74,7 +78,10 @@
         android:background="@drawable/rectangle_cancel"
         android:gravity="center"
         android:orientation="horizontal"
-        android:padding="4dp"
+        android:paddingLeft="8dp"
+        android:paddingTop="5dp"
+        android:paddingRight="10dp"
+        android:paddingBottom="5dp"
         app:layout_constraintBottom_toBottomOf="@id/card_pic_orginal"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -83,8 +90,9 @@
         <!-- X Icon -->
         <ImageView
             android:id="@+id/x_icon"
-            android:layout_width="16dp"
-            android:layout_height="16dp"
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:layout_gravity="center"
             android:layout_marginEnd="4dp"
             android:src="@drawable/close"
             app:tint="@android:color/white" />
@@ -94,23 +102,24 @@
             android:id="@+id/txt_cancel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="sans-serif-medium"
+            android:layout_gravity="center"
+            android:fontFamily="@font/roboto_medium"
             android:text="@string/cancel"
             android:textColor="@android:color/white"
             android:textSize="14sp" />
     </LinearLayout>
 
     <FrameLayout
-        android:id="@+id/box_layout"
+        android:id="@+id/box_layout_orginal"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="12dp"
-        android:layout_marginTop="10dp"
-        android:layout_marginEnd="12dp"
-        android:layout_marginBottom="15dp"
+        android:layout_height="35dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="13dp"
+        android:layout_marginEnd="16dp"
         android:background="@drawable/rectangle"
         android:paddingStart="12dp"
         android:paddingEnd="12dp"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -128,6 +137,7 @@
                 android:id="@+id/img_profile"
                 android:layout_width="30dp"
                 android:layout_height="30dp"
+                android:layout_gravity="center"
                 android:layout_marginEnd="8dp"
                 android:src="@drawable/user" />
 
@@ -136,18 +146,27 @@
                 android:id="@+id/txt_customer_id"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:fontFamily="@font/roboto_medium"
-                android:text="+91 98765431110"
+                android:fontFamily="@font/robotoregular"
+                android:layout_marginRight="5dp"
+                android:text=""
+                android:layout_gravity="center"
                 android:textColor="@color/white"
-                android:textSize="15sp" />
+                android:textSize="15sp"
+                android:visibility="gone" />
 
             <!-- Separator -->
             <TextView
+                android:id="@+id/seperator"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text=" | "
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="5dp"
+                android:layout_marginRight="5dp"
+                android:layout_gravity="center"
                 android:textColor="@color/white"
-                android:textSize="19sp" />
+                android:textSize="19sp"
+                android:visibility="gone" />
 
             <!-- Customer Email -->
             <TextView
@@ -155,12 +174,14 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:ellipsize="end"
-                android:fontFamily="@font/roboto_medium"
+                android:layout_gravity="center"
+                android:fontFamily="@font/robotoregular"
                 android:maxLines="1"
                 android:singleLine="true"
-                android:text="priyanka@gmail.com"
+                android:text=""
                 android:textColor="@color/white"
-                android:textSize="15sp" />
+                android:textSize="15sp"
+                android:visibility="gone" />
         </LinearLayout>
     </FrameLayout>
 

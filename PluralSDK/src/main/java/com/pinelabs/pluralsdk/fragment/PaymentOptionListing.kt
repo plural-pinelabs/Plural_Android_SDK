@@ -1,10 +1,11 @@
 package com.pinelabs.pluralsdk.fragment
 
+import android.content.res.ColorStateList
+import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -16,9 +17,11 @@ import com.pinelabs.pluralsdk.R
 import com.pinelabs.pluralsdk.adapter.DividerItemDecorator
 import com.pinelabs.pluralsdk.adapter.PaymentOptionsAdapter
 import com.pinelabs.pluralsdk.data.model.FetchResponse
+import com.pinelabs.pluralsdk.data.model.Palette
 import com.pinelabs.pluralsdk.data.model.PaymentMode
 import com.pinelabs.pluralsdk.data.model.RecyclerViewPaymentOptionData
 import com.pinelabs.pluralsdk.data.utils.ApiResultHandler
+import com.pinelabs.pluralsdk.utils.Constants.Companion.PAYBYPOINTS_ID
 import com.pinelabs.pluralsdk.utils.Constants.Companion.TAG_CARD
 import com.pinelabs.pluralsdk.utils.Constants.Companion.TAG_NETBANKING
 import com.pinelabs.pluralsdk.utils.Constants.Companion.TAG_UPI
@@ -57,10 +60,17 @@ class PaymentOptionListing : Fragment(), PaymentOptionsAdapter.OnItemClickListen
                 onLoading = {
                 }, onSuccess = { data ->
                     stopShimmer()
-                    listData(
-                        mapPaymentModes(response.data!!.paymentModes!!),
-                        mapPaymentOptions(response.data!!.paymentModes!!)
-                    )
+                    if (response.data != null) {
+                        val paymentModes =  response.data?.paymentModes?.filter { paymentMode ->
+                            paymentMode.paymentModeData != null || paymentMode.paymentModeId== PAYBYPOINTS_ID
+                        }
+                        listData(
+                            mapPaymentModes(paymentModes!!),
+                            mapPaymentOptions(paymentModes),
+                            response.data?.merchantBrandingData?.palette
+                        )
+                    }
+
                 }, onFailure = {}
             )
             fetchDataResponseHandler.handleApiResult(response)
@@ -95,8 +105,8 @@ class PaymentOptionListing : Fragment(), PaymentOptionsAdapter.OnItemClickListen
     }
 
     override fun onItemClick(item: RecyclerViewPaymentOptionData?) {
-        Toast.makeText(activity, item!!.payment_option, Toast.LENGTH_SHORT).show()
-        loadFragment(item.payment_option)
+        //Toast.makeText(activity, item!!.payment_option, Toast.LENGTH_SHORT).show()
+        loadFragment(item!!.payment_option)
     }
 
     fun loadFragment(paymentOption: String) {
@@ -107,7 +117,7 @@ class PaymentOptionListing : Fragment(), PaymentOptionsAdapter.OnItemClickListen
         val selectedFragment = when (paymentOption) {
             PaymentModes.CREDIT_DEBIT.paymentModeName -> CardFragment()
             PaymentModes.UPI.paymentModeName -> UPICollectFragment()
-            //PaymentModes.NET_BANKING.paymentModeName -> NetBankingFragment()
+            PaymentModes.NET_BANKING.paymentModeName -> NetBankingFragment()
             else -> null
         }
 
@@ -141,10 +151,10 @@ class PaymentOptionListing : Fragment(), PaymentOptionsAdapter.OnItemClickListen
         recyclerPaymentOptions.isVisible = true
     }
 
-    fun listData(paymentData: List<RecyclerViewPaymentOptionData>, paymentOption: List<String>) {
+    fun listData(paymentData: List<RecyclerViewPaymentOptionData>, paymentOption: List<String>, palette: Palette?) {
         val layoutManager =
             LinearLayoutManager(activity, LinearLayoutManager.VERTICAL, false)
-        val myRecyclerViewAdapter = PaymentOptionsAdapter(paymentData, paymentOption,this)
+        val myRecyclerViewAdapter = PaymentOptionsAdapter(paymentData, paymentOption, palette,this)
         recyclerPaymentOptions.adapter = myRecyclerViewAdapter
         recyclerPaymentOptions.layoutManager = layoutManager
         val dividerItemDecoration: RecyclerView.ItemDecoration = DividerItemDecorator(
@@ -157,9 +167,9 @@ class PaymentOptionListing : Fragment(), PaymentOptionsAdapter.OnItemClickListen
     fun mapPaymentOptions(paymentModes: List<PaymentMode>): List<String> {
         val paymentOption = mutableListOf<String>()
         paymentModes.forEach { pm ->
-            if (pm.paymentModeData == null) {
+            /*if (pm.paymentModeData == null) {*/
                 paymentOption.add(pm.paymentModeId)
-            }
+            /*}*/
         }
         return paymentOption
     }
