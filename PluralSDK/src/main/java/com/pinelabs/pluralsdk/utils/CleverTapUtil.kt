@@ -54,15 +54,13 @@ class CleverTapUtil {
 
         const val SDK_TYPE_PLATRFORM_ANDROID = "android"
 
-        const val PROFILE_NAME = "Name"
         const val PROFILE_EMAIL = "Email"
         const val PROFILE_PHONE = "Phone"
 
-        fun CT_PROFILE(cleverTapAPI: CleverTapAPI?) {
+        fun CT_PROFILE(cleverTapAPI: CleverTapAPI?, email: String?, phone: String?) {
             val profile = mapOf(
-                PROFILE_NAME to "",
-                PROFILE_EMAIL to "",
-                PROFILE_PHONE to ""
+                PROFILE_EMAIL to email,
+                PROFILE_PHONE to phone
             )
             cleverTapAPI?.onUserLogin(profile)
         }
@@ -82,39 +80,39 @@ class CleverTapUtil {
 
         fun CT_EVENT_PAYMENT_PAGE_LOADED(
             cleverTapAPI: CleverTapAPI?, loadTime: Int?, merchantId: Int?,
-            amount: String?, phone: String?, email: String?,
-            paymentMethod: String, paymentStatus: String
+            amount: String?, phone: String?, email: String?
         ) {
             val paymentPageLoadedData = mapOf(
                 PARAM_LOAD_TIME_MS to loadTime,
                 PARAM_MERCHANT_ID to merchantId,
                 PARAM_AMOUNT to amount,
                 PARAM_USER_PHONE_NO to phone,
-                PARAM_USER_EMAIL to email,
-                PARAM_PAYMENT_METHOD to paymentMethod,
-                PARAM_PAYMENT_STATUS to paymentStatus
+                PARAM_USER_EMAIL to email
             )
             cleverTapAPI?.pushEvent(EVENT_PAYMENT_PAGE_LOADED, paymentPageLoadedData)
 
         }
 
-        fun CT_EVENT_PAYMENT_METHOD(cleverTapAPI: CleverTapAPI) {
+        fun CT_EVENT_PAYMENT_METHOD(
+            cleverTapAPI: CleverTapAPI?,
+            paymentMethod: String, paymentStatus: String,
+            cardNumber: String?, upiMethod: String?, netBank: String?
+        ) {
             val paymentMethodData = mapOf(
-                PARAM_PAYMENT_METHOD_CARD to "",
-                PARAM_PAYMENT_METHOD_UPI to "",
-                PARAM_PAYMENT_METHOD_NB to "",
-                PARAM_PAYMENT_METHOD_EMI to "",
-                PARAM_PAYMENT_METHOD_WALLET to "",
-                PARAM_PAY_BUTTON to ""
+                PARAM_PAYMENT_METHOD to paymentMethod,
+                PARAM_PAYMENT_STATUS to paymentStatus,
+                PARAM_PAYMENT_METHOD_CARD to cardNumber,
+                PARAM_PAYMENT_METHOD_UPI to upiMethod,
+                PARAM_PAYMENT_METHOD_NB to netBank,
+                PARAM_PAY_BUTTON to true
             )
             cleverTapAPI?.pushEvent(EVENT_PAYMENT_METHOD, paymentMethodData)
-
         }
 
         fun CT_EVENT_PAYMENT_STATUS_SUCCESS(
             cleverTapAPI: CleverTapAPI?,
-            orderId: String,
-            paymentId: String
+            orderId: String?,
+            paymentId: String?
         ) {
             val paymentStatusSuccessData = mapOf(
                 PARAM_SUCCESS_ORDER_ID to orderId,
@@ -125,8 +123,8 @@ class CleverTapUtil {
         }
 
         fun CT_EVENT_PAYMENT_STATUS_FAILURE(
-            cleverTapAPI: CleverTapAPI?, orderId: String, paymentId: String,
-            errorCode: String, errorMessage: String
+            cleverTapAPI: CleverTapAPI?, orderId: String?, paymentId: String?,
+            errorCode: String?, errorMessage: String?
         ) {
             val paymentStatusFailureData = mapOf(
                 PARAM_FAILURE_ORDER_ID to orderId,
@@ -138,19 +136,17 @@ class CleverTapUtil {
 
         }
 
-        fun CT_EVENT_PAYMENT_CANCELLED(cleverTapAPI: CleverTapAPI) {
+        fun CT_EVENT_PAYMENT_CANCELLED(cleverTapAPI: CleverTapAPI, cancel:Boolean?, backpress:Boolean?) {
             val paymentStatusCancelledData = mapOf(
-                PARAM_CANCEL to "",
-            )
-            mapOf(
-                PARAM_BACKPRESS to "",
+                PARAM_CANCEL to cancel,
+                PARAM_BACKPRESS to backpress
             )
             cleverTapAPI?.pushEvent(EVENT_PAYMENT_CANCELLED, paymentStatusCancelledData)
         }
 
-        fun CT_EVENT_PAYMENT_COMPLETION_TIME(cleverTapAPI: CleverTapAPI) {
+        fun CT_EVENT_PAYMENT_COMPLETION_TIME(cleverTapAPI: CleverTapAPI, loadTime: Long) {
             val paymentCompletionTimeData = mapOf(
-                PARAM_LOAD_TIME to ""
+                PARAM_LOAD_TIME to loadTime
             )
             cleverTapAPI?.pushEvent(EVENT_PAYMENT_COMPLETION_TIME, paymentCompletionTimeData)
         }

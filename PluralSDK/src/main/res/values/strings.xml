@@ -143,6 +143,19 @@
     <string name="yes_bank">Yes Bank</string>
     <string name="pay">Pay</string>
 
+    <string name="cards">Cards</string>
+    <string name="card_number">Card Number</string>
+    <string name="card_holders_name">Card Holder\'s Name</string>
+    <string name="full_name_on_card">Full Name on Card</string>
+    <string name="enter_card_number">Enter Card Number</string>
+    <string name="expiry_title">Expiry (MM/YY)</string>
+    <string name="cvv_title">CVV</string>
+    <string name="expiry">MM/YY</string>
+    <string name="cvv">CVV</string>
+    <string name="error_expiry">Invalid Expiry Date</string>
+    <string name="error_cvv">Invalid CVV</string>
+    <string name="proceed_to_pay">Proceed to Pay</string>
+
     <string-array name="pbp_top_bank">
         <item>@string/state_bank_of_india</item>
         <item>@string/punjab_national_bank</item>

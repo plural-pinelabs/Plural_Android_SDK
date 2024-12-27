@@ -41,6 +41,8 @@ import com.pinelabs.pluralsdk.data.utils.AmountUtil.convertToRupees
 import com.pinelabs.pluralsdk.data.utils.ApiResultHandler
 import com.pinelabs.pluralsdk.fragment.PaymentOptionListing
 import com.pinelabs.pluralsdk.utils.CleverTapUtil
+import com.pinelabs.pluralsdk.utils.CleverTapUtil.Companion.CT_EVENT_PAYMENT_CANCELLED
+import com.pinelabs.pluralsdk.utils.Constants.Companion.ERROR_CODE
 import com.pinelabs.pluralsdk.utils.Constants.Companion.ERROR_MESSAGE
 import com.pinelabs.pluralsdk.utils.Constants.Companion.TAG_PAYMENT_LISTING
 import com.pinelabs.pluralsdk.utils.Constants.Companion.TAG_UPI
@@ -80,6 +82,9 @@ class LandingActivity : AppCompatActivity() {
     private var loadTime: Long? = null
 
     private var clevertapDefaultInstance: CleverTapAPI? = null
+
+    var orderId: String? = null
+    var paymentId: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -151,10 +156,15 @@ class LandingActivity : AppCompatActivity() {
         val cancelShimmerlayout: View = findViewById(R.id.cancel_layout_shimmer)
 
         cancelShimmerlayout.setOnClickListener {
+            clevertapDefaultInstance?.let { CT_EVENT_PAYMENT_CANCELLED(it,
+                cancel = true,
+                backpress = false
+            ) }
             showCancelConfirmationDialog(null)
         }
 
         cancelLayout.setOnClickListener {
+            clevertapDefaultInstance?.let { CT_EVENT_PAYMENT_CANCELLED(it, true, false) }
             showCancelConfirmationDialog(null)
         }
     }
@@ -164,6 +174,7 @@ class LandingActivity : AppCompatActivity() {
         val view =
             LayoutInflater.from(this).inflate(R.layout.cancel_confirmation_bottom_sheet, null)
         bottomSheetDialog.setContentView(view)
+        bottomSheetDialog.setCancelable(false)
 
         val btnYes: Button = view.findViewById(R.id.btn_yes)
         val btnNo: Button = view.findViewById(R.id.btn_no)
@@ -195,6 +206,7 @@ class LandingActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
+        clevertapDefaultInstance?.let { CT_EVENT_PAYMENT_CANCELLED(it, false, true) }
         if (supportFragmentManager.backStackEntryCount > 0 && supportFragmentManager.fragments[0].tag.equals(
                 TAG_UPI
             ) && deepLink != null
@@ -219,10 +231,12 @@ class LandingActivity : AppCompatActivity() {
                     ApiResultHandler<FetchResponse>(this@LandingActivity, onLoading = {
                         startShimmer()
                     }, onSuccess = { data ->
+                        //orderId = response.order_id
                         setView(data)
                     }, onFailure = { errorMessage ->
                         val i = Intent(applicationContext, FailureActivity::class.java)
-                        i.putExtra(ERROR_MESSAGE, errorMessage)
+                        i.putExtra(ERROR_CODE, errorMessage?.error_code)
+                        i.putExtra(ERROR_MESSAGE, errorMessage?.error_message)
                         startActivity(i)
                         finish()
                     })
@@ -272,7 +286,7 @@ class LandingActivity : AppCompatActivity() {
             }
         }
 
-        if (fetchResponse?.merchantBrandingData == null || fetchResponse?.merchantBrandingData?.logo == null || fetchResponse?.merchantBrandingData?.logo?.imageContent == null) {
+        if (fetchResponse?.merchantBrandingData == null || fetchResponse?.merchantBrandingData?.logo == null || fetchResponse?.merchantBrandingData?.logo?.imageContent.isNullOrEmpty()) {
             makePicInvisible()
             /*color = fetchResponse.merchantBrandingData!!.brandTheme.color
             Toast.makeText(this@LandingActivity, color, Toast.LENGTH_SHORT).show()
@@ -281,7 +295,8 @@ class LandingActivity : AppCompatActivity() {
             layoutOrginal.setBackgroundColor(ColorUtil.generateTransparentColor(color, COLOR_ENUM.COLOR_90.colors))*/
         } else {
             try {
-                val content = fetchResponse?.merchantBrandingData?.logo?.imageContent.split(",")[1]
+                val content =
+                    fetchResponse?.merchantBrandingData?.logo?.imageContent!!.split(",")[1]
                 val bitmap = decodeBase64ToBitmap(content)
                 imgMerchantimage.setImageBitmap(bitmap)
             } catch (e: Exception) {
@@ -294,7 +309,7 @@ class LandingActivity : AppCompatActivity() {
             }
         }
 
-        txtMerchantname.text = fetchResponse?.merchantInfo?.merchantName
+        txtMerchantname.text = fetchResponse?.merchantInfo?.merchantDisplayName
         amount = fetchResponse?.paymentData?.originalTxnAmount?.amount!!
         val amountString = convertToRupees(this, amount!!)
 
@@ -330,10 +345,20 @@ class LandingActivity : AppCompatActivity() {
         ).show()*/
 
         endTime = System.currentTimeMillis()
-        loadTime = endTime!!-startTime!!
-        CleverTapUtil.CT_EVENT_PAYMENT_PAGE_LOADED(clevertapDefaultInstance, loadTime?.toInt(), fetchResponse?.merchantInfo?.merchantId,
-            convertToRupees(this@LandingActivity, fetchResponse?.paymentData?.originalTxnAmount?.amount!!),
-            fetchResponse?.customerInfo?.mobileNo,fetchResponse?.customerInfo?.emailId,"","" )
+        loadTime = endTime!! - startTime!!
+        CleverTapUtil.CT_PROFILE(
+            clevertapDefaultInstance,
+            fetchResponse?.customerInfo?.emailId,
+            fetchResponse?.customerInfo?.mobileNo
+        )
+        CleverTapUtil.CT_EVENT_PAYMENT_PAGE_LOADED(
+            clevertapDefaultInstance, loadTime?.toInt(), fetchResponse?.merchantInfo?.merchantId,
+            convertToRupees(
+                this@LandingActivity,
+                fetchResponse?.paymentData?.originalTxnAmount?.amount!!
+            ),
+            fetchResponse?.customerInfo?.mobileNo, fetchResponse?.customerInfo?.emailId
+        )
         stopShimmer()
     }
 

@@ -6,13 +6,11 @@ import android.os.Bundle
 import android.os.Handler
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
-import com.clevertap.android.sdk.CleverTapAPI
 import com.pinelabs.pluralsdk.PluralSDK
 import com.pinelabs.pluralsdk.R
 import com.pinelabs.pluralsdk.data.model.FetchResponse
 import com.pinelabs.pluralsdk.data.model.Palette
 import com.pinelabs.pluralsdk.data.utils.ApiResultHandler
-import com.pinelabs.pluralsdk.utils.CleverTapUtil
 import com.pinelabs.pluralsdk.viewmodels.FetchDataViewModel
 import com.pinelabs.pluralsdk.viewmodels.ViewModelFactory
 
@@ -24,9 +22,6 @@ class SuccessActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.payment_success)
-
-        val clevertapDefaultInstance = CleverTapAPI.getDefaultInstance(applicationContext)
-        CleverTapUtil.CT_EVENT_PAYMENT_STATUS_SUCCESS(clevertapDefaultInstance,"", "")
 
         val viewModelFactory = ViewModelFactory(application)
         viewModel = ViewModelProvider(this, viewModelFactory)[FetchDataViewModel::class.java]
@@ -42,7 +37,7 @@ class SuccessActivity : AppCompatActivity() {
                 val fetchDataResponseHandler =
                     ApiResultHandler<FetchResponse>(this, onLoading = {
                     }, onSuccess = { data ->
-                        data?.merchantBrandingData?.palette?.let { palette->
+                        data?.merchantBrandingData?.palette?.let { palette ->
                             setStatusBarColor(this, palette)
                         }
 
@@ -57,8 +52,9 @@ class SuccessActivity : AppCompatActivity() {
 
     }
 
-    private fun setStatusBarColor(context: Context, palette: Palette){
-        val color = if (palette!=null) Color.parseColor(palette?.C900) else context.resources.getColor(R.color.header_color)
+    private fun setStatusBarColor(context: Context, palette: Palette) {
+        val color =
+            if (palette != null) Color.parseColor(palette?.C900) else context.resources.getColor(R.color.header_color)
         window.setStatusBarColor(color)
     }
 

@@ -44,6 +44,8 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.clevertap.android.sdk.CleverTapAPI
+import com.clevertap.android.sdk.isNotNullAndBlank
 import com.pinelabs.pluralsdk.PluralSDK
 import com.pinelabs.pluralsdk.activity.LandingActivity
 import com.pinelabs.pluralsdk.activity.SuccessActivity
@@ -54,7 +56,17 @@ import com.pinelabs.pluralsdk.data.model.Palette
 import com.pinelabs.pluralsdk.data.model.PaymentModeData
 import com.pinelabs.pluralsdk.data.model.TransactionStatusResponse
 import com.pinelabs.pluralsdk.data.model.UpiTransactionData
+import com.pinelabs.pluralsdk.utils.CleverTapUtil
+import com.pinelabs.pluralsdk.utils.CleverTapUtil.Companion.CT_EVENT_PAYMENT_CANCELLED
+import com.pinelabs.pluralsdk.utils.Constants.Companion.CT_CARDS
+import com.pinelabs.pluralsdk.utils.Constants.Companion.CT_COLLECT
+import com.pinelabs.pluralsdk.utils.Constants.Companion.CT_INTENT_GPAY
+import com.pinelabs.pluralsdk.utils.Constants.Companion.CT_INTENT_PAYTM
+import com.pinelabs.pluralsdk.utils.Constants.Companion.CT_INTENT_PHONEPE
+import com.pinelabs.pluralsdk.utils.Constants.Companion.CT_UPI
+import com.pinelabs.pluralsdk.utils.Constants.Companion.ERROR_CODE
 import com.pinelabs.pluralsdk.utils.Constants.Companion.GPAY
+import com.pinelabs.pluralsdk.utils.Constants.Companion.PAYMENT_INITIATED
 import com.pinelabs.pluralsdk.utils.Constants.Companion.PAYTM
 import com.pinelabs.pluralsdk.utils.Constants.Companion.PHONEPE
 import com.pinelabs.pluralsdk.utils.Constants.Companion.UPI
@@ -79,7 +91,7 @@ class UPICollectFragment : Fragment(), UpiIntentAdapter.OnItemClickListener {
     private lateinit var btnVerifyContinue: Button
     private lateinit var btnBack: ImageButton
     private var amount: Int? = null
-    private lateinit var currency: String
+    private var currency: String? = null
     private var paymentOptionList = mutableListOf<String>()
     private lateinit var bottomSheetDialog: BottomSheetDialog
     private val mainViewModel by activityViewModels<FetchDataViewModel>()
@@ -107,6 +119,11 @@ class UPICollectFragment : Fragment(), UpiIntentAdapter.OnItemClickListener {
     var t = Timer()
     private var countDownTimer: CountDownTimer? = null
 
+    private var clevertapDefaultInstance: CleverTapAPI? = null
+
+    var orderId: String? = null
+    var paymentId: String? = null
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -117,6 +134,8 @@ class UPICollectFragment : Fragment(), UpiIntentAdapter.OnItemClickListener {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        clevertapDefaultInstance = CleverTapAPI.getDefaultInstance(requireActivity())
 
         // Initializing Views
         etUPIId = view.findViewById(R.id.etUPIId)
@@ -155,6 +174,9 @@ class UPICollectFragment : Fragment(), UpiIntentAdapter.OnItemClickListener {
             val vpa = etUPIId.text.toString()
             payAction(vpa, UPI_COLLECT, null)
         }
+        btnVerifyContinue.background = buttonBackground(requireActivity())
+        btnVerifyContinue.isEnabled = false
+        btnVerifyContinue.alpha = 0.3f
 
         btnPayByUpiApp.setOnClickListener {
             payAction(null, UPI_INTENT, null)
@@ -162,6 +184,7 @@ class UPICollectFragment : Fragment(), UpiIntentAdapter.OnItemClickListener {
 
         // Set up back button click listener
         btnBack.setOnClickListener {
+            clevertapDefaultInstance?.let { CT_EVENT_PAYMENT_CANCELLED(it, false, true) }
             requireActivity().supportFragmentManager.popBackStack()
         }
 
@@ -172,13 +195,17 @@ class UPICollectFragment : Fragment(), UpiIntentAdapter.OnItemClickListener {
                     }, onSuccess = { data ->
                         if (response.data!!.data.status.equals(UPI_PROCESSED_STATUS)) {
                             bottomSheetDialog.dismiss()
+
+                            CleverTapUtil.CT_EVENT_PAYMENT_STATUS_SUCCESS(
+                                clevertapDefaultInstance, orderId, paymentId
+                            )
                             val intent = Intent(requireActivity(), SuccessActivity::class.java)
                             startActivity(intent)
                             requireActivity().finish()
                         } else if (response.data!!.data.status.equals(UPI_PROCESSED_FAILED)) {
                             bottomSheetDialog.dismiss()
                             val intent = Intent(requireActivity(), FailureActivity::class.java)
-                            intent.putExtra(ERROR_MESSAGE, "")
+                            intent.putExtra(ERROR_MESSAGE, UPI_PROCESSED_FAILED)
                             startActivity(intent)
                             requireActivity().finish()
                         }
@@ -186,7 +213,8 @@ class UPICollectFragment : Fragment(), UpiIntentAdapter.OnItemClickListener {
                     }, onFailure = { errorMessage ->
                         bottomSheetDialog.dismiss()
                         val intent = Intent(requireActivity(), FailureActivity::class.java)
-                        intent.putExtra(ERROR_MESSAGE, errorMessage)
+                        intent.putExtra(ERROR_CODE, errorMessage?.error_code)
+                        intent.putExtra(ERROR_MESSAGE, errorMessage?.error_message)
                         startActivity(intent)
                         requireActivity().finish()
                     }
@@ -214,17 +242,17 @@ class UPICollectFragment : Fragment(), UpiIntentAdapter.OnItemClickListener {
                 btnVerifyContinue.background = buttonBackground(requireActivity())
 
                 btnVerifyContinue.isEnabled = isValidUPI
-                if (btnVerifyContinue.isEnabled){
-                    btnVerifyContinue.alpha =1F
+                if (btnVerifyContinue.isEnabled) {
+                    btnVerifyContinue.alpha = 1F
                 } else {
-                    btnVerifyContinue.alpha =0.3F
+                    btnVerifyContinue.alpha = 0.3F
                 }
                 //val color = if (isValidUPI) R.color.colorSecondary else R.color.colorPrimary
             }
         })
         etUPIId.setOnFocusChangeListener { v, hasFocus ->
             if (hasFocus) {
-                    linearCollectBorder.background = setColor(requireContext())
+                linearCollectBorder.background = setColor(requireContext())
             } else {
                 linearCollectBorder.background = ContextCompat.getDrawable(
                     requireContext(),
@@ -261,6 +289,14 @@ class UPICollectFragment : Fragment(), UpiIntentAdapter.OnItemClickListener {
         transactionMode: String?,
         upiAppPackageName: String?
     ) {
+        val upiMethod = if (vpa.isNotNullAndBlank()) CT_COLLECT else
+            if (upiAppPackageName.equals(GPAY)) CT_INTENT_GPAY else
+                if (upiAppPackageName.equals(PHONEPE)) CT_INTENT_PHONEPE else
+                    CT_INTENT_PAYTM
+        CleverTapUtil.CT_EVENT_PAYMENT_METHOD(
+            clevertapDefaultInstance, CT_UPI, PAYMENT_INITIATED,
+            null, upiMethod, null
+        )
         val paymentMode = arrayListOf(UPI_ID)
         val cardDataExtra = Extra(paymentMode, amount, currency, null, null, null, null, null)
         val upiTxnMode = transactionMode
@@ -286,11 +322,14 @@ class UPICollectFragment : Fragment(), UpiIntentAdapter.OnItemClickListener {
                                     response!!.deep_link.toString()
                                 showUpiTray(response!!.deep_link.toString(), upiAppPackageName)
                             }
+                            orderId = response.order_id
+                            paymentId = response.payment_id
                             getTransactionStatus(token)
                         }, onFailure = { errorMessage ->
                             bottomSheetDialog.dismiss()
                             val intent = Intent(requireActivity(), FailureActivity::class.java)
-                            intent.putExtra(ERROR_MESSAGE, errorMessage)
+                            intent.putExtra(ERROR_CODE, errorMessage?.error_code)
+                            intent.putExtra(ERROR_MESSAGE, errorMessage?.error_message)
                             startActivity(intent)
                             requireActivity().finish()
                         })
@@ -324,8 +363,8 @@ class UPICollectFragment : Fragment(), UpiIntentAdapter.OnItemClickListener {
                         }
                         makeViewVisible(paymentOptionList)
                     }
-                    amount = data!!.paymentData!!.originalTxnAmount.amount
-                    currency = data.paymentData!!.originalTxnAmount.currency
+                    amount = data!!.paymentData!!.originalTxnAmount?.amount
+                    currency = data.paymentData!!.originalTxnAmount?.currency
                 }, onFailure = {
                 }
             )
@@ -345,11 +384,11 @@ class UPICollectFragment : Fragment(), UpiIntentAdapter.OnItemClickListener {
         }
 
         circularProgressBar = view.findViewById(R.id.circularProgressBar)
-        if (palette!=null) {
-                circularProgressBar.progressTintList =
-                    ColorStateList.valueOf(Color.parseColor(palette?.C900))
-                cancelPaymentTextView.setTextColor(Color.parseColor(palette?.C900))
-            }
+        if (palette != null) {
+            circularProgressBar.progressTintList =
+                ColorStateList.valueOf(Color.parseColor(palette?.C900))
+            cancelPaymentTextView.setTextColor(Color.parseColor(palette?.C900))
+        }
         timerTextView = view.findViewById(R.id.timerTextView)
 
         startTimer()
@@ -510,14 +549,9 @@ class UPICollectFragment : Fragment(), UpiIntentAdapter.OnItemClickListener {
             cornerRadius = 16f // Normal corner radius
         }
 
-        val normalDrawable = GradientDrawable().apply {
-            setColor(context.resources.getColor(R.color.shimmer_grey))
-            cornerRadius = 16f // Smaller radius when pressed
-        }
-
         // Add states to the StateListDrawable
         stateListDrawable.addState(intArrayOf(android.R.attr.state_enabled), pressedDrawable)
-        stateListDrawable.addState(intArrayOf(), normalDrawable) // Default state
+        stateListDrawable.addState(intArrayOf(), pressedDrawable) // Default state
 
         return stateListDrawable
     }

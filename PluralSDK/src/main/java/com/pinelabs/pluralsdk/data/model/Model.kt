@@ -19,7 +19,7 @@ data class FetchFailure(
     val traceId: String
 )
 
-data class MerchantInfo(val merchantId: Int, val merchantName: String)
+data class MerchantInfo(val merchantId: Int, val merchantName: String, val merchantDisplayName:String?)
 
 data class OrignalTransactionAmount(var amount: Int?, val currency: String)
 
@@ -87,6 +87,7 @@ data class ProcessPaymentResponse(
     val response_message: String,
     val pg_upi_unique_request_id: String?,
     val deep_link: String?,
+    val payment_id: String?,
     val order_id: String?,
     val short_link: String?,
 )
@@ -107,7 +108,7 @@ data class DeviceInfo(
 data class Extra(
     val payment_mode: List<String>?,
     val payment_amount: Int?,
-    val payment_currency: String,
+    val payment_currency: String?,
     val card_last4: String?,
     val redeemable_amount: Int?,
     val registered_mobile_number: String?,

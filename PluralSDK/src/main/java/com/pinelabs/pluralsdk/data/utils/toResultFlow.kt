@@ -27,14 +27,16 @@ inline fun <reified T> toResultFlow(context: Context, crossinline call: suspend 
                     } else {
                         val type = object : TypeToken<FetchError>() {}.type
                         val errorResponse: FetchError? = Gson().fromJson(response.errorBody()!!.charStream(), type)
-                        emit(NetWorkResult.Error(null, errorResponse!!.error_message))
+                        emit(NetWorkResult.Error(null, errorResponse))
                     }
                 } catch (e: Exception) {
-                    emit(NetWorkResult.Error(null, API_ERROR))
+                    val error = FetchError("-1", API_ERROR)
+                    emit(NetWorkResult.Error(null, error))
                 }
             }
         } else {
-            emit(NetWorkResult.Error(null, API_INTERNET_MESSAGE))
+            val error = FetchError("-1", API_INTERNET_MESSAGE)
+            emit(NetWorkResult.Error(null, error))
         }
     }.flowOn(Dispatchers.IO)
 }

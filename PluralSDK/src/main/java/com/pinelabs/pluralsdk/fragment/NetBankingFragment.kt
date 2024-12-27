@@ -24,6 +24,7 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.clevertap.android.sdk.CleverTapAPI
 import com.google.android.flexbox.AlignItems
 import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexWrap
@@ -51,8 +52,15 @@ import com.pinelabs.pluralsdk.data.model.ProcessPaymentRequest
 import com.pinelabs.pluralsdk.data.model.ProcessPaymentResponse
 import com.pinelabs.pluralsdk.data.model.issuerDataList
 import com.pinelabs.pluralsdk.data.utils.ApiResultHandler
+import com.pinelabs.pluralsdk.utils.CleverTapUtil
+import com.pinelabs.pluralsdk.utils.CleverTapUtil.Companion.CT_EVENT_PAYMENT_CANCELLED
+import com.pinelabs.pluralsdk.utils.Constants.Companion.CT_UPI
+import com.pinelabs.pluralsdk.utils.Constants.Companion.ERROR_CODE
 import com.pinelabs.pluralsdk.utils.Constants.Companion.ERROR_MESSAGE
 import com.pinelabs.pluralsdk.utils.Constants.Companion.NET_BANKING_PAYMENT_METHOD
+import com.pinelabs.pluralsdk.utils.Constants.Companion.ORDER_ID
+import com.pinelabs.pluralsdk.utils.Constants.Companion.PAYMENT_ID
+import com.pinelabs.pluralsdk.utils.Constants.Companion.PAYMENT_INITIATED
 import com.pinelabs.pluralsdk.utils.Constants.Companion.REDIRECT_URL
 import com.pinelabs.pluralsdk.utils.Constants.Companion.TOKEN
 import com.pinelabs.pluralsdk.utils.DeviceType
@@ -77,6 +85,7 @@ class NetBankingFragment : Fragment(), NetBankAllAdapter.OnItemClickListener {
     private var bankList: List<NBBANKS>? = mutableListOf()
 
     private var palette: Palette? = null
+    private var clevertapDefaultInstance: CleverTapAPI? = null
 
     private val mainViewModel by activityViewModels<FetchDataViewModel>()
 
@@ -93,9 +102,12 @@ class NetBankingFragment : Fragment(), NetBankAllAdapter.OnItemClickListener {
 
         token = arguments?.getString(TOKEN).toString()
 
+        clevertapDefaultInstance = CleverTapAPI.getDefaultInstance(requireActivity())
+
         //Backpress
         imgBack = view.findViewById(R.id.btnBack)
         imgBack.setOnClickListener {
+            clevertapDefaultInstance?.let { CT_EVENT_PAYMENT_CANCELLED(it, false, true) }
             requireActivity().supportFragmentManager.popBackStack()
         }
 
@@ -121,15 +133,22 @@ class NetBankingFragment : Fragment(), NetBankAllAdapter.OnItemClickListener {
                 item!!.bankCode
             )
         val processPaymentRequest =
-            createProcessPaymentRequest(bankCode, amount!!, currency)
+            createProcessPaymentRequest(item.bankName, bankCode, amount!!, currency)
         mainViewModel.processPayment(token, processPaymentRequest)
     }
 
     private fun createProcessPaymentRequest(
+        bankName: String,
         payCode: String,
         amount: Int,
         currency: String
     ): ProcessPaymentRequest {
+
+        CleverTapUtil.CT_EVENT_PAYMENT_METHOD(
+            clevertapDefaultInstance, CT_UPI, PAYMENT_INITIATED,
+            null, null, bankName
+        )
+
         val paymentMode = arrayListOf(NET_BANKING_PAYMENT_METHOD)
         val netBankingData = NetBankingData(payCode)
         //val convenienceFeesData = ConvenienceFeesData(131040, 23785, 1100, 655925, 500000, 99999999, 155925, "INR")
@@ -186,11 +205,14 @@ class NetBankingFragment : Fragment(), NetBankAllAdapter.OnItemClickListener {
                     }, onSuccess = { response ->
                         val i = Intent(activity, ACSPageActivity::class.java)
                         i.putExtra(REDIRECT_URL, response!!.redirect_url)
+                        i.putExtra(ORDER_ID, response?.order_id)
+                        i.putExtra(PAYMENT_ID, response?.payment_id)
                         startActivity(i)
                         requireActivity().finish()
                     }, onFailure = { errorMessage ->
                         val intent = Intent(requireActivity(), FailureActivity::class.java)
-                        intent.putExtra(ERROR_MESSAGE, errorMessage)
+                        intent.putExtra(ERROR_CODE, errorMessage?.error_code)
+                        intent.putExtra(ERROR_MESSAGE, errorMessage?.error_message)
                         startActivity(intent)
                         requireActivity().finish()
                     })

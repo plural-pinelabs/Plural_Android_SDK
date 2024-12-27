@@ -3,6 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/white"
     android:fillViewport="true">
 
     <LinearLayout
@@ -23,20 +24,20 @@
 
             <ImageButton
                 android:id="@+id/btnBack"
-                android:layout_width="35dp"
-                android:layout_height="35dp"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
                 android:background="?android:selectableItemBackground"
+                android:scaleType="fitXY"
                 android:src="@drawable/back_button" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:fontFamily="@font/roboto_medium"
-                android:paddingStart="4dp"
-                android:paddingEnd="8dp"
-                android:text="Cards"
+                android:layout_marginLeft="10dp"
+                android:fontFamily="@font/roboto_bold"
+                android:text="@string/cards"
                 android:textColor="@android:color/black"
-                android:textSize="17sp" />
+                android:textSize="16sp" />
         </LinearLayout>
 
         <!-- Card Number Field -->
@@ -46,29 +47,26 @@
             android:layout_marginTop="30dp"
             android:layout_marginBottom="5dp"
             android:alpha=".6"
-            android:fontFamily="@font/robotoregular"
+            android:fontFamily="@font/roboto_medium"
             android:paddingLeft="5dp"
-            android:text="Card Number"
+            android:text="@string/card_number"
             android:textColor="@color/black"
-            android:textSize="14sp"
-            android:textStyle="bold" />
+            android:textSize="14sp" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="20dp"
             android:gravity="center_vertical"
-            android:orientation="horizontal">
+            android:orientation="vertical">
 
             <EditText
                 android:id="@+id/etCardNumber"
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
                 android:background="@drawable/edittext_default_border"
                 android:drawablePadding="8dp"
                 android:fontFamily="@font/roboto_medium"
-                android:hint="Enter Card Number"
+                android:hint="@string/enter_card_number"
                 android:inputType="number"
                 android:maxLength="23"
                 android:padding="12dp"
@@ -77,149 +75,156 @@
                 android:textColorHint="@color/shimmer_grey"
                 android:textSize="16sp" />
 
-
-        </LinearLayout>
-
-        <!-- Card Number Error Message -->
-        <TextView
-            android:id="@+id/tvCardNumberError"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:gravity="top"
-            android:textColor="#EB001B"
-            android:visibility="gone" /> <!-- Initially hidden -->
-
-        <!-- Expiry and CVV Headers -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="5dp"
-            android:orientation="horizontal">
-
+            <!-- Card Number Error Message -->
             <TextView
-                android:layout_width="0dp"
+                android:id="@+id/tvCardNumberError"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:alpha=".6"
-                android:fontFamily="@font/robotoregular"
-                android:paddingLeft="5dp"
-                android:text="Expiry (MM/YY)"
-                android:textColor="@color/black"
+                android:paddingLeft="10dp"
+                android:text=""
+                android:textColor="@color/red"
                 android:textSize="14sp"
-                android:textStyle="bold" />
+                android:visibility="invisible" /> <!-- Initially hidden -->
 
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:alpha=".6"
-                android:fontFamily="@font/robotoregular"
-                android:paddingLeft="15dp"
-                android:text="CVV"
-                android:textColor="@color/black"
-                android:textSize="14sp"
-                android:textStyle="bold" />
         </LinearLayout>
 
-        <!-- Expiry and CVV Fields -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="20dp"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:weightSum="2">
-
-            <!-- Expiry Field -->
-            <EditText
-                android:id="@+id/etExpiry"
-                android:layout_width="0dp"
+            android:layout_marginTop="20dp"
+            android:orientation="vertical">
+            <!-- Expiry and CVV Headers -->
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="25dp"
-                android:layout_weight="1"
-                android:background="@drawable/edittext_default_border"
-                android:fontFamily="@font/roboto_medium"
-                android:hint="MM/YY"
-                android:inputType="date"
-                android:padding="12dp"
-                android:textColor="@color/black"
-                android:textColorHint="@color/shimmer_grey"
-                android:textSize="16sp" />
+                android:layout_marginBottom="5dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:weightSum="2">
 
-            <!-- CVV Field -->
-            <EditText
-                android:id="@+id/etCVV"
-                android:layout_width="0dp"
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="25dp"
+                    android:layout_weight="1"
+                    android:alpha=".6"
+                    android:fontFamily="@font/roboto_medium"
+                    android:paddingLeft="5dp"
+                    android:text="@string/expiry_title"
+                    android:textColor="@color/black"
+                    android:textSize="14sp" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:alpha=".6"
+                    android:fontFamily="@font/roboto_medium"
+                    android:paddingLeft="5dp"
+                    android:text="@string/cvv_title"
+                    android:textColor="@color/black"
+                    android:textSize="14sp" />
+            </LinearLayout>
+
+            <!-- Expiry and CVV Fields -->
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:background="@drawable/edittext_default_border"
-                android:fontFamily="@font/roboto_medium"
-                android:hint="CVV"
-                android:inputType="numberPassword"
-                android:maxLength="4"
-                android:padding="12dp"
-                android:textColor="@color/black"
-                android:textColorHint="@color/shimmer_grey"
-                android:textSize="16sp" />
-        </LinearLayout>
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:weightSum="2">
 
-        <!-- Expiry Error Message -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:paddingTop="5dp">
+                <!-- Expiry Field -->
+                <EditText
+                    android:id="@+id/etExpiry"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="25dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/edittext_default_border"
+                    android:fontFamily="@font/roboto_medium"
+                    android:hint="@string/expiry"
+                    android:inputType="date"
+                    android:padding="12dp"
+                    android:textColor="@color/black"
+                    android:textColorHint="@color/shimmer_grey"
+                    android:textSize="16sp" />
+
+                <!-- CVV Field -->
+                <EditText
+                    android:id="@+id/etCVV"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@drawable/edittext_default_border"
+                    android:fontFamily="@font/roboto_medium"
+                    android:hint="@string/cvv"
+                    android:inputType="numberPassword"
+                    android:maxLength="4"
+                    android:padding="12dp"
+                    android:textColor="@color/black"
+                    android:textColorHint="@color/shimmer_grey"
+                    android:textSize="16sp" />
+            </LinearLayout>
+
             <!-- Expiry Error Message -->
-            <TextView
-                android:id="@+id/tvExpiryError"
-                android:layout_width="0dp"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
-                android:layout_marginBottom="2dp"
-                android:layout_weight="1"
-                android:text="Invalid Expiry Date"
-                android:textColor="#EB001B"
-                android:visibility="gone" /> <!-- Initially hidden -->
+                android:orientation="horizontal"
+                android:weightSum="2">
+                <!-- Expiry Error Message -->
+                <TextView
+                    android:id="@+id/tvExpiryError"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="25dp"
+                    android:layout_weight="1"
+                    android:paddingLeft="10dp"
+                    android:text="@string/error_expiry"
+                    android:textColor="@color/red"
+                    android:textSize="14sp"
+                    android:visibility="invisible" /> <!-- Initially hidden -->
 
 
-            <!-- CVV Error Message (below the CVV box) -->
-            <TextView
-                android:id="@+id/tvCVVError"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
-                android:layout_marginBottom="2dp"
-                android:layout_weight="1"
-                android:text="Invalid CVV"
-                android:textColor="#EB001B"
-                android:visibility="gone" /> <!-- Initially hidden -->
+                <!-- CVV Error Message (below the CVV box) -->
+                <TextView
+                    android:id="@+id/tvCVVError"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:paddingLeft="10dp"
+                    android:text="@string/error_cvv"
+                    android:textColor="@color/red"
+                    android:textSize="14sp"
+                    android:visibility="invisible" /> <!-- Initially hidden -->
 
 
+            </LinearLayout>
         </LinearLayout>
 
         <!-- Card Holder's Name Header -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
             android:layout_marginBottom="5dp"
             android:alpha=".6"
-            android:fontFamily="@font/robotoregular"
+            android:fontFamily="@font/roboto_medium"
             android:paddingLeft="5dp"
-            android:text="Card Holder's Name"
+            android:text="@string/card_holders_name"
             android:textColor="@color/black"
-            android:textSize="14sp"
-            android:textStyle="bold" />
+            android:textSize="14sp" />
 
         <!-- Card Holder's Name Field -->
         <EditText
             android:id="@+id/etCardHolderName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="68dp"
+            android:layout_marginBottom="70dp"
             android:background="@drawable/edittext_default_border"
             android:fontFamily="@font/roboto_medium"
-            android:hint="Full Name on Card"
+            android:hint="@string/full_name_on_card"
             android:inputType="textPersonName"
             android:padding="12dp"
             android:textColor="@color/black"
@@ -263,18 +268,20 @@
             android:id="@+id/btnProceedToPay"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="25dp"
             android:backgroundTint="@null"
             android:drawableLeft="@drawable/lock_keyhole_minimalistic"
             android:drawablePadding="8dp"
+            android:enabled="false"
             android:fontFamily="@font/roboto_medium"
             android:paddingLeft="81dp"
             android:paddingTop="10dp"
             android:paddingRight="81dp"
             android:paddingBottom="10dp"
-            android:text="Proceed to Pay"
+            android:text="@string/proceed_to_pay"
+            android:textAllCaps="false"
             android:textColor="@android:color/white"
-            android:textSize="18sp"
+            android:textSize="17sp"
             app:backgroundTint="@null" />
     </LinearLayout>
 </ScrollView>

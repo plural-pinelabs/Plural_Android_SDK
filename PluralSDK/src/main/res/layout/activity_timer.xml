@@ -59,6 +59,8 @@
         android:text="@string/timer_text"
         android:textSize="18sp"
         android:textColor="#333333"
+        android:layout_gravity="center"
+        android:gravity="center"
         android:fontFamily="@font/roboto_bold"
         android:layout_marginTop="24dp" />
 
@@ -68,6 +70,8 @@
         android:text="@string/timer_text2"
         android:textSize="14sp"
         android:textColor="#1C1C1C"
+        android:layout_gravity="center"
+        android:gravity="center"
         android:fontFamily="@font/roboto_medium"
         android:layout_marginTop="8dp" />
 

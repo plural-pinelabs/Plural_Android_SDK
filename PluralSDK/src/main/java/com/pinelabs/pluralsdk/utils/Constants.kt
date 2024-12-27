@@ -2,12 +2,16 @@ package com.pinelabs.pluralsdk.utils
 
 class Constants {
     companion object {
-        const val APP_VERSION="1.0"
+        const val APP_VERSION = "1.0"
 
         const val TOKEN = "TOKEN"
+        const val ERROR_CODE = "ERROR_CODE"
         const val ERROR_MESSAGE = "ERROR_MESSAGE"
         const val ERROR_MESSAGE_DEFAULT = "PAYMENT FAILED"
         const val REDIRECT_URL = "REDIRECT_URL"
+        const val ORDER_ID = "ORDER_ID"
+        const val PAYMENT_ID = "PAYMENT_ID"
+        const val START_TIME= "START_TIME"
         const val SUCCESS_REDIRECT_URL = "savePluralPgTransactionStatus"
 
         const val SPLASH_TIMER: Long = 2300
@@ -90,5 +94,16 @@ class Constants {
         const val TAG_UPI = "TAG_UPI"
         const val TAG_NETBANKING = "TAG_NETBANKING"
 
+        const val CT_CARDS = "cards"
+        const val CT_UPI = "upi"
+        const val CT_COLLECT = "collect"
+        const val CT_INTENT_GPAY = "google_pay"
+        const val CT_INTENT_PHONEPE = "phonepe"
+        const val CT_INTENT_PAYTM = "paytm"
+
+        const val CT_NETBANKING = "netbanking"
+
+        const val PAYMENT_INITIATED = "initiated"
+        const val PAYMENT_DROPPED = "dropped"
     }
 }

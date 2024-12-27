@@ -42,6 +42,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.airbnb.lottie.LottieAnimationView
+import com.clevertap.android.sdk.CleverTapAPI
 import com.google.android.flexbox.AlignItems
 import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexWrap
@@ -69,6 +70,8 @@ import com.pinelabs.pluralsdk.data.model.RewardResponse
 import com.pinelabs.pluralsdk.data.utils.AmountUtil.convertToRupees
 import com.pinelabs.pluralsdk.data.utils.ApiResultHandler
 import com.pinelabs.pluralsdk.data.utils.ColumnUtil
+import com.pinelabs.pluralsdk.utils.CleverTapUtil
+import com.pinelabs.pluralsdk.utils.CleverTapUtil.Companion.CT_EVENT_PAYMENT_CANCELLED
 import com.pinelabs.pluralsdk.utils.Constants.Companion.BANK_ALLAHABAD
 import com.pinelabs.pluralsdk.utils.Constants.Companion.BANK_ANDHRA
 import com.pinelabs.pluralsdk.utils.Constants.Companion.BANK_AU_SMALL
@@ -90,9 +93,15 @@ import com.pinelabs.pluralsdk.utils.Constants.Companion.BANK_UNION
 import com.pinelabs.pluralsdk.utils.Constants.Companion.BANK_YES
 import com.pinelabs.pluralsdk.utils.Constants.Companion.BANK_YES_BANK
 import com.pinelabs.pluralsdk.utils.Constants.Companion.CREDIT_DEBIT_ID
+import com.pinelabs.pluralsdk.utils.Constants.Companion.CT_CARDS
+import com.pinelabs.pluralsdk.utils.Constants.Companion.ERROR_CODE
 import com.pinelabs.pluralsdk.utils.Constants.Companion.ERROR_MESSAGE
+import com.pinelabs.pluralsdk.utils.Constants.Companion.ORDER_ID
 import com.pinelabs.pluralsdk.utils.Constants.Companion.PAYBYPOINTS_ID
+import com.pinelabs.pluralsdk.utils.Constants.Companion.PAYMENT_ID
+import com.pinelabs.pluralsdk.utils.Constants.Companion.PAYMENT_INITIATED
 import com.pinelabs.pluralsdk.utils.Constants.Companion.REDIRECT_URL
+import com.pinelabs.pluralsdk.utils.Constants.Companion.START_TIME
 import com.pinelabs.pluralsdk.utils.Constants.Companion.TOKEN
 import com.pinelabs.pluralsdk.viewmodels.FetchDataViewModel
 import java.util.Calendar
@@ -134,7 +143,7 @@ class CardFragment : Fragment() {
     private var mobileNumber: String? = null
     private var amount: Int? = null
     private var pbpCardNumber: String? = null
-    private lateinit var currency: String
+    private var currency: String? = null
     private lateinit var bottomSheetDialog: BottomSheetDialog
     private lateinit var bottomSheetBanks: BottomSheetDialog
     private val mainViewModel by activityViewModels<FetchDataViewModel>()
@@ -162,6 +171,8 @@ class CardFragment : Fragment() {
 
     private lateinit var spannableString: SpannableString
 
+    private var clevertapDefaultInstance: CleverTapAPI? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
     }
@@ -178,6 +189,7 @@ class CardFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         println("Require activity name ${requireActivity().packageName}")
+        clevertapDefaultInstance = CleverTapAPI.getDefaultInstance(requireActivity())
 
         token = arguments?.getString(TOKEN).toString()
         bottomSheetDialog = BottomSheetDialog(requireActivity())
@@ -241,6 +253,10 @@ class CardFragment : Fragment() {
 
             // Handle payment process here
             val cardNumber = etCardNumber.text.toString().filter { !it.isWhitespace() }
+            CleverTapUtil.CT_EVENT_PAYMENT_METHOD(
+                clevertapDefaultInstance, CT_CARDS, PAYMENT_INITIATED,
+                cardNumber, null, null
+            )
             val cvv = etCVV.text.toString()
             val cardHolderName = etCardHolderName.text.toString()
             val cardExpiry = etExpiry.text.toString()
@@ -259,6 +275,7 @@ class CardFragment : Fragment() {
         }
 
         btnBack.setOnClickListener {
+            clevertapDefaultInstance?.let { CT_EVENT_PAYMENT_CANCELLED(it, false, true) }
             requireActivity().supportFragmentManager.popBackStack()
         }
 
@@ -285,14 +302,14 @@ class CardFragment : Fragment() {
                         isCardNumberValid = false
                     } else {
                         if (validCard(cardNumber)) {
-                            tvCardNumberError.visibility = View.GONE
+                            tvCardNumberError.visibility = View.INVISIBLE
                             etCardNumber.background = ContextCompat.getDrawable(
                                 requireContext(),
                                 R.drawable.edittext_default_border
                             )
                             isCardNumberValid = true
                             // Set the brand icon based on the card type
-                            setCardBrandIcon(etCardNumber, cardType)
+                            //setCardBrandIcon(etCardNumber, cardType)
                         } else {
                             tvCardNumberError.visibility = View.VISIBLE
                             tvCardNumberError.text = "Invalid card number"
@@ -341,7 +358,7 @@ class CardFragment : Fragment() {
         }
     }
 
-    private fun setCardBrandIcon(etCardNumber: EditText, cardType: String) {
+    private fun setCardBrandIcon(etCardNumber: EditText, cardType: String?) {
         val iconResId = cardIcons[cardType]
         if (iconResId != null) {
             etCardNumber.setCompoundDrawablesWithIntrinsicBounds(
@@ -386,6 +403,8 @@ class CardFragment : Fragment() {
                         pbpBankVisbile()
                     }
 
+
+
                 if (cleanedInput.length > 19) {
                     tvCardNumberError.text = "Your card number cannot exceed 19 digits"
                     tvCardNumberError.visibility = View.VISIBLE
@@ -395,11 +414,26 @@ class CardFragment : Fragment() {
                     )
                     isCardNumberValid = false
                 } else if (cleanedInput.length < 19) {
-                    tvCardNumberError.visibility = View.GONE
+                    tvCardNumberError.visibility = View.INVISIBLE
                     etCardNumber.background = setColor(requireActivity())
                     isCardNumberValid = false
+
+                    if (cleanedInput.length > 9) {
+                        val cardType = validateCardType(cleanedInput)
+                        println("Valid condition " + validCard(cleanedInput) + " " + cleanedInput.length)
+
+
+                        // Set the brand icon based on the card type
+                        setCardBrandIcon(etCardNumber, cardType)
+                    } else {
+                        println("Else condition " + validCard(cleanedInput) + " " + cleanedInput.length)
+                    }
+                    if (cleanedInput.length <= 4) {
+                        etCardNumber.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null)
+                    }
+
                 } else {
-                    tvCardNumberError.visibility = View.GONE
+                    tvCardNumberError.visibility = View.INVISIBLE
                     etCardNumber.background = ContextCompat.getDrawable(
                         requireContext(),
                         R.drawable.edittext_default_border
@@ -536,7 +570,7 @@ class CardFragment : Fragment() {
                             )
                             isExpiryValid = false
                         } else {
-                            tvExpiryError.visibility = View.GONE
+                            tvExpiryError.visibility = View.INVISIBLE
                             etExpiry.background = ContextCompat.getDrawable(
                                 requireContext(),
                                 R.drawable.edittext_default_border
@@ -562,7 +596,7 @@ class CardFragment : Fragment() {
 
     private fun setupCVVValidation(etCVV: EditText, tvCVVError: TextView) {
         etCVV.filters =
-            arrayOf<InputFilter>(InputFilter.LengthFilter(3)) // CVV length is limited to 3 digits
+            arrayOf<InputFilter>(InputFilter.LengthFilter(4)) // CVV length is limited to 4 digits
 
         etCVV.addTextChangedListener(object : TextWatcher {
             private var isEditing = false
@@ -582,19 +616,19 @@ class CardFragment : Fragment() {
                 etCVV.background = setColor(requireActivity())
 
                 // Validate input
-                if (cvv.length > 3) {
-                    tvCVVError.text = "CVV cannot exceed 3 digits"
+                if (cvv.length > 4) {
+                    tvCVVError.text = "CVV cannot exceed 4 digits"
                     tvCVVError.visibility = View.VISIBLE
                     etCVV.background = ContextCompat.getDrawable(
                         requireContext(),
                         R.drawable.edittext_error_border
                     )
                     isCVVValid = false
-                } else if (cvv.isEmpty() || cvv.length < 3) {
-                    tvCVVError.visibility = View.GONE
+                } else if (cvv.isEmpty() || cvv.length < 4) {
+                    tvCVVError.visibility = View.INVISIBLE
                     isCVVValid = false
                 } else {
-                    tvCVVError.visibility = View.GONE
+                    tvCVVError.visibility = View.INVISIBLE
                     isCVVValid = true
                 }
 
@@ -616,7 +650,7 @@ class CardFragment : Fragment() {
                     )
                     isCVVValid = false
                 } else {
-                    tvCVVError.visibility = View.GONE
+                    tvCVVError.visibility = View.INVISIBLE
                     etCVV.background = ContextCompat.getDrawable(
                         requireContext(),
                         R.drawable.edittext_default_border
@@ -709,7 +743,8 @@ class CardFragment : Fragment() {
                 currency,
                 last4,
                 redeemableAmount,
-                mobileNumber!!.filter { !mobileNumber!!.isEmpty() },
+                null
+                /*mobileNumber!!.filter { !mobileNumber!!.isEmpty() }*/,
                 null,
                 null
             )
@@ -1062,8 +1097,8 @@ class CardFragment : Fragment() {
             val fetchDataResponseHandler = ApiResultHandler<FetchResponse>(requireActivity(),
                 onLoading = {
                 }, onSuccess = { data ->
-                    amount = data!!.paymentData!!.originalTxnAmount.amount
-                    currency = data!!.paymentData!!.originalTxnAmount.currency
+                    amount = data!!.paymentData!!.originalTxnAmount?.amount
+                    currency = data!!.paymentData!!.originalTxnAmount?.currency
                     palette = data?.merchantBrandingData?.palette
                     btnProceedToPay.background = buttonBackground(requireActivity())
                     if (data.customerInfo != null && data.customerInfo.mobileNo != null)
@@ -1085,6 +1120,7 @@ class CardFragment : Fragment() {
         }
 
         mainViewModel.process_payment_response.observe(viewLifecycleOwner) { response ->
+            val startTime = System.currentTimeMillis()
             val fetchDataResponseHandler =
                 ApiResultHandler<ProcessPaymentResponse>(requireActivity(),
                     onLoading = {
@@ -1105,7 +1141,10 @@ class CardFragment : Fragment() {
                                 override fun onAnimationRepeat(p0: Animator) {
                                     bottomSheetDialog.dismiss()
                                     val i = Intent(activity, ACSPageActivity::class.java)
+                                    i.putExtra(START_TIME, startTime)
                                     i.putExtra(REDIRECT_URL, data!!.redirect_url)
+                                    i.putExtra(ORDER_ID, data?.order_id)
+                                    i.putExtra(PAYMENT_ID, data?.payment_id)
                                     startActivity(i)
                                     requireActivity().finish()
                                 }
@@ -1128,7 +1167,8 @@ class CardFragment : Fragment() {
                                 override fun onAnimationRepeat(p0: Animator) {
                                     bottomSheetDialog.dismiss()
                                     val i = Intent(requireActivity(), FailureActivity::class.java)
-                                    i.putExtra(ERROR_MESSAGE, errorMessage)
+                                    i.putExtra(ERROR_CODE, errorMessage?.error_code)
+                                    i.putExtra(ERROR_MESSAGE, errorMessage?.error_message)
                                     startActivity(i)
                                     requireActivity().finish()
                                 }

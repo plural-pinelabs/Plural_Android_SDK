@@ -27,8 +27,8 @@ data class OrderRequest(
     var merchant_order_reference: String,
     val order_amount: OrderAmount,
     val pre_auth: Boolean,
-    val purchase_details: PurchaseDetails,
-    val integration_mode: String?
+    val purchase_details: PurchaseDetails/*,
+    val integration_mode: String?*/
 )
 
 data class Order(

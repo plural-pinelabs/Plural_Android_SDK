@@ -2,6 +2,7 @@ package com.pinelabs.plural_sdk_test_app
 
 import android.os.Bundle
 import android.widget.Button
+import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.gson.Gson
@@ -29,6 +30,7 @@ class TestAppActivity : AppCompatActivity(), PaymentResultCallBack {
     private lateinit var apiInterface: ApiService
 
     private lateinit var btn_startPayment: Button
+    private lateinit var edt_redirectURL: EditText
 
     private lateinit var token: String
 
@@ -36,6 +38,7 @@ class TestAppActivity : AppCompatActivity(), PaymentResultCallBack {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_test_app)
 
+        edt_redirectURL = findViewById(R.id.edt_redirect_url)
         btn_startPayment = findViewById(R.id.btn_start_sdk)
         btn_startPayment.setOnClickListener {
             /*PluralSDKManager().startPayment(
@@ -44,9 +47,20 @@ class TestAppActivity : AppCompatActivity(), PaymentResultCallBack {
                 this@TestAppActivity
             )}*/
             if (NetworkUtil.isNetworkAvailable(this@TestAppActivity) == true)
+            {
                 generateToken()
-            else
+                /*if (edt_redirectURL.text.isNotEmpty())
+                    PluralSDKManager().startPayment(
+                        this@TestAppActivity,
+                        edt_redirectURL.text.toString(),
+                        this@TestAppActivity
+                    )
+                else
+                    Toast.makeText(this, "Redirect url is empty", Toast.LENGTH_SHORT).show()*/
+
+            } else {
                 Toast.makeText(this, "Network not available", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 

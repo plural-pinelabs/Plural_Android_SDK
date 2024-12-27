@@ -13,11 +13,16 @@ import android.webkit.WebSettings
 import android.webkit.WebView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
+import com.clevertap.android.sdk.CleverTapAPI
 import com.pinelabs.pluralsdk.R
 import com.pinelabs.pluralsdk.data.model.FetchResponse
 import com.pinelabs.pluralsdk.data.model.Palette
 import com.pinelabs.pluralsdk.data.utils.ApiResultHandler
+import com.pinelabs.pluralsdk.utils.CleverTapUtil
+import com.pinelabs.pluralsdk.utils.Constants.Companion.ORDER_ID
+import com.pinelabs.pluralsdk.utils.Constants.Companion.PAYMENT_ID
 import com.pinelabs.pluralsdk.utils.Constants.Companion.REDIRECT_URL
+import com.pinelabs.pluralsdk.utils.Constants.Companion.START_TIME
 import com.pinelabs.pluralsdk.viewmodels.FetchDataViewModel
 import com.pinelabs.pluralsdk.viewmodels.ViewModelFactory
 
@@ -25,9 +30,24 @@ class ACSPageActivity : AppCompatActivity() {
     private lateinit var webAcs: WebView
     private lateinit var viewModel: FetchDataViewModel
 
+    var orderId: String? = null
+    var paymentId: String? = null
+    var startTime: Int? = null
+
+    private var clevertapDefaultInstance: CleverTapAPI? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.acs_webpage)
+
+        orderId = intent.getStringExtra(ORDER_ID)
+        paymentId = intent.getStringExtra(PAYMENT_ID)
+        startTime = intent.getIntExtra(START_TIME,0)
+
+        clevertapDefaultInstance = CleverTapAPI.getDefaultInstance(this@ACSPageActivity)
+        val endTime = System.currentTimeMillis()
+        val processTime= endTime - startTime!!
+        clevertapDefaultInstance?.let { CleverTapUtil.CT_EVENT_PAYMENT_COMPLETION_TIME(it, processTime) }
 
         val viewModelFactory = ViewModelFactory(application)
         viewModel = ViewModelProvider(this, viewModelFactory)[FetchDataViewModel::class.java]
@@ -89,12 +109,17 @@ class ACSPageActivity : AppCompatActivity() {
         webAcs.addJavascriptInterface(WebAppInterface(this@ACSPageActivity), "AndroidInterface")
     }
 
-    class WebAppInterface(context: Activity) {
+    inner class WebAppInterface(context: Activity) {
         private val mContext: Activity = context
 
         @JavascriptInterface
         fun postMessage(response: String?) {
             println("Response from java script ${response}")
+
+            CleverTapUtil.CT_EVENT_PAYMENT_STATUS_SUCCESS(
+                clevertapDefaultInstance, orderId, paymentId)
+
+
             val intent = Intent(mContext, SuccessActivity::class.java)
             mContext.startActivity(intent)
             mContext.finish()

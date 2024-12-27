@@ -16,6 +16,7 @@ import com.pinelabs.pluralsdk.data.model.Palette
 import com.pinelabs.pluralsdk.data.utils.ApiResultHandler
 import com.pinelabs.pluralsdk.utils.CleverTapUtil
 import com.pinelabs.pluralsdk.utils.Constants.Companion.END_BOLD
+import com.pinelabs.pluralsdk.utils.Constants.Companion.ERROR_CODE
 import com.pinelabs.pluralsdk.utils.Constants.Companion.ERROR_MESSAGE
 import com.pinelabs.pluralsdk.utils.Constants.Companion.ERROR_MESSAGE_DEFAULT
 import com.pinelabs.pluralsdk.utils.Constants.Companion.FAILURE_TIMER
@@ -29,6 +30,7 @@ import java.util.TimerTask
 class FailureActivity : AppCompatActivity() {
 
     private lateinit var error_message : String
+    private lateinit var error_code : String
     private lateinit var viewModel: FetchDataViewModel
 
     private lateinit var txtRetry : TextView
@@ -43,11 +45,12 @@ class FailureActivity : AppCompatActivity() {
         val viewModelFactory = ViewModelFactory(application)
         viewModel = ViewModelProvider(this, viewModelFactory)[FetchDataViewModel::class.java]
 
+        error_code = intent.getStringExtra(ERROR_CODE).toString()
         error_message = intent.getStringExtra(ERROR_MESSAGE).toString()
         if (error_message.isEmpty())
             error_message = ERROR_MESSAGE_DEFAULT
 
-        CleverTapUtil.CT_EVENT_PAYMENT_STATUS_FAILURE(clevertapDefaultInstance,"","","",error_message)
+        CleverTapUtil.CT_EVENT_PAYMENT_STATUS_FAILURE(clevertapDefaultInstance,"","",error_code,error_message)
 
         txtAutoClose = findViewById(R.id.txt_autoclose)
         txtRetry = findViewById(R.id.txt_retry)

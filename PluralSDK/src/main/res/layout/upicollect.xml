@@ -48,8 +48,8 @@
             android:gravity="center"
             android:orientation="horizontal"
             android:paddingTop="8dp"
-            android:visibility="gone"
-            android:paddingBottom="8dp">
+            android:paddingBottom="8dp"
+            android:visibility="gone">
 
             <View
                 android:layout_width="0dp"
@@ -126,22 +126,20 @@
             android:id="@+id/btnVerifyContinue"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:background="@drawable/button_background_selector"
+            android:layout_marginTop="25dp"
             android:backgroundTint="@null"
-            app:backgroundTint="@null"
-            android:drawableStart="@drawable/lock_keyhole_minimalistic"
+            android:drawableLeft="@drawable/lock_keyhole_minimalistic"
             android:drawablePadding="8dp"
             android:enabled="false"
-            android:fontFamily="@font/roboto_bold"
+            android:fontFamily="@font/roboto_medium"
             android:paddingLeft="81dp"
-            android:paddingTop="15dp"
+            android:paddingTop="10dp"
             android:paddingRight="81dp"
-            android:paddingBottom="15dp"
-            android:visibility="gone"
+            android:paddingBottom="10dp"
             android:text="@string/verify_continue"
             android:textAllCaps="false"
             android:textColor="@android:color/white"
-            android:textSize="16sp" />
+            android:textSize="17sp"
+            app:backgroundTint="@null" />
     </LinearLayout>
 </ScrollView>
