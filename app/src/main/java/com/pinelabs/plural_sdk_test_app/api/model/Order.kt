@@ -26,6 +26,7 @@ data class OrderResponse(
 data class OrderRequest(
     var merchant_order_reference: String,
     val order_amount: OrderAmount,
+    val notes: String,
     val pre_auth: Boolean,
     val purchase_details: PurchaseDetails/*,
     val integration_mode: String?*/
@@ -43,7 +44,15 @@ data class OrderAmount(val value: Int, val currency: String)
 
 data class OrderFailure(val code: String, val message: String)
 
-data class PurchaseDetails(val customer: Customer, val merchant_metadata: MerchantMetaData)
+data class PurchaseDetails(
+    val account_details: AccountDetails?,
+    val customer: Customer?,
+    val merchant_metadata: MerchantMetaData?
+)
+
+data class AccountDetails(val bank_details: BankDetails?)
+
+data class BankDetails(val bank_data: String?)
 
 data class IntegrationMode(val integration_mode: String)
 

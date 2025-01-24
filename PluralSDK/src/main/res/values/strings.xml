@@ -181,5 +181,13 @@
         <item>@string/yes_bank</item>
     </string-array>
 
-<string name="netbanking_header">Netbanking</string>
+    <string name="netbanking_header">Netbanking</string>
+    <string name="authenticate_otp">Authenticate Your Payment</string>
+    <string name="otp_message">OTP sent to your mobile number </string>
+    <string name="enter_otp">Enter OTP</string>
+    <string name="resend_otp">Resend OTP</string>
+    <string name="resend_otp_in">Resend OTP in</string>
+    <string name="banks_website">Or, complete on your</string>
+    <string name="website">bank’s website</string>
+    <string name="auto_read">Waiting to auto-read OTP</string>
 </resources>

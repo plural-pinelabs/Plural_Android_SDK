@@ -21,6 +21,7 @@ import android.text.TextWatcher
 import android.text.method.LinkMovementMethod
 import android.text.style.ClickableSpan
 import android.text.style.ForegroundColorSpan
+import android.util.DisplayMetrics
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -49,11 +50,15 @@ import com.google.android.flexbox.FlexWrap
 import com.google.android.flexbox.FlexboxLayoutManager
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.google.gson.Gson
 import com.pinelabs.pluralsdk.R
 import com.pinelabs.pluralsdk.activity.ACSPageActivity
 import com.pinelabs.pluralsdk.activity.FailureActivity
 import com.pinelabs.pluralsdk.adapter.FlexAdapter
 import com.pinelabs.pluralsdk.adapter.PBPBanksAdapter
+import com.pinelabs.pluralsdk.data.model.CardBinMetaDataRequest
+import com.pinelabs.pluralsdk.data.model.CardBinMetaDataRequestList
+import com.pinelabs.pluralsdk.data.model.CardBinMetaDataResponse
 import com.pinelabs.pluralsdk.data.model.CardData
 import com.pinelabs.pluralsdk.data.model.Extra
 import com.pinelabs.pluralsdk.data.model.FetchResponse
@@ -70,6 +75,23 @@ import com.pinelabs.pluralsdk.data.model.RewardResponse
 import com.pinelabs.pluralsdk.data.utils.AmountUtil.convertToRupees
 import com.pinelabs.pluralsdk.data.utils.ApiResultHandler
 import com.pinelabs.pluralsdk.data.utils.ColumnUtil
+import com.pinelabs.pluralsdk.data.utils.Utils
+import com.pinelabs.pluralsdk.utils.BankConstant.Companion.ALLAHABAD
+import com.pinelabs.pluralsdk.utils.BankConstant.Companion.ANDHRA
+import com.pinelabs.pluralsdk.utils.BankConstant.Companion.AU
+import com.pinelabs.pluralsdk.utils.BankConstant.Companion.CANARA_BANK
+import com.pinelabs.pluralsdk.utils.BankConstant.Companion.CENTRAL
+import com.pinelabs.pluralsdk.utils.BankConstant.Companion.CORPORATION
+import com.pinelabs.pluralsdk.utils.BankConstant.Companion.FEDERAL
+import com.pinelabs.pluralsdk.utils.BankConstant.Companion.IDBI
+import com.pinelabs.pluralsdk.utils.BankConstant.Companion.IDFC
+import com.pinelabs.pluralsdk.utils.BankConstant.Companion.INDIAN
+import com.pinelabs.pluralsdk.utils.BankConstant.Companion.KARUR
+import com.pinelabs.pluralsdk.utils.BankConstant.Companion.PNB
+import com.pinelabs.pluralsdk.utils.BankConstant.Companion.SBI
+import com.pinelabs.pluralsdk.utils.BankConstant.Companion.SOUTH_INDIAN_BANK
+import com.pinelabs.pluralsdk.utils.BankConstant.Companion.UNION_BANK
+import com.pinelabs.pluralsdk.utils.BankConstant.Companion.YES
 import com.pinelabs.pluralsdk.utils.CleverTapUtil
 import com.pinelabs.pluralsdk.utils.CleverTapUtil.Companion.CT_EVENT_PAYMENT_CANCELLED
 import com.pinelabs.pluralsdk.utils.Constants.Companion.BANK_ALLAHABAD
@@ -83,7 +105,6 @@ import com.pinelabs.pluralsdk.utils.Constants.Companion.BANK_IDBI
 import com.pinelabs.pluralsdk.utils.Constants.Companion.BANK_IDFC
 import com.pinelabs.pluralsdk.utils.Constants.Companion.BANK_IDIAN
 import com.pinelabs.pluralsdk.utils.Constants.Companion.BANK_KARUR_VYSYA
-import com.pinelabs.pluralsdk.utils.Constants.Companion.BANK_OF_INDIA
 import com.pinelabs.pluralsdk.utils.Constants.Companion.BANK_PNB
 import com.pinelabs.pluralsdk.utils.Constants.Companion.BANK_PUNJAB
 import com.pinelabs.pluralsdk.utils.Constants.Companion.BANK_SBI
@@ -92,16 +113,30 @@ import com.pinelabs.pluralsdk.utils.Constants.Companion.BANK_STATE_BANK
 import com.pinelabs.pluralsdk.utils.Constants.Companion.BANK_UNION
 import com.pinelabs.pluralsdk.utils.Constants.Companion.BANK_YES
 import com.pinelabs.pluralsdk.utils.Constants.Companion.BANK_YES_BANK
+import com.pinelabs.pluralsdk.utils.Constants.Companion.BROWSER_ACCEPT_ALL
+import com.pinelabs.pluralsdk.utils.Constants.Companion.BROWSER_ACCEPT_HEADER
+import com.pinelabs.pluralsdk.utils.Constants.Companion.BROWSER_IP_ADDRESS
+import com.pinelabs.pluralsdk.utils.Constants.Companion.BROWSER_JAVASCRIPT_ENABLED
+import com.pinelabs.pluralsdk.utils.Constants.Companion.BROWSER_LANGUAGE
+import com.pinelabs.pluralsdk.utils.Constants.Companion.BROWSER_LANGUAGE_EN
+import com.pinelabs.pluralsdk.utils.Constants.Companion.BROWSER_SCREEN_COLOR_DEPTH
+import com.pinelabs.pluralsdk.utils.Constants.Companion.BROWSER_SCREEN_HEIGHT
+import com.pinelabs.pluralsdk.utils.Constants.Companion.BROWSER_SCREEN_WIDTH
+import com.pinelabs.pluralsdk.utils.Constants.Companion.BROWSER_TIME_ZONE
+import com.pinelabs.pluralsdk.utils.Constants.Companion.BROWSER_USER_AGENT
 import com.pinelabs.pluralsdk.utils.Constants.Companion.CREDIT_DEBIT_ID
 import com.pinelabs.pluralsdk.utils.Constants.Companion.CT_CARDS
 import com.pinelabs.pluralsdk.utils.Constants.Companion.ERROR_CODE
 import com.pinelabs.pluralsdk.utils.Constants.Companion.ERROR_MESSAGE
+import com.pinelabs.pluralsdk.utils.Constants.Companion.IMAGE_LOGO
 import com.pinelabs.pluralsdk.utils.Constants.Companion.ORDER_ID
 import com.pinelabs.pluralsdk.utils.Constants.Companion.PAYBYPOINTS_ID
 import com.pinelabs.pluralsdk.utils.Constants.Companion.PAYMENT_ID
 import com.pinelabs.pluralsdk.utils.Constants.Companion.PAYMENT_INITIATED
+import com.pinelabs.pluralsdk.utils.Constants.Companion.PAYMENT_REFERENCE_TYPE_CARD
 import com.pinelabs.pluralsdk.utils.Constants.Companion.REDIRECT_URL
 import com.pinelabs.pluralsdk.utils.Constants.Companion.START_TIME
+import com.pinelabs.pluralsdk.utils.Constants.Companion.TAG_OTP
 import com.pinelabs.pluralsdk.utils.Constants.Companion.TOKEN
 import com.pinelabs.pluralsdk.viewmodels.FetchDataViewModel
 import java.util.Calendar
@@ -121,7 +156,7 @@ class CardFragment : Fragment() {
         "Laser" to "^(6304|6706|6709|6771)\\d{12,15}$".toRegex(),
         "Maestro" to "^(5018|5020|5038|6304|6759|6761|6763)\\d{8,15}$".toRegex(),
         "Mastercard" to "^(5[1-5]\\d{14}|2(22[1-9]|2[3-9]\\d|[3-6]\\d\\d|7[01])\\d{12})$".toRegex(),
-        "RUPAY" to "^6(?!011)(?:0\\d{14}|52[12]\\d{12})$".toRegex(),
+        "RUPAY" to Regex("^6(?!011)(?:\\d{15}|52[12]\\d{12})$"),
         "Solo" to "^((6334|6767)\\d{12}|(6334|6767)\\d{14}|(6334|6767)\\d{15})$".toRegex(),
         "Switch" to "^((49(0[35]|1[16]|36)|6(333|759))\\d{12,15}|564182\\d{10,13}|633110\\d{10,13})$".toRegex(),
         "Union Pay" to "^(62\\d{14,17})$".toRegex(),
@@ -131,10 +166,10 @@ class CardFragment : Fragment() {
 
     // Mapping of card types to brand icons
     private val cardIcons = mapOf(
-        "amex" to R.drawable.amex,
-        "Visa" to R.drawable.visa,
-        "Mastercard" to R.drawable.mc,
-        "Rupay" to R.drawable.rupay,
+        "AMEX" to R.drawable.amex,
+        "VISA" to R.drawable.visa,
+        "MASTERCARD" to R.drawable.mc,
+        "RUPAY" to R.drawable.rupay,
         "Diners Club" to R.drawable.diners
     )
     private lateinit var token: String
@@ -384,6 +419,7 @@ class CardFragment : Fragment() {
             }
 
             override fun afterTextChanged(s: Editable?) {
+
                 if (isEditing) return
 
                 isEditing = true
@@ -391,11 +427,16 @@ class CardFragment : Fragment() {
                 val cleanedInput = s?.toString()?.replace(Regex("\\s+"), "") ?: ""
                 val formattedInput = cleanedInput.chunked(4).joinToString(" ")
 
+                //Native otp
+                if (cleanedInput.length >= 12) {
+                    getBinData(token, cleanedInput)
+                }
+
                 etCardNumber.setText(formattedInput)
                 etCardNumber.setSelection(formattedInput.length)
 
                 if (isPBPEnabled)
-                    if (cleanedInput.length >= 16) {
+                    if (cleanedInput.length >= 12) {
                         pbpCardNumber = formattedInput
                         checkReward(formattedInput, null)
                     } else {
@@ -420,13 +461,13 @@ class CardFragment : Fragment() {
 
                     if (cleanedInput.length > 9) {
                         val cardType = validateCardType(cleanedInput)
-                        println("Valid condition " + validCard(cleanedInput) + " " + cleanedInput.length)
+                        println("Valid condition " + validCard(cleanedInput) + " " + cleanedInput.length + " " + isCardNumberValid)
 
 
                         // Set the brand icon based on the card type
-                        setCardBrandIcon(etCardNumber, cardType)
+                        //setCardBrandIcon(etCardNumber, cardType)
                     } else {
-                        println("Else condition " + validCard(cleanedInput) + " " + cleanedInput.length)
+                        println("Else condition " + validCard(cleanedInput) + " " + cleanedInput.length + " " + isCardNumberValid)
                     }
                     if (cleanedInput.length <= 4) {
                         etCardNumber.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null)
@@ -697,11 +738,11 @@ class CardFragment : Fragment() {
         var sum = 0
         var alternate = false
         for (i in cardNumber.length - 1 downTo 0) {
-            var n = cardNumber.substring(i, i + 1).toInt()
+            var n = cardNumber[i].digitToInt()
             if (alternate) {
                 n *= 2
                 if (n > 9) {
-                    n = (n % 10) + 1
+                    n -= 9
                 }
             }
             sum += n
@@ -713,6 +754,7 @@ class CardFragment : Fragment() {
     private fun validateCardType(cardNumber: String): String? {
         for ((cardType, regex) in cardTypes) {
             if (regex.matches(cardNumber)) {
+                println("Card type" + cardType)
                 return cardType
             }
         }
@@ -758,8 +800,11 @@ class CardFragment : Fragment() {
     private fun showProcessPaymentDialog() {
         val view = LayoutInflater.from(requireActivity())
             .inflate(R.layout.process_payment_bottom_sheet, null)
-        bottomSheetDialog.setContentView(view)
 
+        var logoAnimation: LottieAnimationView = view.findViewById(R.id.img_logo)
+        logoAnimation.setAnimationFromUrl(IMAGE_LOGO)
+
+        bottomSheetDialog.setContentView(view)
         bottomSheetDialog.show()
     }
 
@@ -822,44 +867,31 @@ class CardFragment : Fragment() {
 
     fun getBankList(): List<PBPBank> {
         val pbpBankList = ArrayList<PBPBank>()
-        pbpBankList.add(PBPBank(BANK_SBI, R.drawable.state_bank_of_india))
-        pbpBankList.add(PBPBank(BANK_PNB, R.drawable.punjab_national_bank))
-        pbpBankList.add(PBPBank(BANK_YES, R.drawable.yes_bank))
+        pbpBankList.add(PBPBank(BANK_SBI, SBI))
+        pbpBankList.add(PBPBank(BANK_PNB, PNB))
+        pbpBankList.add(PBPBank(BANK_YES, YES))
         return pbpBankList.toList()
     }
 
     fun getPBPBankList(): List<PBPBank> {
         val pbpBankList = ArrayList<PBPBank>()
-        pbpBankList.add(PBPBank(BANK_ALLAHABAD, R.drawable.allahabad_bank))
-        pbpBankList.add(PBPBank(BANK_ANDHRA, R.drawable.andhra_bank))
-        pbpBankList.add(PBPBank(BANK_AU_SMALL, R.drawable.au_small_finance_bank))
-        pbpBankList.add(PBPBank(BANK_OF_INDIA, R.drawable.bank_of_india))
-        pbpBankList.add(PBPBank(BANK_CANARA, R.drawable.canara_bank))
-        pbpBankList.add(PBPBank(BANK_CENTRAL, R.drawable.central_bank))
-        pbpBankList.add(PBPBank(BANK_CORPORATION, R.drawable.corporation_bank))
-        pbpBankList.add(PBPBank(BANK_FEDERAL, R.drawable.federal_bank))
-        pbpBankList.add(PBPBank(BANK_IDBI, R.drawable.idbi_bank))
-        pbpBankList.add(PBPBank(BANK_IDFC, R.drawable.idfc_first_bank))
-        pbpBankList.add(PBPBank(BANK_IDIAN, R.drawable.indian_bank))
-        pbpBankList.add(PBPBank(BANK_KARUR_VYSYA, R.drawable.karur_vysya_bank))
-        pbpBankList.add(PBPBank(BANK_PUNJAB, R.drawable.punjab_national_bank))
-        pbpBankList.add(PBPBank(BANK_SOUTH_INDIAN, R.drawable.south_indian_bank))
-        pbpBankList.add(PBPBank(BANK_STATE_BANK, R.drawable.state_bank_of_india))
-        pbpBankList.add(PBPBank(BANK_UNION, R.drawable.union_bank_of_india))
-        pbpBankList.add(PBPBank(BANK_YES_BANK, R.drawable.yes_bank))
-        /*pbpBankList.add(PBPBank(BANK_HDFC, R.drawable.hdfc_bank))
-        pbpBankList.add(PBPBank(BANK_SBI, R.drawable.state_bank_of_india))
-        pbpBankList.add(PBPBank(BANK_ICICI, R.drawable.icici_bank))
-        pbpBankList.add(PBPBank(BANK_AXIS, R.drawable.axis_bank))
-        pbpBankList.add(PBPBank(BANK_CITI, R.drawable.citi_bank))
-        //pbpBankList.add(PBPBank(BANK_FEDERAL, R.drawable.federal_bank))
-        pbpBankList.add(PBPBank(BANK_KOTAK, R.drawable.kotak_bank))
-        pbpBankList.add(PBPBank(BANK_BOB, R.drawable.bank_of_baroda))
-        //pbpBankList.add(PBPBank(BANK_IDFC, R.drawable.idfc_first_bank))
-        pbpBankList.add(PBPBank(BANK_INDIAN_OVERSEAS, R.drawable.indian_overseas_bank))
-        pbpBankList.add(PBPBank(BANK_ONECARD, R.drawable.one_card))
-        pbpBankList.add(PBPBank(BANK_STANDARD_CHARTERED, R.drawable.standard_chartered_bank))
-        pbpBankList.add(PBPBank(BANK_RBL, R.drawable.rbl_bank_limited))*/
+        pbpBankList.add(PBPBank(BANK_ALLAHABAD, ALLAHABAD))
+        pbpBankList.add(PBPBank(BANK_ANDHRA, ANDHRA))
+        pbpBankList.add(PBPBank(BANK_AU_SMALL, AU))
+        //pbpBankList.add(PBPBank(BANK_OF_INDIA, R.drawable.bank_of_india))
+        pbpBankList.add(PBPBank(BANK_CANARA, CANARA_BANK))
+        pbpBankList.add(PBPBank(BANK_CENTRAL, CENTRAL))
+        pbpBankList.add(PBPBank(BANK_CORPORATION, CORPORATION))
+        pbpBankList.add(PBPBank(BANK_FEDERAL, FEDERAL))
+        pbpBankList.add(PBPBank(BANK_IDBI, IDBI))
+        pbpBankList.add(PBPBank(BANK_IDFC, IDFC))
+        pbpBankList.add(PBPBank(BANK_IDIAN, INDIAN))
+        pbpBankList.add(PBPBank(BANK_KARUR_VYSYA, KARUR))
+        pbpBankList.add(PBPBank(BANK_PUNJAB, PNB))
+        pbpBankList.add(PBPBank(BANK_SOUTH_INDIAN, SOUTH_INDIAN_BANK))
+        pbpBankList.add(PBPBank(BANK_STATE_BANK, SBI))
+        pbpBankList.add(PBPBank(BANK_UNION, UNION_BANK))
+        pbpBankList.add(PBPBank(BANK_YES_BANK, YES))
         return pbpBankList.toList()
     }
 
@@ -1222,5 +1254,54 @@ class CardFragment : Fragment() {
 
         return stateListDrawable
     }
+
+    private fun getBinData(token: String, cardNumber: String) {
+        val binRequest = CardBinMetaDataRequest(cardNumber, PAYMENT_REFERENCE_TYPE_CARD)
+        val binRequestList = arrayListOf<CardBinMetaDataRequest>()
+        binRequestList.add(binRequest)
+        println("bin request " + Gson().toJson(binRequestList))
+        mainViewModel.getBinData(token, CardBinMetaDataRequestList(binRequestList))
+        mainViewModel.bin_data_response.observe(viewLifecycleOwner) { response ->
+            val fetchDataResponseHandler =
+                ApiResultHandler<CardBinMetaDataResponse>(requireActivity(),
+                    onLoading = {},
+                    onSuccess = { data ->
+                        println("Domestic card ${data?.extendedCardMetaResponseList?.get(0)?.cardNetwork}")
+                        setCardBrandIcon(
+                            etCardNumber,
+                            data?.extendedCardMetaResponseList?.get(0)?.cardNetwork
+                        )
+                    },
+                    onFailure = {})
+            fetchDataResponseHandler.handleApiResult(response)
+        }
+    }
+
+    private fun createPaymentParams(): HashMap<String, String> {
+
+        val displayMetrics = DisplayMetrics()
+        requireActivity().windowManager.defaultDisplay.getMetrics(displayMetrics)
+        val height = displayMetrics.heightPixels
+        val width = displayMetrics.widthPixels
+        println("Screen size " + height + " " + width)
+        println("Ip address " + Utils.getLocalIpAddress())
+
+        var browserDetails = HashMap<String, String>()
+        browserDetails.put(BROWSER_ACCEPT_HEADER, BROWSER_ACCEPT_ALL)
+        browserDetails.put(BROWSER_LANGUAGE, BROWSER_LANGUAGE_EN)
+        browserDetails.put(BROWSER_SCREEN_HEIGHT, height.toString())
+        browserDetails.put(BROWSER_SCREEN_WIDTH, width.toString())
+        browserDetails.put(BROWSER_TIME_ZONE, "-330")
+        browserDetails.put(
+            BROWSER_USER_AGENT,
+            "mozilla/5.0+(x11;+ubuntu;+linux+x86_64;+rv:72.0)+gecko/20100101+firefox/72.0"
+        )
+        browserDetails.put(BROWSER_IP_ADDRESS, Utils.getLocalIpAddress().toString())
+        browserDetails.put(BROWSER_SCREEN_COLOR_DEPTH, "24")
+        browserDetails.put(BROWSER_JAVASCRIPT_ENABLED, "false")
+        return browserDetails
+
+    }
+
 
 }

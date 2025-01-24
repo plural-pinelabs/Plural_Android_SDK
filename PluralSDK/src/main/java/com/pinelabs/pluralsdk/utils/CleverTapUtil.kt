@@ -136,7 +136,11 @@ class CleverTapUtil {
 
         }
 
-        fun CT_EVENT_PAYMENT_CANCELLED(cleverTapAPI: CleverTapAPI, cancel:Boolean?, backpress:Boolean?) {
+        fun CT_EVENT_PAYMENT_CANCELLED(
+            cleverTapAPI: CleverTapAPI,
+            cancel: Boolean?,
+            backpress: Boolean?
+        ) {
             val paymentStatusCancelledData = mapOf(
                 PARAM_CANCEL to cancel,
                 PARAM_BACKPRESS to backpress
@@ -149,6 +153,18 @@ class CleverTapUtil {
                 PARAM_LOAD_TIME to loadTime
             )
             cleverTapAPI?.pushEvent(EVENT_PAYMENT_COMPLETION_TIME, paymentCompletionTimeData)
+        }
+
+        fun CT_EVENT_SDK_ERROR(
+            cleverTapAPI: CleverTapAPI?,
+            errorCode: String?,
+            errorMessage: String?
+        ) {
+            val sdkError = mapOf(
+                PARAM_ERROR_CODE to errorCode,
+                PARAM_ERROR_MESAGE to errorMessage
+            )
+            cleverTapAPI?.pushEvent(EVENT_SDK_ERROR, sdkError)
         }
 
     }

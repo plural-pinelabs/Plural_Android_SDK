@@ -41,6 +41,7 @@ import com.pinelabs.pluralsdk.adapter.FlexDivider
 import com.pinelabs.pluralsdk.adapter.GridDividerItemDecoration
 import com.pinelabs.pluralsdk.adapter.NetBankAllAdapter
 import com.pinelabs.pluralsdk.adapter.NetBanksAdapter
+import com.pinelabs.pluralsdk.adapter.loadSvgOrOther
 import com.pinelabs.pluralsdk.data.model.ConvenienceFeesData
 import com.pinelabs.pluralsdk.data.model.DeviceInfo
 import com.pinelabs.pluralsdk.data.model.Extra
@@ -69,7 +70,6 @@ import com.pinelabs.pluralsdk.utils.PaymentModes
 import com.pinelabs.pluralsdk.utils.TransactionMode
 import com.pinelabs.pluralsdk.viewmodels.FetchDataViewModel
 import java.util.EnumSet
-
 
 class NetBankingFragment : Fragment(), NetBankAllAdapter.OnItemClickListener {
 
@@ -186,8 +186,8 @@ class NetBankingFragment : Fragment(), NetBankAllAdapter.OnItemClickListener {
 
                     data?.paymentModes?.filter { paymentMode -> paymentMode.paymentModeId == PaymentModes.NET_BANKING.paymentModeID }
                         ?.forEach { paymentMode ->
-                            val pm = paymentMode?.paymentModeData as? PaymentModeData
-                            bankList = mapBankList( pm?.IssersUIDataList )
+                            val pm = paymentMode?.paymentModeData
+                            bankList = mapBankList(pm?.IssersUIDataList)
                             setNetBankingGrid()
                         }
                 }, onFailure = {
@@ -245,7 +245,7 @@ class NetBankingFragment : Fragment(), NetBankAllAdapter.OnItemClickListener {
 
     private fun setNetBankingGrid() {
 
-        if (bankList?.size==5){
+        if (bankList?.size == 5) {
 
             recyclerNetBanks.visibility = View.GONE
             flexNetBanks.visibility = View.VISIBLE
@@ -280,7 +280,8 @@ class NetBankingFragment : Fragment(), NetBankAllAdapter.OnItemClickListener {
                     this@NetBankingFragment
                 )
 
-            val gridLayoutManager = GridLayoutManager(requireActivity(),calculateNoofRows(bankList?.size))
+            val gridLayoutManager =
+                GridLayoutManager(requireActivity(), calculateNoofRows(bankList?.size))
 
             recyclerNetBanks.layoutManager = gridLayoutManager
             recyclerNetBanks.adapter = gridBankAdapter
@@ -377,7 +378,7 @@ class NetBankingFragment : Fragment(), NetBankAllAdapter.OnItemClickListener {
     }
 
     fun calculateNoofRows(count: Int?): Int {
-        return if (count==1) 1 else if (count==2 || count == 4) 2 else 3
+        return if (count == 1) 1 else if (count == 2 || count == 4) 2 else 3
     }
 
     fun setBankGrid(view: View?, bankList: List<NBBANKS>?) {
@@ -393,11 +394,17 @@ class NetBankingFragment : Fragment(), NetBankAllAdapter.OnItemClickListener {
         val name4 = view?.findViewById<TextView>(R.id.txt_bank_name_4)
         val name5 = view?.findViewById<TextView>(R.id.txt_bank_name_5)
 
-        img1?.setImageResource(bankList?.get(0)!!.bankImage)
+        img1?.loadSvgOrOther(bankList?.get(0)!!.bankImage)
+        img2?.loadSvgOrOther(bankList?.get(1)!!.bankImage)
+        img3?.loadSvgOrOther(bankList?.get(2)!!.bankImage)
+        img4?.loadSvgOrOther(bankList?.get(3)!!.bankImage)
+        img5?.loadSvgOrOther(bankList?.get(4)!!.bankImage)
+
+        /*img1?.setImageResource(bankList?.get(0)!!.bankImage)
         img2?.setImageResource(bankList?.get(1)!!.bankImage)
         img3?.setImageResource(bankList?.get(2)!!.bankImage)
         img4?.setImageResource(bankList?.get(3)!!.bankImage)
-        img5?.setImageResource(bankList?.get(4)!!.bankImage)
+        img5?.setImageResource(bankList?.get(4)!!.bankImage)*/
 
         name1?.setText(bankList?.get(0)!!.bankName)
         name2?.setText(bankList?.get(1)!!.bankName)

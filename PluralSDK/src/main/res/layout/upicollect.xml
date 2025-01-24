@@ -84,7 +84,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:fontFamily="@font/robotoregular"
+                android:fontFamily="@font/roboto_medium"
                 android:paddingTop="8dp"
                 android:text="@string/vpa_enter"
                 android:textColor="#8A8A8A"
@@ -130,6 +130,7 @@
             android:backgroundTint="@null"
             android:drawableLeft="@drawable/lock_keyhole_minimalistic"
             android:drawablePadding="8dp"
+            android:visibility="gone"
             android:enabled="false"
             android:fontFamily="@font/roboto_medium"
             android:paddingLeft="81dp"

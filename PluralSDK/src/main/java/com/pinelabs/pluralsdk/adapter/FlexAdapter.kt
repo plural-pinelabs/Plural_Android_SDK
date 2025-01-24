@@ -25,7 +25,9 @@ class FlexAdapter(private val bankList: List<PBPBank>, private val count: Int) :
 
     override fun onBindViewHolder(holder: PBPBankViewHolder, position: Int) {
         holder.bankName.text = bankList.get(position).bankName
-        holder.bankImage.setImageResource(bankList.get(position).bankLogo)
+        holder.bankImage.loadSvgOrOther(bankList.get(position).bankLogo)
+
+        //holder.bankImage.setImageResource(bankList.get(position).bankLogo)
         /*val layoutParams = holder.itemView.layoutParams as FlexboxLayoutManager.LayoutParams
         layoutParams.flexGrow = 1.0f // Allow this item to grow and take available space
         layoutParams.flexShrink = 1.0f // Allow the item to shrink if necessary

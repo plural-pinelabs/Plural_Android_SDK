@@ -28,7 +28,7 @@ class NetBanksAdapter(
             if (bankName?.contains(":") == true) bankName?.split(":")
                 ?.get(1) else bankName
         }?.replace("Bank", "")
-        bankList?.get(position)?.bankImage?.let { holder.bankImage.setImageResource(it) }
+        bankList?.get(position)?.bankImage?.let { holder.bankImage.loadSvgOrOther(it) }
         holder.itemView.setOnClickListener {
             itemClickListener.onItemClick(currentItem)
         }

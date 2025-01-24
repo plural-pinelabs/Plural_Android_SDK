@@ -1,6 +1,7 @@
 package com.pinelabs.pluralsdk.data.model
 
 import com.google.gson.annotations.SerializedName
+import com.pinelabs.pluralsdk.utils.PaymentModes
 
 data class FetchResponse(
     val merchantInfo: MerchantInfo? = null,
@@ -19,13 +20,17 @@ data class FetchFailure(
     val traceId: String
 )
 
-data class MerchantInfo(val merchantId: Int, val merchantName: String, val merchantDisplayName:String?)
+data class MerchantInfo(
+    val merchantId: Int,
+    val merchantName: String,
+    val merchantDisplayName: String?
+)
 
 data class OrignalTransactionAmount(var amount: Int?, val currency: String)
 
 data class PaymentData(var originalTxnAmount: OrignalTransactionAmount?)
 
-data class PaymentMode(val paymentModeId: String, val paymentModeData: Any?)
+data class PaymentMode(val paymentModeId: String, val paymentModeData: PaymentModeData?)
 
 data class PaymentModeData(
     val upi_flows: List<String>?,
@@ -40,11 +45,13 @@ data class Logo(val imageSize: String, val imageContent: String)
 
 data class BrandTheme(val color: String)
 
-data class Palette(@SerializedName("50") val C50: String, @SerializedName("100") val C100: String,
-                   @SerializedName("200") val C200: String, @SerializedName("300") val C300: String,
-                   @SerializedName("400") val C400: String, @SerializedName("500") val C500: String,
-                   @SerializedName("600") val C600: String, @SerializedName("700") val C700: String,
-                   @SerializedName("800") val C800: String, @SerializedName("900") val C900: String)
+data class Palette(
+    @SerializedName("50") val C50: String, @SerializedName("100") val C100: String,
+    @SerializedName("200") val C200: String, @SerializedName("300") val C300: String,
+    @SerializedName("400") val C400: String, @SerializedName("500") val C500: String,
+    @SerializedName("600") val C600: String, @SerializedName("700") val C700: String,
+    @SerializedName("800") val C800: String, @SerializedName("900") val C900: String
+)
 
 data class RecyclerViewPaymentOptionData(
     val payment_image: Int = -1,
@@ -118,7 +125,7 @@ data class Extra(
 
 data class PBPBank(
     val bankName: String,
-    val bankLogo: Int
+    val bankLogo: String
 )
 
 data class UpiData(
@@ -190,4 +197,30 @@ data class CancelResponseData(
     val order_id: String,
     val status: String,
     val signature: String
+)
+
+data class BinResponse(val GlobalBinsData: List<GlobalBinsData>, val resultInfo: ResultInfo)
+
+data class GlobalBinsData(val issuerName: String, val cardType: String, val isDomesticCard: Boolean)
+
+data class ResultInfo(val responseCode: String, val totalBins: String)
+
+data class OTPRequest(@SerializedName("payment-id") val paymentId: String, val otp: String,
+    val )
+
+data class CardBinMetaDataRequestList(val requestList: List<CardBinMetaDataRequest>)
+data class CardBinMetaDataRequest(val paymentIdentifier: String, val paymentReferenceType: String)
+data class CardBinMetaDataResponse(val extendedCardMetaResponseList:List<CardBinMetaDataResponseData>)
+data class CardBinMetaDataResponseData(
+    val paymentIdentifier: String,
+    val paymentReferenceType: String,
+    val cardNetwork: String,
+    val cardIssuer: String,
+    val cardType: String,
+    val cardCategory: String,
+    val isNativeOTPSupported: Boolean,
+    val isInternationalTransactionSupported: Boolean,
+    val isSavedCardSupported: Boolean,
+    val isCvvLessSupported: Boolean,
+    val isEmiSupported: Boolean
 )

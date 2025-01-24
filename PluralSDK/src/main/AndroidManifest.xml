@@ -9,6 +9,10 @@
         android:usesCleartextTraffic="true">
 
         <meta-data
+            android:name="CLEVERTAP_IDENTIFIER"
+            android:value="Identity,Phone" />
+
+        <meta-data
             android:name="CLEVERTAP_ACCOUNT_ID"
             android:value="TEST-Z69-W6Z-9Z6Z" />
         <meta-data
@@ -51,6 +55,17 @@
             android:name=".activity.TestActivity"
             android:launchMode="singleInstance"
             android:screenOrientation="portrait" />
+
+        <!--<receiver
+            android:name=".utils.SmsBroadcastReceiver"
+            android:exported="true"
+            android:permission="com.google.android.gms.auth.api.phone.permission.SEND">
+            <intent-filter>
+                <action android:name="com.google.android.gms.auth.api.phone.SMS_RETRIEVED" />
+            </intent-filter>
+        </receiver>-->
+
+
     </application>
 
     <queries>

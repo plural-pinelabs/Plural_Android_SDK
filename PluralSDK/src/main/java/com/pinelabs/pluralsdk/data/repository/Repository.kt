@@ -1,7 +1,11 @@
 package com.pinelabs.pluralsdk.data.repository
 
 import android.content.Context
+import com.pinelabs.pluralsdk.data.model.BinResponse
 import com.pinelabs.pluralsdk.data.model.CancelTransactionResponse
+import com.pinelabs.pluralsdk.data.model.CardBinMetaDataRequest
+import com.pinelabs.pluralsdk.data.model.CardBinMetaDataRequestList
+import com.pinelabs.pluralsdk.data.model.CardBinMetaDataResponse
 import com.pinelabs.pluralsdk.data.model.FetchResponse
 import com.pinelabs.pluralsdk.data.model.ProcessPaymentRequest
 import com.pinelabs.pluralsdk.data.model.ProcessPaymentResponse
@@ -40,15 +44,31 @@ class Repository(private val remoteDataSource: RemoteDataSource) {
         }
     }
 
-    suspend fun transactionStatus(context: Context, token: String): Flow<NetWorkResult<TransactionStatusResponse>> {
-        return toResultFlow(context){
+    suspend fun transactionStatus(
+        context: Context,
+        token: String
+    ): Flow<NetWorkResult<TransactionStatusResponse>> {
+        return toResultFlow(context) {
             remoteDataSource.transactionStatus(token)
         }
     }
 
-    suspend fun cancelTransaction(context: Context, token: String): Flow<NetWorkResult<CancelTransactionResponse>> {
-        return toResultFlow(context){
+    suspend fun cancelTransaction(
+        context: Context,
+        token: String
+    ): Flow<NetWorkResult<CancelTransactionResponse>> {
+        return toResultFlow(context) {
             remoteDataSource.cancelTransaction(token)
+        }
+    }
+
+    suspend fun binData(
+        context: Context,
+        token: String,
+        cardData: CardBinMetaDataRequestList
+    ): Flow<NetWorkResult<CardBinMetaDataResponse>> {
+        return toResultFlow(context) {
+            remoteDataSource.binData(token, cardData)
         }
     }
 }

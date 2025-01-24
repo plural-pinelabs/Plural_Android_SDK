@@ -1,7 +1,9 @@
 package com.pinelabs.pluralsdk.activity
 
+import android.R.attr
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.res.ColorStateList
 import android.content.res.Resources
 import android.graphics.Bitmap
@@ -9,6 +11,7 @@ import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.drawable.GradientDrawable
+import android.os.Build
 import android.os.Bundle
 import android.text.Spannable
 import android.text.SpannableString
@@ -22,6 +25,7 @@ import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -30,13 +34,13 @@ import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.ViewModelProvider
 import com.clevertap.android.sdk.CleverTapAPI
+import com.google.android.gms.auth.api.phone.SmsRetriever
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.pinelabs.pluralsdk.PluralSDK
 import com.pinelabs.pluralsdk.R
 import com.pinelabs.pluralsdk.data.model.CancelTransactionResponse
 import com.pinelabs.pluralsdk.data.model.FetchResponse
 import com.pinelabs.pluralsdk.data.model.Palette
-import com.pinelabs.pluralsdk.data.utils.AmountUtil
 import com.pinelabs.pluralsdk.data.utils.AmountUtil.convertToRupees
 import com.pinelabs.pluralsdk.data.utils.ApiResultHandler
 import com.pinelabs.pluralsdk.fragment.PaymentOptionListing
@@ -47,18 +51,21 @@ import com.pinelabs.pluralsdk.utils.Constants.Companion.ERROR_MESSAGE
 import com.pinelabs.pluralsdk.utils.Constants.Companion.TAG_PAYMENT_LISTING
 import com.pinelabs.pluralsdk.utils.Constants.Companion.TAG_UPI
 import com.pinelabs.pluralsdk.utils.Constants.Companion.TOKEN
+import com.pinelabs.pluralsdk.utils.SmsBroadcastReceiver
+import com.pinelabs.pluralsdk.utils.SmsBroadcastReceiver.SmsBroadcastReceiverListener
 import com.pinelabs.pluralsdk.viewmodels.FetchDataViewModel
 import com.pinelabs.pluralsdk.viewmodels.ViewModelFactory
+import java.util.regex.Matcher
+import java.util.regex.Pattern
 
 
-class LandingActivity : AppCompatActivity() {
+class LandingActivity : AppCompatActivity(), Thread.UncaughtExceptionHandler {
 
     lateinit var customerLayout: FrameLayout
     lateinit var layoutOrginal: ConstraintLayout
     lateinit var layoutShimmer: View
 
     private lateinit var token: String
-    private lateinit var color: String
 
     private lateinit var imgMerchantimage: ImageView
     private lateinit var txtMerchantname: TextView
@@ -73,7 +80,6 @@ class LandingActivity : AppCompatActivity() {
     var deepLink: String? = null
     //private lateinit var window: Window
 
-    private lateinit var bottomSheetDialog: BottomSheetDialog
     private var amount: Int? = null
     private var palette: Palette? = null
 
@@ -83,9 +89,10 @@ class LandingActivity : AppCompatActivity() {
 
     private var clevertapDefaultInstance: CleverTapAPI? = null
 
-    var orderId: String? = null
-    var paymentId: String? = null
+    val REQ_USER_CONSENT: Int = 200
+    var smsBroadcastReceiver: SmsBroadcastReceiver? = null
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.landing)
@@ -93,16 +100,31 @@ class LandingActivity : AppCompatActivity() {
         clevertapDefaultInstance = CleverTapAPI.getDefaultInstance(applicationContext)
         startTime = System.currentTimeMillis()
 
+        val appSignatureHelper = AppSignatureHelper(this)
+        println("Signature ${appSignatureHelper.appSignatures[0]}")
+
+        startSmartUserConsent()
+
         val viewModelFactory = ViewModelFactory(application)
         viewModel = ViewModelProvider(this, viewModelFactory)[FetchDataViewModel::class.java]
 
         token = intent.getStringExtra(TOKEN).toString()
-        bottomSheetDialog = BottomSheetDialog(this)
 
         getViews()
         fetchData(token)
         setupCancelAction()
         observerFetchData()
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode === REQ_USER_CONSENT) {
+            if ((resultCode === RESULT_OK) && (data != null)) {
+                val message: String? = data?.getStringExtra(SmsRetriever.EXTRA_SMS_MESSAGE)
+                getOtpFromMessage(message)
+            }
+        }
     }
 
     fun getViews() {
@@ -115,7 +137,6 @@ class LandingActivity : AppCompatActivity() {
         txtMerchantMobileNumber = findViewById(R.id.txt_customer_id)
         txtMerchantEmailId = findViewById(R.id.txt_customer_email)
         customerLayout = findViewById(R.id.box_layout_orginal)
-
         cardProfilePic = findViewById(R.id.card_pic_orginal)
 
         layoutOrginal = findViewById(R.id.layout_orginal)
@@ -156,10 +177,7 @@ class LandingActivity : AppCompatActivity() {
         val cancelShimmerlayout: View = findViewById(R.id.cancel_layout_shimmer)
 
         cancelShimmerlayout.setOnClickListener {
-            clevertapDefaultInstance?.let { CT_EVENT_PAYMENT_CANCELLED(it,
-                cancel = true,
-                backpress = false
-            ) }
+            clevertapDefaultInstance?.let { CT_EVENT_PAYMENT_CANCELLED(it, true, false) }
             showCancelConfirmationDialog(null)
         }
 
@@ -251,8 +269,6 @@ class LandingActivity : AppCompatActivity() {
                     ApiResultHandler<CancelTransactionResponse>(this@LandingActivity, onLoading = {
 
                     }, onSuccess = {
-                        if (bottomSheetDialog != null && bottomSheetDialog.isShowing)
-                            bottomSheetDialog.dismiss()
                         Toast.makeText(this, "Transaction cancelled", Toast.LENGTH_SHORT).show()
                         PluralSDK.getInstance().callback?.onCancelTransaction()
                         finish()
@@ -400,5 +416,65 @@ class LandingActivity : AppCompatActivity() {
         val color =
             if (palette != null) Color.parseColor(palette?.C900) else context.resources.getColor(R.color.header_color)
         getWindow().setStatusBarColor(color)
+    }
+
+    override fun uncaughtException(t: Thread, e: Throwable) {
+        println("Exception caught")
+        clevertapDefaultInstance = CleverTapAPI.getDefaultInstance(applicationContext)
+        CleverTapUtil.CT_EVENT_SDK_ERROR(
+            clevertapDefaultInstance,
+            e.javaClass.toString(),
+            e.printStackTrace().toString()
+        )
+    }
+
+    private fun startSmartUserConsent() {
+        val client = SmsRetriever.getClient(this)
+        client.startSmsUserConsent(null)
+        val retriever = client.startSmsRetriever()
+        retriever.addOnSuccessListener {
+
+        }
+    }
+
+    private fun getOtpFromMessage(message: String?) {
+        println("OTP "+message)
+
+        val otpPattern: Pattern = Pattern.compile("(|^)\\d{6}")
+        val matcher: Matcher = otpPattern.matcher(message)
+        if (matcher.find()) {
+            /*etOTP.setText(matcher.group(0))*/
+            println("OTP "+matcher.group(0))
+            Toast.makeText(this@LandingActivity, "OTP "+matcher.group(0), Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun registerBroadcastReceiver() {
+        smsBroadcastReceiver = SmsBroadcastReceiver()
+        smsBroadcastReceiver!!.smsBroadcastReceiverListener =
+            object : SmsBroadcastReceiverListener {
+                override fun onSuccess(intent: Intent?) {
+                    print("SMS Success ")
+                    startActivityForResult(intent!!, REQ_USER_CONSENT)
+                }
+
+                override fun onFailure() {
+                }
+            }
+
+        val intentFilter = IntentFilter(SmsRetriever.SMS_RETRIEVED_ACTION)
+        registerReceiver(smsBroadcastReceiver, intentFilter, Context.RECEIVER_EXPORTED)
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    override fun onStart() {
+        super.onStart();
+        registerBroadcastReceiver()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        unregisterReceiver(smsBroadcastReceiver)
     }
 }

@@ -13,8 +13,7 @@
         app:layout_constraintBottom_toTopOf="@+id/img_plural"
         app:layout_constraintLeft_toLeftOf="@id/img_plural"
         app:layout_constraintRight_toRightOf="@id/img_plural"
-        app:lottie_autoPlay="true"
-        app:lottie_rawRes="@raw/logo_shimmer" />
+        app:lottie_autoPlay="true" />
 
     <ImageView
         android:id="@+id/img_plural"

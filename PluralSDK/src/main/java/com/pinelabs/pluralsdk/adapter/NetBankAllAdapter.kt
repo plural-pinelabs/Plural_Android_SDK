@@ -6,6 +6,10 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import coil.ImageLoader
+import coil.decode.SvgDecoder
+import coil.request.CachePolicy
+import coil.request.ImageRequest
 import com.pinelabs.pluralsdk.R
 import com.pinelabs.pluralsdk.utils.NBBANKS
 
@@ -32,7 +36,8 @@ class NetBankAllAdapter(
             if (bankName?.contains(":") == true) bankName?.split(":")
                 ?.get(1) else bankName
         }
-        bankList?.get(position)?.bankImage?.let { holder.bankImage.setImageResource(it) }
+        //bankList?.get(position)?.bankImage?.let { holder.bankImage.setImageResource(it) }
+        holder.bankImage.loadSvgOrOther(currentItem?.bankImage)
 
         holder.itemView.setOnClickListener {
             itemClickListener.onItemClick(currentItem)
@@ -50,6 +55,42 @@ class NetBankAllAdapter(
 
     interface OnItemClickListener {
         fun onItemClick(item: NBBANKS?)
+    }
+
+}
+
+public fun ImageView.loadSvgOrOther(myUrl: String?, cache: Boolean = true) {
+
+    myUrl?.let {
+        if (it.lowercase().endsWith("svg")) {
+            val imageLoader = ImageLoader.Builder(this.context)
+                .componentRegistry {
+                    add(SvgDecoder(this@loadSvgOrOther.context))
+                }.build()
+
+            val request = ImageRequest.Builder(this.context).apply {
+                /*error(errorImg)
+                placeholder(errorImg)*/
+                data(it).decoder(SvgDecoder(this@loadSvgOrOther.context))
+            }.target(this).build()
+
+            imageLoader.enqueue(request)
+        } else {
+            val imageLoader = ImageLoader(context)
+
+            val request = ImageRequest.Builder(context).apply {
+                if (cache) {
+                    memoryCachePolicy(CachePolicy.ENABLED)
+                } else {
+                    memoryCachePolicy(CachePolicy.DISABLED)
+                }
+                /*error(errorImg)
+                placeholder(errorImg)*/
+                data("$it")
+            }.target(this).build()
+
+            imageLoader.enqueue(request)
+        }
     }
 
 }

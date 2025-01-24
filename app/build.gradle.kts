@@ -51,6 +51,7 @@ dependencies {
     implementation(libs.retrofit.converter.gson)
     implementation(libs.retrofit.logging.interceptor)
 
+    implementation(libs.clevertap)
     //implementation(libs.plural)
 
 }

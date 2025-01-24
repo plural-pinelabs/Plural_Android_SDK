@@ -11,7 +11,7 @@ class Constants {
         const val REDIRECT_URL = "REDIRECT_URL"
         const val ORDER_ID = "ORDER_ID"
         const val PAYMENT_ID = "PAYMENT_ID"
-        const val START_TIME= "START_TIME"
+        const val START_TIME = "START_TIME"
         const val SUCCESS_REDIRECT_URL = "savePluralPgTransactionStatus"
 
         const val SPLASH_TIMER: Long = 2300
@@ -19,8 +19,13 @@ class Constants {
         const val UPI_TRANSACTION_STATUS_DELAY = 0L
         const val UPI_TRANSACTION_STATUS_INTERVAL = 5000L
 
-        const val BASE_URL = "https://api-staging.pluralonline.com/api/v3/checkout-bff/"
+        const val BASE_URL_UAT = "https://api-staging.pluralonline.com/api/v3/checkout-bff/"
         const val BASE_URL_QA = "https://pluralqa.pinepg.in/api/v3/checkout-bff/"
+        const val BASE_URL_PROD = "https://api.pluralonline.com/api/v3/checkout-bff/"
+        const val BASE_ANIMATION = "https://d1xlp3rxzdtgvz.cloudfront.net/loaderAnimation/"
+        const val BASE_IMAGES ="https://d1xlp3rxzdtgvz.cloudfront.net/bank-icons/bank-logos/"
+
+        const val IMAGE_LOGO = BASE_ANIMATION + "logo_shimmer.json"
 
         const val API_INTERNET_MESSAGE = "No Internet Connection"
         const val API_ERROR = "API_ERROR"
@@ -93,6 +98,7 @@ class Constants {
         const val TAG_CARD = "TAG_CARD"
         const val TAG_UPI = "TAG_UPI"
         const val TAG_NETBANKING = "TAG_NETBANKING"
+        const val TAG_OTP = "TAG_OTP"
 
         const val CT_CARDS = "cards"
         const val CT_UPI = "upi"
@@ -105,5 +111,20 @@ class Constants {
 
         const val PAYMENT_INITIATED = "initiated"
         const val PAYMENT_DROPPED = "dropped"
+
+        const val PAYMENT_REFERENCE_TYPE_CARD = "CARD"
+
+        const val BROWSER_ACCEPT_HEADER="browseracceptheader"
+        const val BROWSER_LANGUAGE = "browserlanguage"
+        const val BROWSER_SCREEN_HEIGHT = "browserscreenheight"
+        const val BROWSER_SCREEN_WIDTH = "browserscreenwidth"
+        const val BROWSER_TIME_ZONE = "browsertimezone"
+        const val BROWSER_USER_AGENT = "browseruseragent"
+        const val BROWSER_IP_ADDRESS = "browseripaddress"
+        const val BROWSER_SCREEN_COLOR_DEPTH = "browserscreencolordepth"
+        const val BROWSER_JAVASCRIPT_ENABLED = "browserjavascriptenabledval"
+        const val BROWSER_ACCEPT_ALL = "*/*"
+        const val BROWSER_LANGUAGE_EN = "en"
+        const val BROWSER_USER_AGENT_ANDROID = "Mozilla/5.0 (Linux; Android 10; Pixel 4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.127 Mobile Safari/537.36"
     }
 }

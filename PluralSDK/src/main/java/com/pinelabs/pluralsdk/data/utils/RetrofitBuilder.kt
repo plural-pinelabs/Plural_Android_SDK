@@ -1,8 +1,9 @@
 package com.pinelabs.pluralsdk.data.utils
 
 import com.pinelabs.pluralsdk.data.ApiService
-import com.pinelabs.pluralsdk.utils.Constants.Companion.BASE_URL
+import com.pinelabs.pluralsdk.utils.Constants.Companion.BASE_URL_PROD
 import com.pinelabs.pluralsdk.utils.Constants.Companion.BASE_URL_QA
+import com.pinelabs.pluralsdk.utils.Constants.Companion.BASE_URL_UAT
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -15,13 +16,13 @@ object RetrofitBuilder {
     val clientBuilder: OkHttpClient.Builder =
         client.newBuilder()
             .addInterceptor(interceptor)
-            .connectTimeout(30, TimeUnit.SECONDS)
-            .readTimeout(30, TimeUnit.SECONDS)
-            .writeTimeout(30, TimeUnit.SECONDS)
+            .connectTimeout(60, TimeUnit.SECONDS)
+            .readTimeout(60, TimeUnit.SECONDS)
+            .writeTimeout(60, TimeUnit.SECONDS)
 
     private fun getRetrofit(): Retrofit {
         return Retrofit.Builder()
-            .baseUrl(BASE_URL_QA)
+            .baseUrl(BASE_URL_UAT)
             .addConverterFactory(GsonConverterFactory.create())
             .client(clientBuilder.build())
             .build()

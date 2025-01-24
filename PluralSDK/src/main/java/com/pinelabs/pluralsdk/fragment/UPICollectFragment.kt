@@ -113,7 +113,7 @@ class UPICollectFragment : Fragment(), UpiIntentAdapter.OnItemClickListener {
 
     internal val UPI_PAYMENT = 0
 
-    private val UPI_REGEX = Regex("^[\\w.]{1,}-?[\\w.]{0,}-?[\\w.]{1,}@[a-zA-Z]{3,}$")
+    private val UPI_REGEX = Regex("^[\\w.]{1,}-?[\\w.]{0,}-?[\\w.]{1,}@[a-zA-Z]{2,}$")
     val upiList = mutableListOf<Int>()
 
     var t = Timer()
@@ -357,7 +357,7 @@ class UPICollectFragment : Fragment(), UpiIntentAdapter.OnItemClickListener {
                     }.filter { paymentMode -> paymentMode.paymentModeData != null }.toList()
                     if (paymentModeData.size > 0) {
                         val pm = paymentModeData.get(0).paymentModeData as? PaymentModeData
-                        pm?.upi_flows!!.forEach { upiOption ->
+                        pm?.upi_flows?.forEach { upiOption ->
                             paymentOptionList.add(upiOption)
                             println(upiOption)
                         }

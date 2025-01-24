@@ -24,7 +24,8 @@ class PBPBanksAdapter(private val bankList: List<PBPBank>) :
 
     override fun onBindViewHolder(holder: PBPBankViewHolder, position: Int) {
         holder.bankName.text = bankList.get(position).bankName
-        holder.bankImage.setImageResource(bankList.get(position).bankLogo)
+        //holder.bankImage.setImageResource(bankList.get(position).bankLogo)
+        holder.bankImage.loadSvgOrOther(bankList.get(position).bankLogo)
     }
 
     override fun getItemCount(): Int {
