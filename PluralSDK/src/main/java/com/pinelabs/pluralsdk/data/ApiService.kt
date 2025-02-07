@@ -8,6 +8,7 @@ import com.pinelabs.pluralsdk.data.model.CardBinMetaDataRequestList
 import com.pinelabs.pluralsdk.data.model.CardBinMetaDataResponse
 import com.pinelabs.pluralsdk.data.model.FetchResponse
 import com.pinelabs.pluralsdk.data.model.OTPRequest
+import com.pinelabs.pluralsdk.data.model.OTPResponse
 import com.pinelabs.pluralsdk.data.model.ProcessPaymentRequest
 import com.pinelabs.pluralsdk.data.model.ProcessPaymentResponse
 import com.pinelabs.pluralsdk.data.model.RewardRequest
@@ -21,7 +22,7 @@ import retrofit2.http.Query
 
 interface ApiService {
     @POST("fetch/data")
-    suspend fun fetchData(@Query("token", encoded = true) token: String): Response<FetchResponse>
+    suspend fun fetchData(@Query("token", encoded = true) token: String?): Response<FetchResponse>
 
     @POST("process/payment")
     suspend fun processPayment(
@@ -40,7 +41,7 @@ interface ApiService {
         @Query(
             "token",
             encoded = true
-        ) token: String
+        ) token: String?
     ): Response<TransactionStatusResponse>
 
     @POST("cancel")
@@ -48,7 +49,7 @@ interface ApiService {
         @Query(
             "token",
             encoded = true
-        ) token: String
+        ) token: String, @Query("cancelPayment") cancelPayment: Boolean
     ): Response<CancelTransactionResponse>
 
     @POST("getMetaData")
@@ -65,7 +66,7 @@ interface ApiService {
             "token",
             encoded = true
         ) token: String, @Body request: OTPRequest
-    ): Response<BinResponse>
+    ): Response<OTPResponse>
 
     @POST("otp/submit")
     suspend fun submitOTP(
@@ -73,7 +74,7 @@ interface ApiService {
             "token",
             encoded = true
         ) token: String, @Body request: OTPRequest
-    ): Response<BinResponse>
+    ): Response<OTPResponse>
 
     @POST("otp/resend")
     suspend fun resendOTP(
@@ -81,5 +82,5 @@ interface ApiService {
             "token",
             encoded = true
         ) token: String, @Body request: OTPRequest
-    ): Response<BinResponse>
+    ): Response<OTPResponse>
 }

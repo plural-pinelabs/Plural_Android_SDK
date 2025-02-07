@@ -11,6 +11,7 @@
     <string name="processing_payment">Processing your payment</string>
     <string name="payment_successfull">Yay! Payment Successful.</string>
     <string name="processing_payment_description">We’ll confirm everything in just a few seconds.</string>
+    <string name="payment_verification">We’re verifying your payment status. Please do not go back or refresh.</string>
     <string name="upi_payment_request">Or get payment request on UPI ID</string>
     <string name="verify_continue">Verify &amp; Continue</string>
     <string name="vpa_enter">Enter UPI ID</string>
@@ -190,4 +191,10 @@
     <string name="banks_website">Or, complete on your</string>
     <string name="website">bank’s website</string>
     <string name="auto_read">Waiting to auto-read OTP</string>
+    <string name="lets_try_again">Let\'s try again</string>
+    <string name="payment_didnt">Payment of </string>
+    <string name="payment_didnt_go_through"> couldn\'t go through</string>
+    <string name="retry_upi_header">Retry with another UPI app</string>
+    <string name="retry_upi_content">Please ensure that the UPI app is installed on your phone before trying again.</string>
+    <string name="view_other_upi_app">View other UPI apps</string>
 </resources>

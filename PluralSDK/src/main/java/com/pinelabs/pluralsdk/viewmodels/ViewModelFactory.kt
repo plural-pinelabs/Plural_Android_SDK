@@ -11,3 +11,9 @@ class ViewModelFactory(private val application: Application) : ViewModelProvider
         return FetchDataViewModel(Repository(RemoteDataSource()), application) as T
     }
 }
+
+class ViewModelFactoryRetry(private val application: Application) : ViewModelProvider.Factory {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        return RetryViewModel(Repository(RemoteDataSource()), application) as T
+    }
+}

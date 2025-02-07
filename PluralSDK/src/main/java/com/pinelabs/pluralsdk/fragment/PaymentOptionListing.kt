@@ -6,6 +6,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -56,31 +58,37 @@ class PaymentOptionListing : Fragment(), PaymentOptionsAdapter.OnItemClickListen
 
         token = arguments?.getString(TOKEN).toString()
 
+
+        val activityButton = requireActivity().findViewById<ConstraintLayout>(R.id.layout_orginal)
+        activityButton.visibility = View.VISIBLE
+
         clevertapDefaultInstance = CleverTapAPI.getDefaultInstance(requireActivity())
 
         recyclerPaymentOptions = view.findViewById(R.id.recycler_payment_options)
         shimmerLayout = view.findViewById(R.id.shimmerFrameLayout)
         startShimmer()
-        mainViewModel.fetch_response.observe(viewLifecycleOwner) { response ->
-            val fetchDataResponseHandler = ApiResultHandler<FetchResponse>(requireActivity(),
-                onLoading = {
-                }, onSuccess = { data ->
-                    stopShimmer()
-                    if (response.data != null) {
+        mainViewModel.fetch_response
+            .observe(viewLifecycleOwner) { response ->
+                val fetchDataResponseHandler = ApiResultHandler<FetchResponse>(requireActivity(),
+                    onLoading = {
+                    }, onSuccess = { data ->
+                        stopShimmer()
+                        if (response.data != null) {
                         val paymentModes = response.data?.paymentModes?.filter { paymentMode ->
-                            paymentMode.paymentModeData != null || paymentMode.paymentModeId == PAYBYPOINTS_ID
-                        }
-                        listData(
-                            mapPaymentModes(paymentModes!!),
-                            mapPaymentOptions(paymentModes),
-                            response.data?.merchantBrandingData?.palette
-                        )
-                    }
+                                paymentMode.paymentModeData != null || paymentMode.paymentModeId == PAYBYPOINTS_ID
+                            }
+                            listData(
+                                mapPaymentModes(paymentModes!!),
+                                mapPaymentOptions(paymentModes!!),
+                                response.data?.merchantBrandingData?.palette
+                            )
 
-                }, onFailure = {}
-            )
-            fetchDataResponseHandler.handleApiResult(response)
-        }
+                        }
+
+                    }, onFailure = {}
+                )
+                fetchDataResponseHandler.handleApiResult(response)
+            }
     }
 
     private fun mapPaymentModes(paymentModes: List<PaymentMode>): List<RecyclerViewPaymentOptionData> {
@@ -118,7 +126,7 @@ class PaymentOptionListing : Fragment(), PaymentOptionsAdapter.OnItemClickListen
     fun loadFragment(paymentOption: String) {
 
         val arguments = Bundle()
-        arguments.putString(TOKEN, token)
+        arguments.putString(TOKEN, token+"abc")
 
         // loading which Payment Option where
         val selectedFragment = when (paymentOption) {
@@ -141,7 +149,7 @@ class PaymentOptionListing : Fragment(), PaymentOptionsAdapter.OnItemClickListen
             fragment.arguments = arguments
             val transaction = requireActivity().supportFragmentManager.beginTransaction()
             transaction.replace(R.id.details_fragment, fragment, TAG)
-            transaction.addToBackStack(null)
+            transaction.addToBackStack(TAG)
             transaction.commit()
         }
     }

@@ -11,6 +11,8 @@ import com.pinelabs.pluralsdk.R
 import com.pinelabs.pluralsdk.data.model.FetchResponse
 import com.pinelabs.pluralsdk.data.model.Palette
 import com.pinelabs.pluralsdk.data.utils.ApiResultHandler
+import com.pinelabs.pluralsdk.utils.Constants.Companion.ORDER_ID
+import com.pinelabs.pluralsdk.utils.Constants.Companion.PAYMENT_ID
 import com.pinelabs.pluralsdk.viewmodels.FetchDataViewModel
 import com.pinelabs.pluralsdk.viewmodels.ViewModelFactory
 
@@ -18,15 +20,22 @@ class SuccessActivity : AppCompatActivity() {
 
     private val AUTO_CLOSE_DELAY = 2000L
     private lateinit var viewModel: FetchDataViewModel
+    var orderId: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.payment_success)
 
+        orderId = intent.getStringExtra(
+            ORDER_ID
+        )
+
         val viewModelFactory = ViewModelFactory(application)
         viewModel = ViewModelProvider(this, viewModelFactory)[FetchDataViewModel::class.java]
 
-        PluralSDK.getInstance().callback!!.onSuccessOccured()
+        PluralSDK.getInstance().callback!!.onSuccessOccured(
+            orderId
+        )
 
         Handler().postDelayed({
             finish() // Close

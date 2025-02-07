@@ -57,15 +57,16 @@ import com.pinelabs.pluralsdk.data.model.PaymentModeData
 import com.pinelabs.pluralsdk.data.model.TransactionStatusResponse
 import com.pinelabs.pluralsdk.data.model.UpiTransactionData
 import com.pinelabs.pluralsdk.utils.CleverTapUtil
-import com.pinelabs.pluralsdk.utils.CleverTapUtil.Companion.CT_EVENT_PAYMENT_CANCELLED
 import com.pinelabs.pluralsdk.utils.Constants.Companion.CT_CARDS
 import com.pinelabs.pluralsdk.utils.Constants.Companion.CT_COLLECT
+import com.pinelabs.pluralsdk.utils.Constants.Companion.CT_INTENT_ALL
 import com.pinelabs.pluralsdk.utils.Constants.Companion.CT_INTENT_GPAY
 import com.pinelabs.pluralsdk.utils.Constants.Companion.CT_INTENT_PAYTM
 import com.pinelabs.pluralsdk.utils.Constants.Companion.CT_INTENT_PHONEPE
 import com.pinelabs.pluralsdk.utils.Constants.Companion.CT_UPI
 import com.pinelabs.pluralsdk.utils.Constants.Companion.ERROR_CODE
 import com.pinelabs.pluralsdk.utils.Constants.Companion.GPAY
+import com.pinelabs.pluralsdk.utils.Constants.Companion.ORDER_ID
 import com.pinelabs.pluralsdk.utils.Constants.Companion.PAYMENT_INITIATED
 import com.pinelabs.pluralsdk.utils.Constants.Companion.PAYTM
 import com.pinelabs.pluralsdk.utils.Constants.Companion.PHONEPE
@@ -75,6 +76,7 @@ import com.pinelabs.pluralsdk.utils.Constants.Companion.UPI_ID
 import com.pinelabs.pluralsdk.utils.Constants.Companion.UPI_INTENT
 import com.pinelabs.pluralsdk.utils.Constants.Companion.UPI_INTENT_PREFIX
 import com.pinelabs.pluralsdk.utils.Constants.Companion.UPI_PAY_WITH
+import com.pinelabs.pluralsdk.utils.Constants.Companion.UPI_PROCESSED_ATTEMPTED
 import com.pinelabs.pluralsdk.utils.Constants.Companion.UPI_PROCESSED_FAILED
 import com.pinelabs.pluralsdk.utils.Constants.Companion.UPI_PROCESSED_STATUS
 import com.pinelabs.pluralsdk.utils.Constants.Companion.UPI_TRANSACTION_STATUS_DELAY
@@ -108,7 +110,7 @@ class UPICollectFragment : Fragment(), UpiIntentAdapter.OnItemClickListener {
     private lateinit var timerTextView: TextView
     private lateinit var btnPayByUpiApp: Button
     private var palette: Palette? = null
-    private val totalTime = 600000L
+    private val totalTime = 100000L
     private val interval = 1000L
 
     internal val UPI_PAYMENT = 0
@@ -120,9 +122,28 @@ class UPICollectFragment : Fragment(), UpiIntentAdapter.OnItemClickListener {
     private var countDownTimer: CountDownTimer? = null
 
     private var clevertapDefaultInstance: CleverTapAPI? = null
+    private var listener: onRetryListener? = null
+    private var buttonClicked: Boolean = false
 
     var orderId: String? = null
     var paymentId: String? = null
+
+    var transactionMode: String? = null
+    var upiAppPackageName: String? = null
+
+    interface onRetryListener {
+        fun onRetry(isAcs: Boolean)
+    }
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        listener = context as? onRetryListener
+    }
+
+    override fun onDetach() {
+        super.onDetach()
+        listener = null
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -136,6 +157,8 @@ class UPICollectFragment : Fragment(), UpiIntentAdapter.OnItemClickListener {
         super.onViewCreated(view, savedInstanceState)
 
         clevertapDefaultInstance = CleverTapAPI.getDefaultInstance(requireActivity())
+        buttonClicked = false
+        (activity as LandingActivity).deepLink = null
 
         // Initializing Views
         etUPIId = view.findViewById(R.id.etUPIId)
@@ -171,6 +194,7 @@ class UPICollectFragment : Fragment(), UpiIntentAdapter.OnItemClickListener {
 
 
         btnVerifyContinue.setOnClickListener {
+            buttonClicked = true
             val vpa = etUPIId.text.toString()
             payAction(vpa, UPI_COLLECT, null)
         }
@@ -179,47 +203,91 @@ class UPICollectFragment : Fragment(), UpiIntentAdapter.OnItemClickListener {
         btnVerifyContinue.alpha = 0.3f
 
         btnPayByUpiApp.setOnClickListener {
+            buttonClicked = true
             payAction(null, UPI_INTENT, null)
         }
 
         // Set up back button click listener
         btnBack.setOnClickListener {
-            clevertapDefaultInstance?.let { CT_EVENT_PAYMENT_CANCELLED(it, false, true) }
-            requireActivity().supportFragmentManager.popBackStack()
+            //clevertapDefaultInstance?.let { CT_EVENT_PAYMENT_CANCELLED(it, false, true) }
+            //requireActivity().supportFragmentManager.popBackStack()
+            requireActivity().onBackPressed()
         }
 
         mainViewModel.transaction_status_response.observe(viewLifecycleOwner) { response ->
-            val transactionStatusResponseHandler =
-                ApiResultHandler<TransactionStatusResponse>(requireActivity(),
-                    onLoading = {
-                    }, onSuccess = { data ->
-                        if (response.data!!.data.status.equals(UPI_PROCESSED_STATUS)) {
-                            bottomSheetDialog.dismiss()
+            if (buttonClicked) {
+                val transactionStatusResponseHandler =
+                    ApiResultHandler<TransactionStatusResponse>(requireActivity(),
+                        onLoading = {
+                        }, onSuccess = { data ->
+                            if (buttonClicked) {
+                                if (response?.data!!.data.status.equals(UPI_PROCESSED_STATUS)) {
+                                    bottomSheetDialog.dismiss()
 
-                            CleverTapUtil.CT_EVENT_PAYMENT_STATUS_SUCCESS(
-                                clevertapDefaultInstance, orderId, paymentId
-                            )
-                            val intent = Intent(requireActivity(), SuccessActivity::class.java)
-                            startActivity(intent)
-                            requireActivity().finish()
-                        } else if (response.data!!.data.status.equals(UPI_PROCESSED_FAILED)) {
-                            bottomSheetDialog.dismiss()
+                                    CleverTapUtil.CT_EVENT_PAYMENT_STATUS_SUCCESS(
+                                        clevertapDefaultInstance, orderId, paymentId
+                                    )
+                                    val intent =
+                                        Intent(requireActivity(), SuccessActivity::class.java)
+                                    intent.putExtra(ORDER_ID, orderId)
+                                    startActivity(intent)
+                                    requireActivity().finish()
+                                } else if (response.data!!.data.status.equals(UPI_PROCESSED_FAILED) || response.data!!.data.status.equals(
+                                        UPI_PROCESSED_ATTEMPTED
+                                    )
+                                ) {
+                                    buttonClicked = false
+                                    bottomSheetDialog.dismiss()
+                                    listener?.onRetry(false)
+                                    /*val intent = Intent(requireActivity(), FailureActivity::class.java)
+                                    intent.putExtra(ERROR_MESSAGE, UPI_PROCESSED_FAILED)
+                                    startActivity(intent)
+                                    requireActivity().finish()*/
+                                }
+                                println("Transaction status ${response.data!!.data.status}")
+                            }
+                        }, onFailure = { errorMessage ->
+                            /*bottomSheetDialog.dismiss()
+                            listener?.onRetry(false)*/
                             val intent = Intent(requireActivity(), FailureActivity::class.java)
-                            intent.putExtra(ERROR_MESSAGE, UPI_PROCESSED_FAILED)
+                            intent.putExtra(ERROR_CODE, errorMessage?.error_code)
+                            intent.putExtra(ERROR_MESSAGE, errorMessage?.error_message)
                             startActivity(intent)
                             requireActivity().finish()
                         }
-                        println("Transaction status ${response.data!!.data.status}")
-                    }, onFailure = { errorMessage ->
-                        bottomSheetDialog.dismiss()
-                        val intent = Intent(requireActivity(), FailureActivity::class.java)
-                        intent.putExtra(ERROR_CODE, errorMessage?.error_code)
-                        intent.putExtra(ERROR_MESSAGE, errorMessage?.error_message)
-                        startActivity(intent)
-                        requireActivity().finish()
-                    }
-                )
-            transactionStatusResponseHandler.handleApiResult(response)
+                    )
+                transactionStatusResponseHandler.handleApiResult(response)
+            }
+
+        }
+
+        mainViewModel.process_payment_response.observe(viewLifecycleOwner) { response ->
+            if (buttonClicked) {
+                val fetchDataResponseHandler =
+                    ApiResultHandler<ProcessPaymentResponse>(requireActivity(),
+                        onLoading = {
+                            showProcessPaymentDialog()
+                        }, onSuccess = { response ->
+                            LandingActivity().paymentId = response?.payment_id
+                            if (response!!.deep_link != null && transactionMode == UPI_INTENT) {
+                                (activity as LandingActivity).deepLink =
+                                    response!!.deep_link.toString()
+                                showUpiTray(response!!.deep_link.toString(), upiAppPackageName)
+                            }
+                            orderId = response.order_id
+                            paymentId = response.payment_id
+                            getTransactionStatus(token)
+                        }, onFailure = { errorMessage ->
+                            bottomSheetDialog.dismiss()
+                            /*val intent = Intent(requireActivity(), FailureActivity::class.java)
+                            intent.putExtra(ERROR_CODE, errorMessage?.error_code)
+                            intent.putExtra(ERROR_MESSAGE, errorMessage?.error_message)
+                            startActivity(intent)
+                            requireActivity().finish()*/
+                            listener?.onRetry(false)
+                        })
+                fetchDataResponseHandler.handleApiResult(response)
+            }
         }
 
         setupUPIIdValidation()
@@ -292,7 +360,7 @@ class UPICollectFragment : Fragment(), UpiIntentAdapter.OnItemClickListener {
         val upiMethod = if (vpa.isNotNullAndBlank()) CT_COLLECT else
             if (upiAppPackageName.equals(GPAY)) CT_INTENT_GPAY else
                 if (upiAppPackageName.equals(PHONEPE)) CT_INTENT_PHONEPE else
-                    CT_INTENT_PAYTM
+                    if (upiAppPackageName.equals(PAYTM)) CT_INTENT_PAYTM else CT_INTENT_ALL
         CleverTapUtil.CT_EVENT_PAYMENT_METHOD(
             clevertapDefaultInstance, CT_UPI, PAYMENT_INITIATED,
             null, upiMethod, null
@@ -306,35 +374,14 @@ class UPICollectFragment : Fragment(), UpiIntentAdapter.OnItemClickListener {
             ProcessPaymentRequest(card_data = null, upiData, null, cardDataExtra, upiTxnData, null)
         vpaContext = vpa
 
+        this.transactionMode = transactionMode
+        this.upiAppPackageName = upiAppPackageName
+
         if ((transactionMode.equals(UPI_INTENT) && (activity as LandingActivity).deepLink == null) || transactionMode.equals(
                 UPI_COLLECT
             )
         ) {
             mainViewModel.processPayment(token, processPaymentRequest)
-            mainViewModel.process_payment_response.observe(viewLifecycleOwner) { response ->
-                val fetchDataResponseHandler =
-                    ApiResultHandler<ProcessPaymentResponse>(requireActivity(),
-                        onLoading = {
-                            showProcessPaymentDialog()
-                        }, onSuccess = { response ->
-                            if (response!!.deep_link != null && transactionMode == UPI_INTENT) {
-                                (activity as LandingActivity).deepLink =
-                                    response!!.deep_link.toString()
-                                showUpiTray(response!!.deep_link.toString(), upiAppPackageName)
-                            }
-                            orderId = response.order_id
-                            paymentId = response.payment_id
-                            getTransactionStatus(token)
-                        }, onFailure = { errorMessage ->
-                            bottomSheetDialog.dismiss()
-                            val intent = Intent(requireActivity(), FailureActivity::class.java)
-                            intent.putExtra(ERROR_CODE, errorMessage?.error_code)
-                            intent.putExtra(ERROR_MESSAGE, errorMessage?.error_message)
-                            startActivity(intent)
-                            requireActivity().finish()
-                        })
-                fetchDataResponseHandler.handleApiResult(response)
-            }
         } else {
             showProcessPaymentDialog()
             if ((activity as LandingActivity).deepLink != null && transactionMode == UPI_INTENT)
@@ -380,7 +427,7 @@ class UPICollectFragment : Fragment(), UpiIntentAdapter.OnItemClickListener {
 
         cancelPaymentTextView.setOnClickListener {
             bottomSheetDialog.dismiss()
-            showCancelConfirmationDialog()
+            requireActivity().onBackPressed()
         }
 
         circularProgressBar = view.findViewById(R.id.circularProgressBar)
@@ -393,9 +440,10 @@ class UPICollectFragment : Fragment(), UpiIntentAdapter.OnItemClickListener {
 
         startTimer()
         // Initialize BottomSheetDialog
-        bottomSheetDialog.setContentView(view)
         bottomSheetDialog.setCancelable(false)
         bottomSheetDialog.setCanceledOnTouchOutside(false)
+        bottomSheetDialog.setContentView(view)
+
         bottomSheetDialog.show() // Show the dialog first
     }
 
@@ -420,8 +468,10 @@ class UPICollectFragment : Fragment(), UpiIntentAdapter.OnItemClickListener {
                 timerTextView.text = "00:00"
                 circularProgressBar.progress = 0
 
-                requireActivity().finish()
-                PluralSDK.getInstance().callback!!.onSuccessOccured()
+                bottomSheetDialog.dismiss()
+                listener?.onRetry(false)
+                /*requireActivity().finish()
+                PluralSDK.getInstance().callback!!.onSuccessOccured("")*/
             }
         }.start()
     }
@@ -436,8 +486,10 @@ class UPICollectFragment : Fragment(), UpiIntentAdapter.OnItemClickListener {
 
         btnYes.setOnClickListener {
             bottomSheetDialog.dismiss()
-            Toast.makeText(requireActivity(), "Transaction cancelled", Toast.LENGTH_SHORT).show()
-            requireActivity().finish()
+            requireActivity().onBackPressed()
+            //mainViewModel.cancelTransaction(token)
+            /*Toast.makeText(requireActivity(), "Transaction cancelled", Toast.LENGTH_SHORT).show()
+            requireActivity().finish()*/
         }
 
         btnNo.setOnClickListener {
@@ -487,6 +539,7 @@ class UPICollectFragment : Fragment(), UpiIntentAdapter.OnItemClickListener {
     }
 
     override fun onItemClick(position: Int) {
+        buttonClicked = true
         when (position) {
             0 -> payAction(null, UPI_INTENT, GPAY)
             1 -> payAction(null, UPI_INTENT, PHONEPE)

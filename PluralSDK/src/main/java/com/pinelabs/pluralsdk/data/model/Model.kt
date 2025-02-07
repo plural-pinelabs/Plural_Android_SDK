@@ -4,6 +4,7 @@ import com.google.gson.annotations.SerializedName
 import com.pinelabs.pluralsdk.utils.PaymentModes
 
 data class FetchResponse(
+    val transactionInfo: TransactionInfo? = null,
     val merchantInfo: MerchantInfo? = null,
     val paymentData: PaymentData? = null,
     val paymentModes: List<PaymentMode>? = null,
@@ -18,6 +19,10 @@ data class FetchFailure(
     val type: String,
     val message: String,
     val traceId: String
+)
+
+data class TransactionInfo(
+    val orderId: String
 )
 
 data class MerchantInfo(
@@ -185,12 +190,13 @@ data class TransactionStatusResponse(
 
 data class TransactionStatus(
     val order_id: String,
-    val status: String
+    val status: String,
+    val is_retry_available: Boolean
 )
 
 data class CancelTransactionResponse(
-    val responsePage: String,
-    val responseData: CancelResponseData
+    val response_code: Int,
+    val response_message: String
 )
 
 data class CancelResponseData(
@@ -205,12 +211,16 @@ data class GlobalBinsData(val issuerName: String, val cardType: String, val isDo
 
 data class ResultInfo(val responseCode: String, val totalBins: String)
 
-data class OTPRequest(@SerializedName("payment-id") val paymentId: String, val otp: String,
-    val )
+data class OTPRequest(
+    @SerializedName("payment-id") val paymentId: String?, val otp: String?,
+    val challenge_url: String?
+)
+
+data class OTPResponse(val next: List<String>?, val status: String?)
 
 data class CardBinMetaDataRequestList(val requestList: List<CardBinMetaDataRequest>)
 data class CardBinMetaDataRequest(val paymentIdentifier: String, val paymentReferenceType: String)
-data class CardBinMetaDataResponse(val extendedCardMetaResponseList:List<CardBinMetaDataResponseData>)
+data class CardBinMetaDataResponse(val extendedCardMetaResponseList: List<CardBinMetaDataResponseData>)
 data class CardBinMetaDataResponseData(
     val paymentIdentifier: String,
     val paymentReferenceType: String,

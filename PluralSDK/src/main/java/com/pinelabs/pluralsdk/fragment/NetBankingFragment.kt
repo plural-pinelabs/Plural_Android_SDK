@@ -1,7 +1,7 @@
 package com.pinelabs.pluralsdk.fragment
 
+import android.animation.Animator
 import android.content.Context
-import android.content.Intent
 import android.content.res.Resources
 import android.graphics.Color
 import android.graphics.drawable.Drawable
@@ -17,52 +17,48 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.lifecycle.distinctUntilChanged
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.airbnb.lottie.LottieAnimationView
 import com.clevertap.android.sdk.CleverTapAPI
-import com.google.android.flexbox.AlignItems
-import com.google.android.flexbox.FlexDirection
-import com.google.android.flexbox.FlexWrap
-import com.google.android.flexbox.FlexboxItemDecoration
 import com.google.android.flexbox.FlexboxLayout
-import com.google.android.flexbox.FlexboxLayoutManager
-import com.google.android.flexbox.JustifyContent
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.pinelabs.pluralsdk.R
 import com.pinelabs.pluralsdk.activity.ACSPageActivity
-import com.pinelabs.pluralsdk.activity.FailureActivity
+import com.pinelabs.pluralsdk.activity.LandingActivity
 import com.pinelabs.pluralsdk.adapter.DividerItemDecorator
-import com.pinelabs.pluralsdk.adapter.FlexDivider
 import com.pinelabs.pluralsdk.adapter.GridDividerItemDecoration
 import com.pinelabs.pluralsdk.adapter.NetBankAllAdapter
 import com.pinelabs.pluralsdk.adapter.NetBanksAdapter
 import com.pinelabs.pluralsdk.adapter.loadSvgOrOther
-import com.pinelabs.pluralsdk.data.model.ConvenienceFeesData
 import com.pinelabs.pluralsdk.data.model.DeviceInfo
 import com.pinelabs.pluralsdk.data.model.Extra
 import com.pinelabs.pluralsdk.data.model.FetchResponse
 import com.pinelabs.pluralsdk.data.model.NetBankingData
 import com.pinelabs.pluralsdk.data.model.Palette
-import com.pinelabs.pluralsdk.data.model.PaymentModeData
+import com.pinelabs.pluralsdk.data.model.PaymentMode
 import com.pinelabs.pluralsdk.data.model.ProcessPaymentRequest
 import com.pinelabs.pluralsdk.data.model.ProcessPaymentResponse
 import com.pinelabs.pluralsdk.data.model.issuerDataList
 import com.pinelabs.pluralsdk.data.utils.ApiResultHandler
 import com.pinelabs.pluralsdk.utils.CleverTapUtil
-import com.pinelabs.pluralsdk.utils.CleverTapUtil.Companion.CT_EVENT_PAYMENT_CANCELLED
+import com.pinelabs.pluralsdk.utils.Constants.Companion.CT_NETBANKING
 import com.pinelabs.pluralsdk.utils.Constants.Companion.CT_UPI
-import com.pinelabs.pluralsdk.utils.Constants.Companion.ERROR_CODE
-import com.pinelabs.pluralsdk.utils.Constants.Companion.ERROR_MESSAGE
+import com.pinelabs.pluralsdk.utils.Constants.Companion.IMAGE_LOGO
 import com.pinelabs.pluralsdk.utils.Constants.Companion.NET_BANKING_PAYMENT_METHOD
 import com.pinelabs.pluralsdk.utils.Constants.Companion.ORDER_ID
+import com.pinelabs.pluralsdk.utils.Constants.Companion.PAYBYPOINTS_ID
 import com.pinelabs.pluralsdk.utils.Constants.Companion.PAYMENT_ID
 import com.pinelabs.pluralsdk.utils.Constants.Companion.PAYMENT_INITIATED
 import com.pinelabs.pluralsdk.utils.Constants.Companion.REDIRECT_URL
+import com.pinelabs.pluralsdk.utils.Constants.Companion.START_TIME
+import com.pinelabs.pluralsdk.utils.Constants.Companion.TAG_ACS
 import com.pinelabs.pluralsdk.utils.Constants.Companion.TOKEN
 import com.pinelabs.pluralsdk.utils.DeviceType
 import com.pinelabs.pluralsdk.utils.NBBANKS
@@ -78,6 +74,8 @@ class NetBankingFragment : Fragment(), NetBankAllAdapter.OnItemClickListener {
     private lateinit var recyclerNetBanks: RecyclerView
     private lateinit var linearMoreBanks: LinearLayout
     private lateinit var moreBankAdapter: NetBankAllAdapter
+    private lateinit var bottomSheetDialog: BottomSheetDialog
+    private lateinit var moreBanksBottomSheetDialog: BottomSheetDialog
 
     private lateinit var token: String
     private var amount: Int? = 0
@@ -85,9 +83,29 @@ class NetBankingFragment : Fragment(), NetBankAllAdapter.OnItemClickListener {
     private var bankList: List<NBBANKS>? = mutableListOf()
 
     private var palette: Palette? = null
+    private var orderId: String? = null
+
     private var clevertapDefaultInstance: CleverTapAPI? = null
 
     private val mainViewModel by activityViewModels<FetchDataViewModel>()
+    var paymentModes: List<PaymentMode>? = mutableListOf()
+
+    var buttonClicked: Boolean = false
+    private var listener: onRetryListener? = null
+
+    interface onRetryListener {
+        fun onRetry(isAcs: Boolean)
+    }
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        listener = context as? onRetryListener
+    }
+
+    override fun onDetach() {
+        super.onDetach()
+        listener = null
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -100,15 +118,24 @@ class NetBankingFragment : Fragment(), NetBankAllAdapter.OnItemClickListener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        buttonClicked = false
+
         token = arguments?.getString(TOKEN).toString()
 
         clevertapDefaultInstance = CleverTapAPI.getDefaultInstance(requireActivity())
 
+        bottomSheetDialog = BottomSheetDialog(requireActivity())
+        moreBanksBottomSheetDialog = BottomSheetDialog(requireActivity())
+
+        val activityButton = requireActivity().findViewById<ConstraintLayout>(R.id.layout_orginal)
+        activityButton.visibility = View.VISIBLE
+
         //Backpress
         imgBack = view.findViewById(R.id.btnBack)
         imgBack.setOnClickListener {
-            clevertapDefaultInstance?.let { CT_EVENT_PAYMENT_CANCELLED(it, false, true) }
-            requireActivity().supportFragmentManager.popBackStack()
+            //clevertapDefaultInstance?.let { CT_EVENT_PAYMENT_CANCELLED(it, false, true) }
+            //requireActivity().supportFragmentManager.popBackStack()
+            requireActivity().onBackPressed()
         }
 
         flexNetBanks = view.findViewById(R.id.flex_net_banks_grid)
@@ -124,10 +151,88 @@ class NetBankingFragment : Fragment(), NetBankAllAdapter.OnItemClickListener {
         }
 
         setLiveDataListener()
+        mainViewModel.process_payment_response.observe(viewLifecycleOwner) { response ->
+            if (buttonClicked) {
+                val startTime = System.currentTimeMillis()
+                val fetchDataResponseHandler =
+                    ApiResultHandler<ProcessPaymentResponse>(requireActivity(),
+                        onLoading = {
+                            if (moreBanksBottomSheetDialog!=null && moreBanksBottomSheetDialog.isShowing) moreBanksBottomSheetDialog.dismiss()
+                            showProcessPaymentDialog()
+                        }, onSuccess = { response ->
+
+                            bottomSheetDialog.findViewById<LottieAnimationView>(R.id.img_logo)!!
+                                .addAnimatorListener(object : Animator.AnimatorListener {
+                                    override fun onAnimationStart(animation: Animator) {
+
+                                    }
+
+                                    override fun onAnimationEnd(animation: Animator) {
+                                    }
+
+                                    override fun onAnimationCancel(animation: Animator) {
+                                    }
+
+                                    override fun onAnimationRepeat(animation: Animator) {
+
+                                        bottomSheetDialog.dismiss()
+                                        LandingActivity().paymentId = response?.payment_id
+
+                                        val arguments = Bundle()
+                                        arguments.putString(TOKEN, token)
+                                        arguments.putLong(START_TIME, startTime)
+                                        arguments.putString(
+                                            REDIRECT_URL,
+                                            response!!.redirect_url
+                                        )
+                                        arguments.putString(ORDER_ID, response?.order_id)
+                                        arguments.putString(PAYMENT_ID, response?.payment_id)
+                                        //arguments.putString(RETRY_PAGE, retryPage)
+
+                                        val acsFragment = ACSFragment()
+                                        acsFragment.arguments = arguments
+
+                                        requireActivity().supportFragmentManager.popBackStack()
+                                        val transaction =
+                                            requireActivity().supportFragmentManager.beginTransaction()
+                                        transaction.replace(
+                                            R.id.details_fragment,
+                                            acsFragment,
+                                            TAG_ACS
+                                        )
+                                        transaction.addToBackStack(TAG_ACS)
+                                        transaction.commit()
+                                    }
+
+                                })
+
+                                    /*val i = Intent(activity, ACSPageActivity::class.java)
+                                    i.putExtra(TOKEN, token)
+                                    i.putExtra(REDIRECT_URL, response!!.redirect_url)
+                                    i.putExtra(ORDER_ID, response?.order_id)
+                                    i.putExtra(PAYMENT_ID, response?.payment_id)
+                                    startActivity(i)
+                                    requireActivity().finish()*/
+
+                        }, onFailure = { errorMessage ->
+                            bottomSheetDialog.dismiss()
+                            println("Process payment : Netbanking: Failure")
+                            /*val intent = Intent(requireActivity(), FailureActivity::class.java)
+                        intent.putExtra(ORDER_ID, orderId)
+                        intent.putExtra(ERROR_CODE, errorMessage?.error_code)
+                        intent.putExtra(ERROR_MESSAGE, errorMessage?.error_message)
+                        startActivity(intent)
+                        requireActivity().finish()*/
+                            listener?.onRetry(false)
+                        })
+                fetchDataResponseHandler.handleApiResult(response)
+            }
+        }
 
     }
 
     override fun onItemClick(item: NBBANKS?) {
+        buttonClicked = true
         val bankCode =
             if (item!!.bankName!!.contains(":")) item!!.bankName!!.split(":")[0] else resources.getString(
                 item!!.bankCode
@@ -145,7 +250,7 @@ class NetBankingFragment : Fragment(), NetBankAllAdapter.OnItemClickListener {
     ): ProcessPaymentRequest {
 
         CleverTapUtil.CT_EVENT_PAYMENT_METHOD(
-            clevertapDefaultInstance, CT_UPI, PAYMENT_INITIATED,
+            clevertapDefaultInstance, CT_NETBANKING, PAYMENT_INITIATED,
             null, null, bankName
         )
 
@@ -172,52 +277,36 @@ class NetBankingFragment : Fragment(), NetBankAllAdapter.OnItemClickListener {
     }
 
     private fun setLiveDataListener() {
-
-        mainViewModel.fetch_response.observe(viewLifecycleOwner) { response ->
-            val fetchDataResponseHandler = ApiResultHandler<FetchResponse>(requireActivity(),
-                onLoading = {
-                }, onSuccess = { data ->
-                    data?.paymentData?.originalTxnAmount?.let { transactionAmount ->
-                        amount = transactionAmount.amount
-                        currency = transactionAmount.currency
-                    }
-
-                    palette = data?.merchantBrandingData?.palette
-
-                    data?.paymentModes?.filter { paymentMode -> paymentMode.paymentModeId == PaymentModes.NET_BANKING.paymentModeID }
-                        ?.forEach { paymentMode ->
-                            val pm = paymentMode?.paymentModeData
-                            bankList = mapBankList(pm?.IssersUIDataList)
-                            setNetBankingGrid()
-                        }
-                }, onFailure = {
-
-                }
-            )
-            fetchDataResponseHandler.handleApiResult(response)
-        }
-
-        mainViewModel.process_payment_response.observe(viewLifecycleOwner) { response ->
-            val fetchDataResponseHandler =
-                ApiResultHandler<ProcessPaymentResponse>(requireActivity(),
+        mainViewModel.fetch_response.removeObservers(viewLifecycleOwner)
+        mainViewModel.fetch_response.distinctUntilChanged()
+            .observe(viewLifecycleOwner) { response ->
+                val fetchDataResponseHandler = ApiResultHandler<FetchResponse>(requireActivity(),
                     onLoading = {
+                    }, onSuccess = { data ->
+                        data?.paymentData?.originalTxnAmount?.let { transactionAmount ->
+                            amount = transactionAmount.amount
+                            currency = transactionAmount.currency
+                        }
 
-                    }, onSuccess = { response ->
-                        val i = Intent(activity, ACSPageActivity::class.java)
-                        i.putExtra(REDIRECT_URL, response!!.redirect_url)
-                        i.putExtra(ORDER_ID, response?.order_id)
-                        i.putExtra(PAYMENT_ID, response?.payment_id)
-                        startActivity(i)
-                        requireActivity().finish()
-                    }, onFailure = { errorMessage ->
-                        val intent = Intent(requireActivity(), FailureActivity::class.java)
-                        intent.putExtra(ERROR_CODE, errorMessage?.error_code)
-                        intent.putExtra(ERROR_MESSAGE, errorMessage?.error_message)
-                        startActivity(intent)
-                        requireActivity().finish()
-                    })
-            fetchDataResponseHandler.handleApiResult(response)
-        }
+                        palette = data?.merchantBrandingData?.palette
+                        orderId = data?.transactionInfo?.orderId
+
+                        data?.paymentModes?.filter { paymentMode -> paymentMode.paymentModeId == PaymentModes.NET_BANKING.paymentModeID }
+                            ?.forEach { paymentMode ->
+                                val pm = paymentMode?.paymentModeData
+                                bankList = mapBankList(pm?.IssersUIDataList)
+                                setNetBankingGrid()
+                            }
+
+                        paymentModes = response.data?.paymentModes?.filter { paymentMode ->
+                            paymentMode.paymentModeData != null || paymentMode.paymentModeId == PAYBYPOINTS_ID
+                        }
+                    }, onFailure = {
+
+                    }
+                )
+                fetchDataResponseHandler.handleApiResult(response)
+            }
 
     }
 
@@ -312,7 +401,6 @@ class NetBankingFragment : Fragment(), NetBankAllAdapter.OnItemClickListener {
     }
 
     private fun showMoreBanks() {
-        val moreBanksBottomSheetDialog = BottomSheetDialog(requireActivity())
         val view =
             LayoutInflater.from(requireActivity()).inflate(R.layout.netbanking_all_banks, null)
         moreBanksBottomSheetDialog.setContentView(view)
@@ -412,5 +500,24 @@ class NetBankingFragment : Fragment(), NetBankAllAdapter.OnItemClickListener {
         name4?.setText(bankList?.get(3)!!.bankName)
         name5?.setText(bankList?.get(4)!!.bankName)
     }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        mainViewModel.process_payment_response.removeObservers(this)
+    }
+
+    private fun showProcessPaymentDialog() {
+        val view = LayoutInflater.from(requireActivity())
+            .inflate(R.layout.process_payment_bottom_sheet, null)
+
+        var logoAnimation: LottieAnimationView = view.findViewById(R.id.img_logo)
+        logoAnimation.setAnimationFromUrl(IMAGE_LOGO)
+
+        bottomSheetDialog.setCancelable(false)
+        bottomSheetDialog.setCanceledOnTouchOutside(false)
+        bottomSheetDialog.setContentView(view)
+        bottomSheetDialog.show()
+    }
+
 }
 

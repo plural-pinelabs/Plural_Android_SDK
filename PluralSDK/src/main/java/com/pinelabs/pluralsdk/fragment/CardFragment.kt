@@ -40,6 +40,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.distinctUntilChanged
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.airbnb.lottie.LottieAnimationView
@@ -53,7 +54,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.gson.Gson
 import com.pinelabs.pluralsdk.R
 import com.pinelabs.pluralsdk.activity.ACSPageActivity
-import com.pinelabs.pluralsdk.activity.FailureActivity
+import com.pinelabs.pluralsdk.activity.LandingActivity
 import com.pinelabs.pluralsdk.adapter.FlexAdapter
 import com.pinelabs.pluralsdk.adapter.PBPBanksAdapter
 import com.pinelabs.pluralsdk.data.model.CardBinMetaDataRequest
@@ -62,6 +63,8 @@ import com.pinelabs.pluralsdk.data.model.CardBinMetaDataResponse
 import com.pinelabs.pluralsdk.data.model.CardData
 import com.pinelabs.pluralsdk.data.model.Extra
 import com.pinelabs.pluralsdk.data.model.FetchResponse
+import com.pinelabs.pluralsdk.data.model.OTPRequest
+import com.pinelabs.pluralsdk.data.model.OTPResponse
 import com.pinelabs.pluralsdk.data.model.OrderDetails
 import com.pinelabs.pluralsdk.data.model.OrderDetailsAmount
 import com.pinelabs.pluralsdk.data.model.PBPBank
@@ -93,7 +96,6 @@ import com.pinelabs.pluralsdk.utils.BankConstant.Companion.SOUTH_INDIAN_BANK
 import com.pinelabs.pluralsdk.utils.BankConstant.Companion.UNION_BANK
 import com.pinelabs.pluralsdk.utils.BankConstant.Companion.YES
 import com.pinelabs.pluralsdk.utils.CleverTapUtil
-import com.pinelabs.pluralsdk.utils.CleverTapUtil.Companion.CT_EVENT_PAYMENT_CANCELLED
 import com.pinelabs.pluralsdk.utils.Constants.Companion.BANK_ALLAHABAD
 import com.pinelabs.pluralsdk.utils.Constants.Companion.BANK_ANDHRA
 import com.pinelabs.pluralsdk.utils.Constants.Companion.BANK_AU_SMALL
@@ -118,12 +120,12 @@ import com.pinelabs.pluralsdk.utils.Constants.Companion.BROWSER_ACCEPT_HEADER
 import com.pinelabs.pluralsdk.utils.Constants.Companion.BROWSER_IP_ADDRESS
 import com.pinelabs.pluralsdk.utils.Constants.Companion.BROWSER_JAVASCRIPT_ENABLED
 import com.pinelabs.pluralsdk.utils.Constants.Companion.BROWSER_LANGUAGE
-import com.pinelabs.pluralsdk.utils.Constants.Companion.BROWSER_LANGUAGE_EN
 import com.pinelabs.pluralsdk.utils.Constants.Companion.BROWSER_SCREEN_COLOR_DEPTH
 import com.pinelabs.pluralsdk.utils.Constants.Companion.BROWSER_SCREEN_HEIGHT
 import com.pinelabs.pluralsdk.utils.Constants.Companion.BROWSER_SCREEN_WIDTH
 import com.pinelabs.pluralsdk.utils.Constants.Companion.BROWSER_TIME_ZONE
 import com.pinelabs.pluralsdk.utils.Constants.Companion.BROWSER_USER_AGENT
+import com.pinelabs.pluralsdk.utils.Constants.Companion.BROWSER_USER_AGENT_ANDROID
 import com.pinelabs.pluralsdk.utils.Constants.Companion.CREDIT_DEBIT_ID
 import com.pinelabs.pluralsdk.utils.Constants.Companion.CT_CARDS
 import com.pinelabs.pluralsdk.utils.Constants.Companion.ERROR_CODE
@@ -135,17 +137,22 @@ import com.pinelabs.pluralsdk.utils.Constants.Companion.PAYMENT_ID
 import com.pinelabs.pluralsdk.utils.Constants.Companion.PAYMENT_INITIATED
 import com.pinelabs.pluralsdk.utils.Constants.Companion.PAYMENT_REFERENCE_TYPE_CARD
 import com.pinelabs.pluralsdk.utils.Constants.Companion.REDIRECT_URL
+import com.pinelabs.pluralsdk.utils.Constants.Companion.REQ_RETRY_CALLBACK
 import com.pinelabs.pluralsdk.utils.Constants.Companion.START_TIME
+import com.pinelabs.pluralsdk.utils.Constants.Companion.TAG_ACS
 import com.pinelabs.pluralsdk.utils.Constants.Companion.TAG_OTP
+import com.pinelabs.pluralsdk.utils.Constants.Companion.TAG_PAYMENT_LISTING
 import com.pinelabs.pluralsdk.utils.Constants.Companion.TOKEN
+import com.pinelabs.pluralsdk.utils.PaymentModes
 import com.pinelabs.pluralsdk.viewmodels.FetchDataViewModel
 import java.util.Calendar
+import java.util.Locale
 
 
 class CardFragment : Fragment() {
 
     private val cardTypes = mapOf(
-        "amex" to "^3[47]\\d{13}$".toRegex(),
+        "AMEX" to "^3[47]\\d{13}$".toRegex(),
         "BCGlobal" to "^(6541|6556)\\d{12}$".toRegex(),
         "Carte Blanche" to "^389\\d{11}$".toRegex(),
         "Diners Club" to "^3(?:0[0-5]|[68]\\d)\\d{11}$".toRegex(),
@@ -155,12 +162,12 @@ class CardFragment : Fragment() {
         "KoreanLocal" to "^9\\d{15}$".toRegex(),
         "Laser" to "^(6304|6706|6709|6771)\\d{12,15}$".toRegex(),
         "Maestro" to "^(5018|5020|5038|6304|6759|6761|6763)\\d{8,15}$".toRegex(),
-        "Mastercard" to "^(5[1-5]\\d{14}|2(22[1-9]|2[3-9]\\d|[3-6]\\d\\d|7[01])\\d{12})$".toRegex(),
+        "MASTERCARD" to "^(5[1-5]\\d{14}|2(22[1-9]|2[3-9]\\d|[3-6]\\d\\d|7[01])\\d{12})$".toRegex(),
         "RUPAY" to Regex("^6(?!011)(?:\\d{15}|52[12]\\d{12})$"),
         "Solo" to "^((6334|6767)\\d{12}|(6334|6767)\\d{14}|(6334|6767)\\d{15})$".toRegex(),
         "Switch" to "^((49(0[35]|1[16]|36)|6(333|759))\\d{12,15}|564182\\d{10,13}|633110\\d{10,13})$".toRegex(),
         "Union Pay" to "^(62\\d{14,17})$".toRegex(),
-        "Visa" to "^4\\d*$".toRegex(),
+        "VISA" to "^4\\d*$".toRegex(),
         "Visa Master" to "^(?:4\\d{12}(?:\\d{3})?|5[1-5]\\d{14})$".toRegex()
     )
 
@@ -188,6 +195,7 @@ class CardFragment : Fragment() {
     private var isCardHolderNameValid = false
     private var isPBPChecked = false
     private var isPBPEnabled = false
+    private var orderId: String? = null
     private var palette: Palette? = null
 
     private lateinit var etCardNumber: EditText
@@ -208,6 +216,23 @@ class CardFragment : Fragment() {
 
     private var clevertapDefaultInstance: CleverTapAPI? = null
 
+    private var listener: onRetryListener? = null
+    private var buttonClicked: Boolean = false
+
+    interface onRetryListener {
+        fun onRetry(isAcs: Boolean)
+    }
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        listener = context as? onRetryListener
+    }
+
+    override fun onDetach() {
+        super.onDetach()
+        listener = null
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
     }
@@ -222,6 +247,11 @@ class CardFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+
+        buttonClicked = false
+        val activityButton = requireActivity().findViewById<ConstraintLayout>(R.id.layout_orginal)
+        activityButton.visibility = View.VISIBLE
 
         println("Require activity name ${requireActivity().packageName}")
         clevertapDefaultInstance = CleverTapAPI.getDefaultInstance(requireActivity())
@@ -286,6 +316,7 @@ class CardFragment : Fragment() {
 
         btnProceedToPay.setOnClickListener {
 
+            buttonClicked = true
             // Handle payment process here
             val cardNumber = etCardNumber.text.toString().filter { !it.isWhitespace() }
             CleverTapUtil.CT_EVENT_PAYMENT_METHOD(
@@ -310,8 +341,9 @@ class CardFragment : Fragment() {
         }
 
         btnBack.setOnClickListener {
-            clevertapDefaultInstance?.let { CT_EVENT_PAYMENT_CANCELLED(it, false, true) }
-            requireActivity().supportFragmentManager.popBackStack()
+            //clevertapDefaultInstance?.let { CT_EVENT_PAYMENT_CANCELLED(it, false, true) }
+            //requireActivity().supportFragmentManager.popBackStack()
+            requireActivity().onBackPressed()
         }
 
         etCardNumber.setOnFocusChangeListener { _, hasFocus ->
@@ -428,9 +460,9 @@ class CardFragment : Fragment() {
                 val formattedInput = cleanedInput.chunked(4).joinToString(" ")
 
                 //Native otp
-                if (cleanedInput.length >= 12) {
+                /*if (cleanedInput.length >= 12) {
                     getBinData(token, cleanedInput)
-                }
+                }*/
 
                 etCardNumber.setText(formattedInput)
                 etCardNumber.setSelection(formattedInput.length)
@@ -465,7 +497,7 @@ class CardFragment : Fragment() {
 
 
                         // Set the brand icon based on the card type
-                        //setCardBrandIcon(etCardNumber, cardType)
+                        setCardBrandIcon(etCardNumber, cardType)
                     } else {
                         println("Else condition " + validCard(cleanedInput) + " " + cleanedInput.length + " " + isCardNumberValid)
                     }
@@ -804,6 +836,8 @@ class CardFragment : Fragment() {
         var logoAnimation: LottieAnimationView = view.findViewById(R.id.img_logo)
         logoAnimation.setAnimationFromUrl(IMAGE_LOGO)
 
+        bottomSheetDialog.setCancelable(false)
+        bottomSheetDialog.setCanceledOnTouchOutside(false)
         bottomSheetDialog.setContentView(view)
         bottomSheetDialog.show()
     }
@@ -1112,102 +1146,178 @@ class CardFragment : Fragment() {
 
     private fun observeListener() {
 
-        mainViewModel.pbpAmount.observe(viewLifecycleOwner) { pbpAmount ->
-            if (pbpAmount != null) {
-                val redeemableAmount = amount!! - redeemableAmount!!
-                btnProceedToPay.text = getString(R.string.pay) + " " + convertToRupees(
-                    requireContext(),
-                    redeemableAmount
-                )
-            } else {
-                btnProceedToPay.text =
-                    getString(R.string.pay) + " " + convertToRupees(requireContext(), amount!!)
-            }
-        }
-
-        mainViewModel.fetch_response.observe(viewLifecycleOwner) { response ->
-            val fetchDataResponseHandler = ApiResultHandler<FetchResponse>(requireActivity(),
-                onLoading = {
-                }, onSuccess = { data ->
-                    amount = data!!.paymentData!!.originalTxnAmount?.amount
-                    currency = data!!.paymentData!!.originalTxnAmount?.currency
-                    palette = data?.merchantBrandingData?.palette
-                    btnProceedToPay.background = buttonBackground(requireActivity())
-                    if (data.customerInfo != null && data.customerInfo.mobileNo != null)
-                        mobileNumber = data.customerInfo.mobileNo
-                    btnProceedToPay.text =
-                        getString(R.string.pay) + " " + convertToRupees(requireContext(), amount!!)
-                    val paymentModeData = data!!.paymentModes!!.filter { paymentMode ->
-                        paymentMode.paymentModeId.equals(
-                            PAYBYPOINTS_ID
+        try {
+            mainViewModel.pbpAmount.distinctUntilChanged()
+                .observe(viewLifecycleOwner) { pbpAmount ->
+                    if (pbpAmount != null) {
+                        val redeemableAmount = amount!! - redeemableAmount!!
+                        btnProceedToPay.text = getString(R.string.pay) + " " + convertToRupees(
+                            requireContext(),
+                            redeemableAmount
                         )
+                    } else {
+                        btnProceedToPay.text =
+                            getString(R.string.pay) + " " + convertToRupees(
+                                requireContext(),
+                                amount!!
+                            )
                     }
-                    if (paymentModeData.size > 0) {
-                        makeViewVisible()
-                        isPBPEnabled = true
-                    }
-                }, onFailure = {}
-            )
-            fetchDataResponseHandler.handleApiResult(response)
-        }
+                }
 
-        mainViewModel.process_payment_response.observe(viewLifecycleOwner) { response ->
-            val startTime = System.currentTimeMillis()
-            val fetchDataResponseHandler =
-                ApiResultHandler<ProcessPaymentResponse>(requireActivity(),
-                    onLoading = {
-                        showProcessPaymentDialog()
-                    }, onSuccess = { data ->
-                        bottomSheetDialog.findViewById<LottieAnimationView>(R.id.img_logo)!!
-                            .addAnimatorListener(object : Animator.AnimatorListener {
-                                override fun onAnimationStart(p0: Animator) {
+            mainViewModel.fetch_response.distinctUntilChanged()
+                .observe(viewLifecycleOwner) { response ->
+                    val fetchDataResponseHandler =
+                        ApiResultHandler<FetchResponse>(requireActivity(),
+                            onLoading = {
+                            }, onSuccess = { data ->
+                                amount = data!!.paymentData!!.originalTxnAmount?.amount
+                                currency = data!!.paymentData!!.originalTxnAmount?.currency
+                                palette = data?.merchantBrandingData?.palette
+                                orderId = data?.transactionInfo?.orderId
+                                btnProceedToPay.background = buttonBackground(requireActivity())
+                                if (data.customerInfo != null && data.customerInfo.mobileNo != null)
+                                    mobileNumber = data.customerInfo.mobileNo
+                                btnProceedToPay.text =
+                                    getString(R.string.pay) + " " + convertToRupees(
+                                        requireContext(),
+                                        amount!!
+                                    )
+                                val paymentModeData = data!!.paymentModes!!.filter { paymentMode ->
+                                    paymentMode.paymentModeId.equals(
+                                        PAYBYPOINTS_ID
+                                    )
                                 }
-
-                                override fun onAnimationEnd(p0: Animator) {
-                                    Toast.makeText(activity, "Ended", Toast.LENGTH_SHORT).show()
+                                if (paymentModeData.size > 0) {
+                                    makeViewVisible()
+                                    isPBPEnabled = true
                                 }
+                            }, onFailure = {}
+                        )
+                    fetchDataResponseHandler.handleApiResult(response)
+                }
 
-                                override fun onAnimationCancel(p0: Animator) {
-                                }
+            mainViewModel.process_payment_response.distinctUntilChanged()
+                .observe(viewLifecycleOwner) { response ->
+                    if (buttonClicked) {
 
-                                override fun onAnimationRepeat(p0: Animator) {
+                        val startTime = System.currentTimeMillis()
+                        val fetchDataResponseHandler =
+                            ApiResultHandler<ProcessPaymentResponse>(requireActivity(),
+                                onLoading = {
+                                    showProcessPaymentDialog()
+                                }, onSuccess = { data ->
+                                    LandingActivity().paymentId = data?.payment_id
+                                    bottomSheetDialog.findViewById<LottieAnimationView>(R.id.img_logo)!!
+                                        .addAnimatorListener(object : Animator.AnimatorListener {
+                                            override fun onAnimationStart(p0: Animator) {
+                                            }
+
+                                            override fun onAnimationEnd(p0: Animator) {
+                                                Toast.makeText(
+                                                    activity,
+                                                    "Ended",
+                                                    Toast.LENGTH_SHORT
+                                                )
+                                                    .show()
+                                            }
+
+                                            override fun onAnimationCancel(p0: Animator) {
+                                            }
+
+                                            override fun onAnimationRepeat(p0: Animator) {
+                                                bottomSheetDialog.dismiss()
+
+
+                                                val arguments = Bundle()
+                                                arguments.putString(TOKEN, token)
+                                                arguments.putLong(START_TIME, startTime)
+                                                arguments.putString(
+                                                    REDIRECT_URL,
+                                                    data!!.redirect_url
+                                                )
+                                                arguments.putString(ORDER_ID, data?.order_id)
+                                                arguments.putString(PAYMENT_ID, data?.payment_id)
+                                                //arguments.putString(RETRY_PAGE, retryPage)
+
+                                                val acsFragment = ACSFragment()
+                                                acsFragment.arguments = arguments
+
+                                                requireActivity().supportFragmentManager.popBackStack()
+                                                val transaction =
+                                                    requireActivity().supportFragmentManager.beginTransaction()
+                                                transaction.replace(
+                                                    R.id.details_fragment,
+                                                    acsFragment,
+                                                    TAG_ACS
+                                                )
+                                                transaction.addToBackStack(TAG_ACS)
+                                                transaction.commit()
+
+
+                                                /*val i = Intent(activity, ACSPageActivity::class.java)
+                                                i.putExtra(TOKEN, token)
+                                                i.putExtra(START_TIME, startTime)
+                                                i.putExtra(REDIRECT_URL, data!!.redirect_url)
+                                                i.putExtra(ORDER_ID, data?.order_id)
+                                                i.putExtra(PAYMENT_ID, data?.payment_id)
+                                                requireActivity().startActivityForResult(
+                                                    i,
+                                                    REQ_RETRY_CALLBACK
+                                                )*/
+                                                //requireActivity().finish()
+                                                //generateOtp(data?.payment_id, data?.redirect_url)
+                                            }
+
+                                        })
+
+                                }, onFailure = { errorMessage ->
+
                                     bottomSheetDialog.dismiss()
-                                    val i = Intent(activity, ACSPageActivity::class.java)
+                                    /*val i = Intent(activity, ACSPageActivity::class.java)
+                                    i.putExtra(TOKEN, token)
                                     i.putExtra(START_TIME, startTime)
-                                    i.putExtra(REDIRECT_URL, data!!.redirect_url)
-                                    i.putExtra(ORDER_ID, data?.order_id)
-                                    i.putExtra(PAYMENT_ID, data?.payment_id)
-                                    startActivity(i)
-                                    requireActivity().finish()
-                                }
+                                    i.putExtra(REDIRECT_URL, "www.google.com")
+                                    i.putExtra(ORDER_ID, "123")
+                                    i.putExtra(PAYMENT_ID, "123")
+                                    requireActivity().startActivityForResult(
+                                        i,
+                                        REQ_RETRY_CALLBACK
+                                    )
+                                    requireActivity().finish()*/
 
-                            })
+                                    listener?.onRetry(false)
+                                    /*bottomSheetDialog.findViewById<LottieAnimationView>(R.id.img_logo)!!
+                                        .addAnimatorListener(object : Animator.AnimatorListener {
+                                            override fun onAnimationStart(p0: Animator) {
+                                            }
 
-                    }, onFailure = { errorMessage ->
-                        bottomSheetDialog.findViewById<LottieAnimationView>(R.id.img_logo)!!
-                            .addAnimatorListener(object : Animator.AnimatorListener {
-                                override fun onAnimationStart(p0: Animator) {
-                                }
+                                            override fun onAnimationEnd(p0: Animator) {
+                                                Toast.makeText(activity, "Ended", Toast.LENGTH_SHORT).show()
+                                            }
 
-                                override fun onAnimationEnd(p0: Animator) {
-                                    Toast.makeText(activity, "Ended", Toast.LENGTH_SHORT).show()
-                                }
+                                            override fun onAnimationCancel(p0: Animator) {
+                                            }
 
-                                override fun onAnimationCancel(p0: Animator) {
-                                }
+                                            override fun onAnimationRepeat(p0: Animator) {
+                                                bottomSheetDialog.dismiss()
+                                                *//*val i = Intent(requireActivity(), FailureActivity::class.java)
+                                        i.putExtra(ORDER_ID, orderId)
+                                        i.putExtra(ERROR_CODE, errorMessage?.error_code)
+                                        i.putExtra(ERROR_MESSAGE, errorMessage?.error_message)
+                                        startActivity(i)
+                                        requireActivity().finish()*//*
 
-                                override fun onAnimationRepeat(p0: Animator) {
-                                    bottomSheetDialog.dismiss()
-                                    val i = Intent(requireActivity(), FailureActivity::class.java)
-                                    i.putExtra(ERROR_CODE, errorMessage?.error_code)
-                                    i.putExtra(ERROR_MESSAGE, errorMessage?.error_message)
-                                    startActivity(i)
-                                    requireActivity().finish()
-                                }
+                                        //requireActivity().finish()
+                                    }
 
-                            })
-                    })
-            fetchDataResponseHandler.handleApiResult(response)
+                                })*/
+                                })
+                        fetchDataResponseHandler.handleApiResult(response)
+
+                    }
+                }
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
 
     }
@@ -1261,47 +1371,98 @@ class CardFragment : Fragment() {
         binRequestList.add(binRequest)
         println("bin request " + Gson().toJson(binRequestList))
         mainViewModel.getBinData(token, CardBinMetaDataRequestList(binRequestList))
-        mainViewModel.bin_data_response.observe(viewLifecycleOwner) { response ->
-            val fetchDataResponseHandler =
-                ApiResultHandler<CardBinMetaDataResponse>(requireActivity(),
-                    onLoading = {},
-                    onSuccess = { data ->
-                        println("Domestic card ${data?.extendedCardMetaResponseList?.get(0)?.cardNetwork}")
-                        setCardBrandIcon(
-                            etCardNumber,
-                            data?.extendedCardMetaResponseList?.get(0)?.cardNetwork
-                        )
-                    },
-                    onFailure = {})
-            fetchDataResponseHandler.handleApiResult(response)
-        }
+        mainViewModel.bin_data_response.distinctUntilChanged()
+            .observe(viewLifecycleOwner) { response ->
+                val fetchDataResponseHandler =
+                    ApiResultHandler<CardBinMetaDataResponse>(requireActivity(),
+                        onLoading = {},
+                        onSuccess = { data ->
+                            println("Domestic card ${data?.extendedCardMetaResponseList?.get(0)?.cardNetwork}")
+                            setCardBrandIcon(
+                                etCardNumber,
+                                data?.extendedCardMetaResponseList?.get(0)?.cardNetwork
+                            )
+                        },
+                        onFailure = {})
+                fetchDataResponseHandler.handleApiResult(response)
+            }
+    }
+
+    private fun generateOtp(paymentId: String?, challengeUrl: String?) {
+        val otpRequest = OTPRequest(paymentId, null, challengeUrl)
+        mainViewModel.generatOtp(token, otpRequest)
+        mainViewModel.generate_otp_response.distinctUntilChanged()
+            .observe(viewLifecycleOwner) { response ->
+                val generateOtpResponseHandler =
+                    ApiResultHandler<OTPResponse>(requireActivity(),
+                        onLoading = {},
+                        onSuccess = {
+                            /*val optFragment = OtpFragment()
+                                        val transaction =
+                                            requireActivity().supportFragmentManager.beginTransaction()
+                                        transaction.replace(R.id.details_fragment, optFragment, TAG_OTP)
+                                        transaction.commit()*/
+                        },
+                        onFailure = {})
+                generateOtpResponseHandler.handleApiResult(response)
+            }
+    }
+
+    private fun sendOtp(paymentId: String, otp: String) {
+        val otpRequest = OTPRequest(paymentId, otp, null)
+        mainViewModel.submitOtp(token, otpRequest)
+        mainViewModel.submit_otp_response.distinctUntilChanged()
+            .observe(viewLifecycleOwner) { response ->
+                val sendOtpResponseHandler =
+                    ApiResultHandler<OTPResponse>(requireActivity(),
+                        onLoading = {},
+                        onSuccess = {},
+                        onFailure = {})
+                sendOtpResponseHandler.handleApiResult(response)
+            }
+    }
+
+    private fun resendOtp(paymentId: String) {
+        val otpRequest = OTPRequest(paymentId, null, null)
+        mainViewModel.resendOtp(token, otpRequest)
+        mainViewModel.resend_otp_response.distinctUntilChanged()
+            .observe(viewLifecycleOwner) { response ->
+                val resendOtpResponseHandler =
+                    ApiResultHandler<OTPResponse>(requireActivity(),
+                        onLoading = {},
+                        onSuccess = {},
+                        onFailure = {})
+                resendOtpResponseHandler.handleApiResult(response)
+            }
     }
 
     private fun createPaymentParams(): HashMap<String, String> {
-
         val displayMetrics = DisplayMetrics()
         requireActivity().windowManager.defaultDisplay.getMetrics(displayMetrics)
         val height = displayMetrics.heightPixels
         val width = displayMetrics.widthPixels
+        val pixelFormat = requireActivity().windowManager.defaultDisplay.pixelFormat
         println("Screen size " + height + " " + width)
         println("Ip address " + Utils.getLocalIpAddress())
 
         var browserDetails = HashMap<String, String>()
         browserDetails.put(BROWSER_ACCEPT_HEADER, BROWSER_ACCEPT_ALL)
-        browserDetails.put(BROWSER_LANGUAGE, BROWSER_LANGUAGE_EN)
+        browserDetails.put(BROWSER_LANGUAGE, Locale.getDefault().language)
         browserDetails.put(BROWSER_SCREEN_HEIGHT, height.toString())
         browserDetails.put(BROWSER_SCREEN_WIDTH, width.toString())
-        browserDetails.put(BROWSER_TIME_ZONE, "-330")
+        browserDetails.put(BROWSER_TIME_ZONE, Utils.getTimeOffset().toString())
         browserDetails.put(
             BROWSER_USER_AGENT,
-            "mozilla/5.0+(x11;+ubuntu;+linux+x86_64;+rv:72.0)+gecko/20100101+firefox/72.0"
+            BROWSER_USER_AGENT_ANDROID
         )
         browserDetails.put(BROWSER_IP_ADDRESS, Utils.getLocalIpAddress().toString())
-        browserDetails.put(BROWSER_SCREEN_COLOR_DEPTH, "24")
-        browserDetails.put(BROWSER_JAVASCRIPT_ENABLED, "false")
+        browserDetails.put(BROWSER_SCREEN_COLOR_DEPTH, Utils.getColorDepth(pixelFormat).toString())
+        browserDetails.put(BROWSER_JAVASCRIPT_ENABLED, "true")
         return browserDetails
-
     }
 
-
+    override fun onDestroyView() {
+        super.onDestroyView()
+        mainViewModel.process_payment_response.removeObservers(viewLifecycleOwner)
+    }
 }

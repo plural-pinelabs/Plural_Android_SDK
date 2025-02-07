@@ -23,7 +23,7 @@ class Constants {
         const val BASE_URL_QA = "https://pluralqa.pinepg.in/api/v3/checkout-bff/"
         const val BASE_URL_PROD = "https://api.pluralonline.com/api/v3/checkout-bff/"
         const val BASE_ANIMATION = "https://d1xlp3rxzdtgvz.cloudfront.net/loaderAnimation/"
-        const val BASE_IMAGES ="https://d1xlp3rxzdtgvz.cloudfront.net/bank-icons/bank-logos/"
+        const val BASE_IMAGES = "https://d1xlp3rxzdtgvz.cloudfront.net/bank-icons/bank-logos/"
 
         const val IMAGE_LOGO = BASE_ANIMATION + "logo_shimmer.json"
 
@@ -34,6 +34,7 @@ class Constants {
         const val NET_BANKING_LABEL = "Netbanking"
         const val UPI_LABEL = "UPI"
         const val WALLET_LABEL = "WALLET"
+        const val ALL_PAYMENT_METHODS_LABEL = "All Payment Methods"
 
         const val CREDIT_DEBIT_ID = "CREDIT_DEBIT"
         const val PAYBYPOINTS_ID = "PAYBYPOINTS"
@@ -93,12 +94,15 @@ class Constants {
         const val UPI_PAY_WITH = "Open with"
         const val UPI_PROCESSED_STATUS = "PROCESSED"
         const val UPI_PROCESSED_FAILED = "FAILED"
+        const val UPI_PROCESSED_ATTEMPTED = "ATTEMPTED"
+
 
         const val TAG_PAYMENT_LISTING = "TAG_PAYMENT_LISTING"
         const val TAG_CARD = "TAG_CARD"
         const val TAG_UPI = "TAG_UPI"
         const val TAG_NETBANKING = "TAG_NETBANKING"
         const val TAG_OTP = "TAG_OTP"
+        const val TAG_ACS = "TAG_ACS"
 
         const val CT_CARDS = "cards"
         const val CT_UPI = "upi"
@@ -106,6 +110,7 @@ class Constants {
         const val CT_INTENT_GPAY = "google_pay"
         const val CT_INTENT_PHONEPE = "phonepe"
         const val CT_INTENT_PAYTM = "paytm"
+        const val CT_INTENT_ALL = "any upi app"
 
         const val CT_NETBANKING = "netbanking"
 
@@ -114,7 +119,7 @@ class Constants {
 
         const val PAYMENT_REFERENCE_TYPE_CARD = "CARD"
 
-        const val BROWSER_ACCEPT_HEADER="browseracceptheader"
+        const val BROWSER_ACCEPT_HEADER = "browseracceptheader"
         const val BROWSER_LANGUAGE = "browserlanguage"
         const val BROWSER_SCREEN_HEIGHT = "browserscreenheight"
         const val BROWSER_SCREEN_WIDTH = "browserscreenwidth"
@@ -124,7 +129,13 @@ class Constants {
         const val BROWSER_SCREEN_COLOR_DEPTH = "browserscreencolordepth"
         const val BROWSER_JAVASCRIPT_ENABLED = "browserjavascriptenabledval"
         const val BROWSER_ACCEPT_ALL = "*/*"
-        const val BROWSER_LANGUAGE_EN = "en"
-        const val BROWSER_USER_AGENT_ANDROID = "Mozilla/5.0 (Linux; Android 10; Pixel 4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.127 Mobile Safari/537.36"
+        const val BROWSER_USER_AGENT_ANDROID =
+            "Mozilla/5.0 (Linux; Android 10; Pixel 4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.127 Mobile Safari/537.36"
+
+        const val OTP_RESEND = "RESEND"
+        const val OTP_CANCEL = "CANCEL"
+
+        val REQ_RETRY_CALLBACK: Int = 300
+
     }
 }

@@ -7,6 +7,8 @@ import com.pinelabs.pluralsdk.data.model.CardBinMetaDataRequest
 import com.pinelabs.pluralsdk.data.model.CardBinMetaDataRequestList
 import com.pinelabs.pluralsdk.data.model.CardBinMetaDataResponse
 import com.pinelabs.pluralsdk.data.model.FetchResponse
+import com.pinelabs.pluralsdk.data.model.OTPRequest
+import com.pinelabs.pluralsdk.data.model.OTPResponse
 import com.pinelabs.pluralsdk.data.model.ProcessPaymentRequest
 import com.pinelabs.pluralsdk.data.model.ProcessPaymentResponse
 import com.pinelabs.pluralsdk.data.model.RewardRequest
@@ -18,7 +20,7 @@ import kotlinx.coroutines.flow.Flow
 
 class Repository(private val remoteDataSource: RemoteDataSource) {
 
-    suspend fun fetchData(context: Context, token: String): Flow<NetWorkResult<FetchResponse>> {
+    suspend fun fetchData(context: Context, token: String?): Flow<NetWorkResult<FetchResponse>> {
         return toResultFlow(context) {
             remoteDataSource.fetchData(token)
         }
@@ -46,7 +48,7 @@ class Repository(private val remoteDataSource: RemoteDataSource) {
 
     suspend fun transactionStatus(
         context: Context,
-        token: String
+        token: String?
     ): Flow<NetWorkResult<TransactionStatusResponse>> {
         return toResultFlow(context) {
             remoteDataSource.transactionStatus(token)
@@ -71,4 +73,35 @@ class Repository(private val remoteDataSource: RemoteDataSource) {
             remoteDataSource.binData(token, cardData)
         }
     }
+
+    suspend fun generateOTP(
+        context: Context,
+        token: String,
+        otpRequest: OTPRequest
+    ): Flow<NetWorkResult<OTPResponse>> {
+        return toResultFlow(context) {
+            remoteDataSource.generateOTP(token, otpRequest)
+        }
+    }
+
+    suspend fun submitOTP(
+        context: Context,
+        token: String,
+        otpRequest: OTPRequest
+    ): Flow<NetWorkResult<OTPResponse>> {
+        return toResultFlow(context) {
+            remoteDataSource.submitOTP(token, otpRequest)
+        }
+    }
+
+    suspend fun resendOTP(
+        context: Context,
+        token: String,
+        otpRequest: OTPRequest
+    ): Flow<NetWorkResult<OTPResponse>> {
+        return toResultFlow(context) {
+            remoteDataSource.resendOTP(token, otpRequest)
+        }
+    }
+
 }

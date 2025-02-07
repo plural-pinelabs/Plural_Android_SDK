@@ -46,8 +46,7 @@ class TestAppActivity : AppCompatActivity(), PaymentResultCallBack {
                 "",
                 this@TestAppActivity
             )}*/
-            if (NetworkUtil.isNetworkAvailable(this@TestAppActivity) == true)
-            {
+            if (NetworkUtil.isNetworkAvailable(this@TestAppActivity) == true) {
                 generateToken()
                 /*if (edt_redirectURL.text.isNotEmpty())
                     PluralSDKManager().startPayment(
@@ -158,12 +157,12 @@ class TestAppActivity : AppCompatActivity(), PaymentResultCallBack {
 
     }
 
-    override fun onErrorOccured(message: String?) {
+    override fun onErrorOccured(orderId: String?, code: String?, message: String?) {
         Toast.makeText(this@TestAppActivity, "Error in app ${message}", Toast.LENGTH_SHORT).show()
     }
 
-    override fun onSuccessOccured() {
-        Toast.makeText(this@TestAppActivity, "Yay Payment Successful", Toast.LENGTH_SHORT).show()
+    override fun onSuccessOccured(orderId: String?) {
+        Toast.makeText(this@TestAppActivity, "Yay Payment Successful ${orderId}", Toast.LENGTH_SHORT).show()
     }
 
     override fun onTransactionResponse() {

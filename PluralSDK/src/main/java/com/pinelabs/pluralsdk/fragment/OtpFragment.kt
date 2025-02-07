@@ -15,6 +15,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.Fragment
 import com.google.android.gms.auth.api.phone.SmsRetriever
 import com.pinelabs.pluralsdk.R
@@ -22,6 +23,7 @@ import com.pinelabs.pluralsdk.activity.ACSPageActivity
 import com.pinelabs.pluralsdk.utils.Constants.Companion.ORDER_ID
 import com.pinelabs.pluralsdk.utils.Constants.Companion.PAYMENT_ID
 import com.pinelabs.pluralsdk.utils.Constants.Companion.REDIRECT_URL
+import com.pinelabs.pluralsdk.utils.Constants.Companion.TOKEN
 import java.util.Timer
 
 class OtpFragment : Fragment() {
@@ -50,6 +52,10 @@ class OtpFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+
+        val activityButton = requireActivity().findViewById<ConstraintLayout>(R.id.layout_orginal)
+        activityButton.visibility = View.VISIBLE
+
         textResendOtp = view.findViewById(R.id.resend_otp_text)
         resendOtpTimer = view.findViewById(R.id.linear_resend_otp_timer)
         textTimer = view.findViewById(R.id.resend_otp_timer)
@@ -61,6 +67,7 @@ class OtpFragment : Fragment() {
         linearAcsPage = view.findViewById(R.id.linear_bank)
         linearAcsPage.setOnClickListener {
             val i = Intent(activity, ACSPageActivity::class.java)
+            i.putExtra(TOKEN, "")
             i.putExtra(REDIRECT_URL, "")
             i.putExtra(ORDER_ID, "")
             i.putExtra(PAYMENT_ID, "")

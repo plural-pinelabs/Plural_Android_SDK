@@ -1,6 +1,7 @@
 package com.pinelabs.pluralsdk.activity
 
 import android.R.attr
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
@@ -20,6 +21,7 @@ import android.util.Base64
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
 import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.ImageView
@@ -33,7 +35,9 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.distinctUntilChanged
 import com.clevertap.android.sdk.CleverTapAPI
+import com.clevertap.android.sdk.isNotNullAndBlank
 import com.google.android.gms.auth.api.phone.SmsRetriever
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.pinelabs.pluralsdk.PluralSDK
@@ -41,25 +45,47 @@ import com.pinelabs.pluralsdk.R
 import com.pinelabs.pluralsdk.data.model.CancelTransactionResponse
 import com.pinelabs.pluralsdk.data.model.FetchResponse
 import com.pinelabs.pluralsdk.data.model.Palette
+import com.pinelabs.pluralsdk.data.model.PaymentMode
+import com.pinelabs.pluralsdk.data.model.TransactionStatusResponse
 import com.pinelabs.pluralsdk.data.utils.AmountUtil.convertToRupees
+import com.pinelabs.pluralsdk.data.utils.AmountUtil.roundToDecimal
 import com.pinelabs.pluralsdk.data.utils.ApiResultHandler
+import com.pinelabs.pluralsdk.fragment.ACSFragment
+import com.pinelabs.pluralsdk.fragment.BottomSheetRetryFragment
+import com.pinelabs.pluralsdk.fragment.BottomSheetRetryUpiFragment
+import com.pinelabs.pluralsdk.fragment.CardFragment
+import com.pinelabs.pluralsdk.fragment.NetBankingFragment
 import com.pinelabs.pluralsdk.fragment.PaymentOptionListing
+import com.pinelabs.pluralsdk.fragment.UPICollectFragment
 import com.pinelabs.pluralsdk.utils.CleverTapUtil
 import com.pinelabs.pluralsdk.utils.CleverTapUtil.Companion.CT_EVENT_PAYMENT_CANCELLED
 import com.pinelabs.pluralsdk.utils.Constants.Companion.ERROR_CODE
 import com.pinelabs.pluralsdk.utils.Constants.Companion.ERROR_MESSAGE
+import com.pinelabs.pluralsdk.utils.Constants.Companion.ORDER_ID
+import com.pinelabs.pluralsdk.utils.Constants.Companion.PAYBYPOINTS_ID
+import com.pinelabs.pluralsdk.utils.Constants.Companion.REQ_RETRY_CALLBACK
+import com.pinelabs.pluralsdk.utils.Constants.Companion.TAG_ACS
+import com.pinelabs.pluralsdk.utils.Constants.Companion.TAG_CARD
+import com.pinelabs.pluralsdk.utils.Constants.Companion.TAG_NETBANKING
 import com.pinelabs.pluralsdk.utils.Constants.Companion.TAG_PAYMENT_LISTING
 import com.pinelabs.pluralsdk.utils.Constants.Companion.TAG_UPI
 import com.pinelabs.pluralsdk.utils.Constants.Companion.TOKEN
+import com.pinelabs.pluralsdk.utils.Constants.Companion.UPI_PROCESSED_STATUS
+import com.pinelabs.pluralsdk.utils.PaymentModes
 import com.pinelabs.pluralsdk.utils.SmsBroadcastReceiver
 import com.pinelabs.pluralsdk.utils.SmsBroadcastReceiver.SmsBroadcastReceiverListener
 import com.pinelabs.pluralsdk.viewmodels.FetchDataViewModel
+import com.pinelabs.pluralsdk.viewmodels.RetryViewModel
 import com.pinelabs.pluralsdk.viewmodels.ViewModelFactory
+import com.pinelabs.pluralsdk.viewmodels.ViewModelFactoryRetry
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 
 
-class LandingActivity : AppCompatActivity(), Thread.UncaughtExceptionHandler {
+class LandingActivity : AppCompatActivity(), Thread.UncaughtExceptionHandler,
+    CardFragment.onRetryListener, NetBankingFragment.onRetryListener,
+    UPICollectFragment.onRetryListener,
+    ACSFragment.onRetryListener {
 
     lateinit var customerLayout: FrameLayout
     lateinit var layoutOrginal: ConstraintLayout
@@ -76,8 +102,11 @@ class LandingActivity : AppCompatActivity(), Thread.UncaughtExceptionHandler {
     private lateinit var cardProfilePic: CardView
 
     private lateinit var viewModel: FetchDataViewModel
+    private lateinit var retryViewModel: RetryViewModel
 
     var deepLink: String? = null
+    var paymentId: String? = null
+
     //private lateinit var window: Window
 
     private var amount: Int? = null
@@ -92,10 +121,14 @@ class LandingActivity : AppCompatActivity(), Thread.UncaughtExceptionHandler {
     val REQ_USER_CONSENT: Int = 200
     var smsBroadcastReceiver: SmsBroadcastReceiver? = null
 
+    var paymentModes: List<PaymentMode>? = mutableListOf()
+    var isAcs = false
+
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.landing)
+
 
         clevertapDefaultInstance = CleverTapAPI.getDefaultInstance(applicationContext)
         startTime = System.currentTimeMillis()
@@ -106,7 +139,10 @@ class LandingActivity : AppCompatActivity(), Thread.UncaughtExceptionHandler {
         startSmartUserConsent()
 
         val viewModelFactory = ViewModelFactory(application)
+        val viewModelFactoryRetry = ViewModelFactoryRetry(application)
+
         viewModel = ViewModelProvider(this, viewModelFactory)[FetchDataViewModel::class.java]
+        retryViewModel = ViewModelProvider(this, viewModelFactoryRetry)[RetryViewModel::class.java]
 
         token = intent.getStringExtra(TOKEN).toString()
 
@@ -125,6 +161,16 @@ class LandingActivity : AppCompatActivity(), Thread.UncaughtExceptionHandler {
                 getOtpFromMessage(message)
             }
         }
+
+        /*Toast.makeText(this, "Callback reached", Toast.LENGTH_SHORT).show()
+        if (requestCode === REQ_RETRY_CALLBACK) {
+            if ((resultCode === RESULT_OK) && (data != null)) {
+                val retryPage: String? = data?.getStringExtra(RETRY_PAGE)
+                println("Retry page ${retryPage}")
+                showPaymentListingFragment(retryPage)
+            }
+        }*/
+
     }
 
     fun getViews() {
@@ -178,21 +224,22 @@ class LandingActivity : AppCompatActivity(), Thread.UncaughtExceptionHandler {
 
         cancelShimmerlayout.setOnClickListener {
             clevertapDefaultInstance?.let { CT_EVENT_PAYMENT_CANCELLED(it, true, false) }
-            showCancelConfirmationDialog(null)
+            showCancelConfirmationDialog(this, null)
         }
 
         cancelLayout.setOnClickListener {
             clevertapDefaultInstance?.let { CT_EVENT_PAYMENT_CANCELLED(it, true, false) }
-            showCancelConfirmationDialog(null)
+            showCancelConfirmationDialog(this, null)
         }
     }
 
-    private fun showCancelConfirmationDialog(tag: String?) {
-        val bottomSheetDialog = BottomSheetDialog(this)
+    public fun showCancelConfirmationDialog(activity: Activity, tag: String?) {
+        val bottomSheetDialog = BottomSheetDialog(activity)
         val view =
-            LayoutInflater.from(this).inflate(R.layout.cancel_confirmation_bottom_sheet, null)
-        bottomSheetDialog.setContentView(view)
+            LayoutInflater.from(activity).inflate(R.layout.cancel_confirmation_bottom_sheet, null)
         bottomSheetDialog.setCancelable(false)
+        bottomSheetDialog.setCanceledOnTouchOutside(false)
+        bottomSheetDialog.setContentView(view)
 
         val btnYes: Button = view.findViewById(R.id.btn_yes)
         val btnNo: Button = view.findViewById(R.id.btn_no)
@@ -201,18 +248,20 @@ class LandingActivity : AppCompatActivity(), Thread.UncaughtExceptionHandler {
             btnYes.backgroundTintList = ColorStateList.valueOf(Color.parseColor(palette?.C900))
             btnNo.setTextColor(Color.parseColor(palette?.C900))
             val drawable =
-                ContextCompat.getDrawable(this, R.drawable.outlined_button) as GradientDrawable
+                ContextCompat.getDrawable(activity, R.drawable.outlined_button) as GradientDrawable
             drawable.setStroke(convertDpToPx(2), Color.parseColor(palette?.C900))
             btnNo.background = drawable
         }
 
         btnYes.setOnClickListener {
+            bottomSheetDialog.dismiss()
             if (tag != null) {
+                supportFragmentManager.popBackStack()
                 viewModel.cancelTransaction(token)
             } else {
-                bottomSheetDialog.dismiss()
-                Toast.makeText(this, "Transaction cancelled", Toast.LENGTH_SHORT).show()
-                finish()
+                //Toast.makeText(this, "Transaction cancelled", Toast.LENGTH_SHORT).show()
+                activity.finish()
+                PluralSDK.getInstance().callback?.onCancelTransaction()
             }
         }
 
@@ -225,13 +274,38 @@ class LandingActivity : AppCompatActivity(), Thread.UncaughtExceptionHandler {
 
     override fun onBackPressed() {
         clevertapDefaultInstance?.let { CT_EVENT_PAYMENT_CANCELLED(it, false, true) }
-        if (supportFragmentManager.backStackEntryCount > 0 && supportFragmentManager.fragments[0].tag.equals(
-                TAG_UPI
-            ) && deepLink != null
-        ) {
-            showCancelConfirmationDialog(TAG_UPI)
+
+        println(
+            "Back presss ${supportFragmentManager.backStackEntryCount} ${
+                supportFragmentManager.getBackStackEntryAt(
+                    supportFragmentManager.backStackEntryCount - 1
+                ).name
+            }"
+        )
+
+        if (supportFragmentManager.backStackEntryCount > 0) {
+            val tag =
+                supportFragmentManager.getBackStackEntryAt(supportFragmentManager.backStackEntryCount - 1).name
+
+            if (tag.equals(TAG_ACS))
+                this.isAcs = true
+
+            /*if (tag.equals(TAG_UPI) && deepLink != null) {
+                showCancelConfirmationDialog(this, TAG_UPI)
+            } else if (tag.equals(TAG_ACS)) {
+                this.isAcs = true
+                viewModel.cancelTransaction(token)
+            } else
+                super.onBackPressed()*/
+
+            if (tag.equals(TAG_ACS) || deepLink.isNotNullAndBlank() || paymentId.isNotNullAndBlank())
+                showCancelConfirmationDialog(this, tag)
+            else
+                supportFragmentManager.popBackStack()
+
+
         } else if (supportFragmentManager.backStackEntryCount == 0) {
-            showCancelConfirmationDialog(null)
+            showCancelConfirmationDialog(this, null)
         } else {
             super.onBackPressed()
         }
@@ -243,6 +317,51 @@ class LandingActivity : AppCompatActivity(), Thread.UncaughtExceptionHandler {
 //    }
 
     fun observerFetchData() {
+        retryViewModel.transaction_status_response.distinctUntilChanged()
+            .observe(this) { response ->
+                val fetchDataResponseHandler =
+                    ApiResultHandler<TransactionStatusResponse>(this, onLoading = {
+                    }, onSuccess = { data ->
+                        println("Transaction status landing")
+                        data?.data?.let { data ->
+                            if (data.status.equals(UPI_PROCESSED_STATUS)) {
+                                val intent = Intent(this, SuccessActivity::class.java)
+                                intent.putExtra(ORDER_ID, data?.order_id)
+                                startActivity(intent)
+                                finish()
+                            } else {
+                                if (data.is_retry_available) {
+                                    val bottomSheetDialog =
+                                        BottomSheetRetryFragment(
+                                            txtTransactionamount.text.toString().replace(Regex("\\s+"), ""),
+                                            isAcs,
+                                            paymentModes,
+                                            token
+                                        )
+                                    bottomSheetDialog.isCancelable = false
+                                    bottomSheetDialog.show(supportFragmentManager, "")
+                                    //mainViewModel.clearTransactionStatus()
+                                } else {
+                                    val intent = Intent(this, FailureActivity::class.java)
+                                    //intent.putExtra(ORDER_ID, orderId)
+                                    startActivity(intent)
+                                    finish()
+                                }
+                            }
+
+                        }
+                    }, onFailure = {
+                        val intent = Intent(this, FailureActivity::class.java)
+                        //intent.putExtra(ORDER_ID, orderId)
+                        startActivity(intent)
+                        finish()
+                        println("Transaction status failure")
+                    })
+                fetchDataResponseHandler.handleApiResult(response)
+
+            }
+
+
         try {
             viewModel.fetch_response.observe(this) { response ->
                 val fetchDataResponseHandler =
@@ -251,6 +370,11 @@ class LandingActivity : AppCompatActivity(), Thread.UncaughtExceptionHandler {
                     }, onSuccess = { data ->
                         //orderId = response.order_id
                         setView(data)
+
+                        paymentModes = response.data?.paymentModes?.filter { paymentMode ->
+                            paymentMode.paymentModeData != null || paymentMode.paymentModeId == PAYBYPOINTS_ID
+                        }
+
                     }, onFailure = { errorMessage ->
                         val i = Intent(applicationContext, FailureActivity::class.java)
                         i.putExtra(ERROR_CODE, errorMessage?.error_code)
@@ -269,9 +393,23 @@ class LandingActivity : AppCompatActivity(), Thread.UncaughtExceptionHandler {
                     ApiResultHandler<CancelTransactionResponse>(this@LandingActivity, onLoading = {
 
                     }, onSuccess = {
-                        Toast.makeText(this, "Transaction cancelled", Toast.LENGTH_SHORT).show()
-                        PluralSDK.getInstance().callback?.onCancelTransaction()
-                        finish()
+                        this.paymentId = null
+                        this.deepLink = null
+                        /*if (this.isAcs) {
+                            val bottomSheetDialog =
+                                BottomSheetRetryFragment(
+                                    convertToRupees(this, amount!!),
+                                    isAcs,
+                                    paymentModes,
+                                    token
+                                )
+                            bottomSheetDialog.isCancelable = false
+                            bottomSheetDialog.show(supportFragmentManager, "")
+                        }*/ /*else {
+                            Toast.makeText(this, "Transaction cancelled", Toast.LENGTH_SHORT).show()
+                            PluralSDK.getInstance().callback?.onCancelTransaction()
+                            finish()
+                        }*/
                     }, onFailure = {
 
                     })
@@ -369,9 +507,8 @@ class LandingActivity : AppCompatActivity(), Thread.UncaughtExceptionHandler {
         )
         CleverTapUtil.CT_EVENT_PAYMENT_PAGE_LOADED(
             clevertapDefaultInstance, loadTime?.toInt(), fetchResponse?.merchantInfo?.merchantId,
-            convertToRupees(
-                this@LandingActivity,
-                fetchResponse?.paymentData?.originalTxnAmount?.amount!!
+            roundToDecimal(
+                fetchResponse?.paymentData?.originalTxnAmount?.amount!!.toDouble() / 100
             ),
             fetchResponse?.customerInfo?.mobileNo, fetchResponse?.customerInfo?.emailId
         )
@@ -438,14 +575,15 @@ class LandingActivity : AppCompatActivity(), Thread.UncaughtExceptionHandler {
     }
 
     private fun getOtpFromMessage(message: String?) {
-        println("OTP "+message)
+        println("OTP " + message)
 
         val otpPattern: Pattern = Pattern.compile("(|^)\\d{6}")
         val matcher: Matcher = otpPattern.matcher(message)
         if (matcher.find()) {
             /*etOTP.setText(matcher.group(0))*/
-            println("OTP "+matcher.group(0))
-            Toast.makeText(this@LandingActivity, "OTP "+matcher.group(0), Toast.LENGTH_SHORT).show()
+            println("OTP " + matcher.group(0))
+            Toast.makeText(this@LandingActivity, "OTP " + matcher.group(0), Toast.LENGTH_SHORT)
+                .show()
         }
     }
 
@@ -477,4 +615,11 @@ class LandingActivity : AppCompatActivity(), Thread.UncaughtExceptionHandler {
         super.onStop()
         unregisterReceiver(smsBroadcastReceiver)
     }
+
+    override fun onRetry(isAcs: Boolean) {
+        this.isAcs = isAcs
+        retryViewModel.getTransactionStatus(token)
+        //loadFragment(fragmentTag)
+    }
+
 }

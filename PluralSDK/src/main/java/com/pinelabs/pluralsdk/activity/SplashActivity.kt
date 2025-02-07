@@ -26,30 +26,12 @@ class SplashActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.splash)
 
-
-        // Get the current display
-        val display = windowManager.defaultDisplay
-
-
-        // Get the pixel format for the display
-        val pixelFormat = display.pixelFormat
-
-
-        // Print the color depth (bits per pixel)
-        val colorDepth: Int = Utils.getColorDepth(pixelFormat)
-        println("Screen color depth: $pixelFormat : $colorDepth bits per pixel")
-
-
-        val timeZone: TimeZone = TimeZone.getDefault()
-        val timeZoneID: String = timeZone.getID()
-        println("Time zone "+timeZoneID)
-
         //CleverTapAPI.setDebugLevel(CleverTapAPI.LogLevel.DEBUG);    //Default Log level
         val clevertapDefaultInstance = CleverTapAPI.getDefaultInstance(this@SplashActivity)
         CleverTapUtil.CT_EVENT_SDK_INITIALISED(clevertapDefaultInstance, this@SplashActivity)
 
         token = intent.getStringExtra(TOKEN).toString()
-        //token ="V3_6EvDWnlDV7oe%2B3HJJD2Gv6k3e3Jy%2F8mAvWR%2BKF1r0t7ufpPKL7x4EbExjFO40qaw"
+        //token ="V3_XIc%2BwZynYrXQjBUoV%2BzBgGxwxWQmkwLm6NYXdIA12X2TxJ2nOa%2BJ%2FTmQcEnNf4I6"
 
         logoAnimation = findViewById(R.id.img_logo)
         logoAnimation.setAnimationFromUrl(IMAGE_LOGO)
