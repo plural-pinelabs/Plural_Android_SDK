@@ -1,7 +1,5 @@
 package com.pinelabs.pluralsdk.fragment
 
-import android.content.res.ColorStateList
-import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -74,7 +72,7 @@ class PaymentOptionListing : Fragment(), PaymentOptionsAdapter.OnItemClickListen
                     }, onSuccess = { data ->
                         stopShimmer()
                         if (response.data != null) {
-                        val paymentModes = response.data?.paymentModes?.filter { paymentMode ->
+                            val paymentModes = response.data?.paymentModes?.filter { paymentMode ->
                                 paymentMode.paymentModeData != null || paymentMode.paymentModeId == PAYBYPOINTS_ID
                             }
                             listData(
@@ -126,7 +124,7 @@ class PaymentOptionListing : Fragment(), PaymentOptionsAdapter.OnItemClickListen
     fun loadFragment(paymentOption: String) {
 
         val arguments = Bundle()
-        arguments.putString(TOKEN, token+"abc")
+        arguments.putString(TOKEN, token)
 
         // loading which Payment Option where
         val selectedFragment = when (paymentOption) {

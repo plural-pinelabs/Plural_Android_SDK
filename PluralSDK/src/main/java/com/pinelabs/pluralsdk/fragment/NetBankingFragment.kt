@@ -94,7 +94,7 @@ class NetBankingFragment : Fragment(), NetBankAllAdapter.OnItemClickListener {
     private var listener: onRetryListener? = null
 
     interface onRetryListener {
-        fun onRetry(isAcs: Boolean)
+        fun onRetry(isAcs: Boolean, errorMessage:String?)
     }
 
     override fun onAttach(context: Context) {
@@ -223,7 +223,7 @@ class NetBankingFragment : Fragment(), NetBankAllAdapter.OnItemClickListener {
                         intent.putExtra(ERROR_MESSAGE, errorMessage?.error_message)
                         startActivity(intent)
                         requireActivity().finish()*/
-                            listener?.onRetry(false)
+                            listener?.onRetry(false, errorMessage?.error_message)
                         })
                 fetchDataResponseHandler.handleApiResult(response)
             }

@@ -51,7 +51,7 @@ class ACSFragment : Fragment() {
     private lateinit var logoAnimation: LottieAnimationView
 
     interface onRetryListener {
-        fun onRetry(isAcs: Boolean)
+        fun onRetry(isAcs: Boolean, errorMessage:String?)
     }
 
     override fun onAttach(context: Context) {
@@ -166,7 +166,7 @@ class ACSFragment : Fragment() {
                     //viewModel.getTransactionStatus(token)
                     webAcs.visibility = View.GONE
                     constrainSuccess.visibility = View.VISIBLE
-                    listener?.onRetry(true)
+                    listener?.onRetry(true,"")
                 }
             }
         }
@@ -207,6 +207,11 @@ class ACSFragment : Fragment() {
             )
 
         }
+    }
+
+    fun showProcessPayment(){
+        webAcs.visibility = View.GONE
+        constrainSuccess.visibility = View.VISIBLE
     }
 
 }

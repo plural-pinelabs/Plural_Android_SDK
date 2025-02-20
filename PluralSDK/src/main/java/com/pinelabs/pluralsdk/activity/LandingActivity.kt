@@ -22,6 +22,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
+import android.webkit.WebView
 import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.ImageView
@@ -123,6 +124,7 @@ class LandingActivity : AppCompatActivity(), Thread.UncaughtExceptionHandler,
 
     var paymentModes: List<PaymentMode>? = mutableListOf()
     var isAcs = false
+    var errorMessage: String? = null
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -275,21 +277,23 @@ class LandingActivity : AppCompatActivity(), Thread.UncaughtExceptionHandler,
     override fun onBackPressed() {
         clevertapDefaultInstance?.let { CT_EVENT_PAYMENT_CANCELLED(it, false, true) }
 
-        println(
-            "Back presss ${supportFragmentManager.backStackEntryCount} ${
-                supportFragmentManager.getBackStackEntryAt(
-                    supportFragmentManager.backStackEntryCount - 1
-                ).name
-            }"
-        )
-
         if (supportFragmentManager.backStackEntryCount > 0) {
+
+            println(
+                "Back presss ${supportFragmentManager.backStackEntryCount} ${
+                    supportFragmentManager.getBackStackEntryAt(
+                        supportFragmentManager.backStackEntryCount - 1
+                    ).name
+                }"
+            )
+
             val tag =
                 supportFragmentManager.getBackStackEntryAt(supportFragmentManager.backStackEntryCount - 1).name
 
             if (tag.equals(TAG_ACS))
                 this.isAcs = true
-
+            supportFragmentManager.findFragmentByTag(TAG_ACS)?.requireActivity()?.findViewById<WebView>(R.id.web_acs)?.visibility =  View.GONE
+            supportFragmentManager.findFragmentByTag(TAG_ACS)?.requireActivity()?.findViewById<ConstraintLayout>(R.id.constrain_success)?.visibility = View.VISIBLE
             /*if (tag.equals(TAG_UPI) && deepLink != null) {
                 showCancelConfirmationDialog(this, TAG_UPI)
             } else if (tag.equals(TAG_ACS)) {
@@ -297,8 +301,9 @@ class LandingActivity : AppCompatActivity(), Thread.UncaughtExceptionHandler,
                 viewModel.cancelTransaction(token)
             } else
                 super.onBackPressed()*/
-
-            if (tag.equals(TAG_ACS) || deepLink.isNotNullAndBlank() || paymentId.isNotNullAndBlank())
+            if (tag.equals(TAG_ACS)) {
+                onRetry(isAcs, "")
+            } else if (deepLink.isNotNullAndBlank() || paymentId.isNotNullAndBlank())
                 showCancelConfirmationDialog(this, tag)
             else
                 supportFragmentManager.popBackStack()
@@ -333,10 +338,13 @@ class LandingActivity : AppCompatActivity(), Thread.UncaughtExceptionHandler,
                                 if (data.is_retry_available) {
                                     val bottomSheetDialog =
                                         BottomSheetRetryFragment(
-                                            txtTransactionamount.text.toString().replace(Regex("\\s+"), ""),
+                                            txtTransactionamount.text.toString()
+                                                .replace(Regex("\\s+"), ""),
                                             isAcs,
                                             paymentModes,
-                                            token
+                                            palette,
+                                            token,
+                                            errorMessage
                                         )
                                     bottomSheetDialog.isCancelable = false
                                     bottomSheetDialog.show(supportFragmentManager, "")
@@ -616,8 +624,9 @@ class LandingActivity : AppCompatActivity(), Thread.UncaughtExceptionHandler,
         unregisterReceiver(smsBroadcastReceiver)
     }
 
-    override fun onRetry(isAcs: Boolean) {
+    override fun onRetry(isAcs: Boolean, errorMessage: String?) {
         this.isAcs = isAcs
+        this.errorMessage = errorMessage
         retryViewModel.getTransactionStatus(token)
         //loadFragment(fragmentTag)
     }

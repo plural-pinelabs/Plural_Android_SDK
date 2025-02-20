@@ -14,6 +14,7 @@ import com.pinelabs.pluralsdk.R
 import com.pinelabs.pluralsdk.activity.LandingActivity
 import com.pinelabs.pluralsdk.adapter.DividerItemDecorator
 import com.pinelabs.pluralsdk.adapter.PaymentOptionsAdapter
+import com.pinelabs.pluralsdk.data.model.Palette
 import com.pinelabs.pluralsdk.data.model.PaymentMode
 import com.pinelabs.pluralsdk.data.model.RecyclerViewPaymentOptionData
 import com.pinelabs.pluralsdk.utils.Constants.Companion.TAG_CARD
@@ -27,7 +28,9 @@ class BottomSheetRetryFragment(
     amount: String,
     retryAcs: Boolean,
     paymentModes: List<PaymentMode>?,
-    token: String?
+    palette: Palette?,
+    token: String?,
+    errorMessage: String?
 ) :
     BottomSheetDialogFragment(), PaymentOptionsAdapter.OnItemClickListener {
 
@@ -35,6 +38,8 @@ class BottomSheetRetryFragment(
     var token: String? = token
     var retryAcs = retryAcs
     var amount = amount
+    var palette = palette
+    var errorMessage = errorMessage
 
     private lateinit var txt_payment: TextView
     private lateinit var close_icon: ImageView
@@ -52,11 +57,13 @@ class BottomSheetRetryFragment(
         println("UPI Bottom sheet")
 
         txt_payment = view.findViewById(R.id.txt_payment)
-        txt_payment.text =
-            context?.getString(R.string.payment_didnt) + " " + amount + " " + context?.getString(R.string.payment_didnt_go_through)
+        txt_payment.text = if (errorMessage?.isBlank() == true)
+            context?.getString(R.string.payment_didnt) + " " + amount + " " + context?.getString(
+                R.string.payment_didnt_go_through
+            ) else errorMessage
         close_icon = view.findViewById(R.id.x_icon)
         close_icon.setOnClickListener {
-            LandingActivity().showCancelConfirmationDialog(requireActivity(),null)
+            LandingActivity().showCancelConfirmationDialog(requireActivity(), null)
         }
 
         var recyclerPaymentOptions: RecyclerView = view.findViewById(R.id.recycler_payment_options)
@@ -65,7 +72,7 @@ class BottomSheetRetryFragment(
         val myRecyclerViewAdapter = PaymentOptionsAdapter(
             mapPaymentModes(paymentModesil!!), mapPaymentOptions(
                 paymentModesil!!
-            ), null, this
+            ), palette, this
         )
         recyclerPaymentOptions.adapter = myRecyclerViewAdapter
         recyclerPaymentOptions.layoutManager = layoutManager

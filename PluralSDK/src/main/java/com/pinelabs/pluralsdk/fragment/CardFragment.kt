@@ -220,7 +220,7 @@ class CardFragment : Fragment() {
     private var buttonClicked: Boolean = false
 
     interface onRetryListener {
-        fun onRetry(isAcs: Boolean)
+        fun onRetry(isAcs: Boolean, errorMessage:String?)
     }
 
     override fun onAttach(context: Context) {
@@ -1285,7 +1285,7 @@ class CardFragment : Fragment() {
                                     )
                                     requireActivity().finish()*/
 
-                                    listener?.onRetry(false)
+                                    listener?.onRetry(false, errorMessage?.error_message)
                                     /*bottomSheetDialog.findViewById<LottieAnimationView>(R.id.img_logo)!!
                                         .addAnimatorListener(object : Animator.AnimatorListener {
                                             override fun onAnimationStart(p0: Animator) {

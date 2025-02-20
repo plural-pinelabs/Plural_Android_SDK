@@ -110,7 +110,7 @@ class UPICollectFragment : Fragment(), UpiIntentAdapter.OnItemClickListener {
     private lateinit var timerTextView: TextView
     private lateinit var btnPayByUpiApp: Button
     private var palette: Palette? = null
-    private val totalTime = 100000L
+    private val totalTime = 30000L
     private val interval = 1000L
 
     internal val UPI_PAYMENT = 0
@@ -132,7 +132,7 @@ class UPICollectFragment : Fragment(), UpiIntentAdapter.OnItemClickListener {
     var upiAppPackageName: String? = null
 
     interface onRetryListener {
-        fun onRetry(isAcs: Boolean)
+        fun onRetry(isAcs: Boolean, errorMessage:String?)
     }
 
     override fun onAttach(context: Context) {
@@ -238,7 +238,7 @@ class UPICollectFragment : Fragment(), UpiIntentAdapter.OnItemClickListener {
                                 ) {
                                     buttonClicked = false
                                     bottomSheetDialog.dismiss()
-                                    listener?.onRetry(false)
+                                    listener?.onRetry(false, "")
                                     /*val intent = Intent(requireActivity(), FailureActivity::class.java)
                                     intent.putExtra(ERROR_MESSAGE, UPI_PROCESSED_FAILED)
                                     startActivity(intent)
@@ -284,7 +284,7 @@ class UPICollectFragment : Fragment(), UpiIntentAdapter.OnItemClickListener {
                             intent.putExtra(ERROR_MESSAGE, errorMessage?.error_message)
                             startActivity(intent)
                             requireActivity().finish()*/
-                            listener?.onRetry(false)
+                            listener?.onRetry(false, errorMessage?.error_message)
                         })
                 fetchDataResponseHandler.handleApiResult(response)
             }
@@ -469,7 +469,7 @@ class UPICollectFragment : Fragment(), UpiIntentAdapter.OnItemClickListener {
                 circularProgressBar.progress = 0
 
                 bottomSheetDialog.dismiss()
-                listener?.onRetry(false)
+                listener?.onRetry(false, "")
                 /*requireActivity().finish()
                 PluralSDK.getInstance().callback!!.onSuccessOccured("")*/
             }
