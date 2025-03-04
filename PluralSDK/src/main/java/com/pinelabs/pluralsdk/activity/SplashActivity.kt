@@ -15,7 +15,6 @@ import java.util.TimeZone
 import java.util.Timer
 import java.util.TimerTask
 
-
 class SplashActivity : AppCompatActivity() {
 
     private lateinit var token: String
@@ -31,7 +30,7 @@ class SplashActivity : AppCompatActivity() {
         CleverTapUtil.CT_EVENT_SDK_INITIALISED(clevertapDefaultInstance, this@SplashActivity)
 
         token = intent.getStringExtra(TOKEN).toString()
-        //token ="V3_XIc%2BwZynYrXQjBUoV%2BzBgGxwxWQmkwLm6NYXdIA12X2TxJ2nOa%2BJ%2FTmQcEnNf4I6"
+        //token ="V3_NjWKlMIxa4IvVPhP31XBZA2TJjiLQQJs5N95raw0dLVH5p%2B5vPGn8EL3DozZkN0L"
 
         logoAnimation = findViewById(R.id.img_logo)
         logoAnimation.setAnimationFromUrl(IMAGE_LOGO)

@@ -2,6 +2,7 @@ package com.pinelabs.pluralsdk.data.model
 
 import com.google.gson.annotations.SerializedName
 import com.pinelabs.pluralsdk.utils.PaymentModes
+import java.io.Serializable
 
 data class FetchResponse(
     val transactionInfo: TransactionInfo? = null,
@@ -12,7 +13,15 @@ data class FetchResponse(
     val customerInfo: CustomerInfo? = null  // New field for customer information
 )
 
-data class FetchError(val error_code: String, val error_message: String)
+data class FetchError(
+    val error_code: String,
+    val error_message: String,
+    val error_details: ErrorDetails?
+)
+
+data class ErrorDetails(val source: String, val error: ErrorDetailsError)
+
+data class ErrorDetailsError(val code: String, val message: String, val next: List<String>)
 
 data class FetchFailure(
     val status: String,
@@ -55,7 +64,7 @@ data class Palette(
     @SerializedName("200") val C200: String, @SerializedName("300") val C300: String,
     @SerializedName("400") val C400: String, @SerializedName("500") val C500: String,
     @SerializedName("600") val C600: String, @SerializedName("700") val C700: String,
-    @SerializedName("800") val C800: String, @SerializedName("900") val C900: String
+    @SerializedName("800") val C800: String, @SerializedName("900") var C900: String
 )
 
 data class RecyclerViewPaymentOptionData(
@@ -65,9 +74,16 @@ data class RecyclerViewPaymentOptionData(
 
 // New data class to hold customer information
 data class CustomerInfo(
+    val customerId: String,
+    val firstName: String,
+    val lastName: String,
+    val isEditCustomerDetailsAllowed: Boolean,
+    val totalTokens: Int,
     val mobileNo: String,
-    val emailId: String
+    val emailId: String,
+    val tokens: List<SavedCardTokens>
 )
+
 
 data class ProcessPaymentRequest(
     val card_data: CardData?,
@@ -76,7 +92,7 @@ data class ProcessPaymentRequest(
     val extras: Extra?,
     val txn_data: UpiTransactionData?,
     val convenience_fee_data: ConvenienceFeesData?
-)
+) : Serializable
 
 data class ConvenienceFeesData(
     val convenience_fees_amt_in_paise: Int,
@@ -109,12 +125,25 @@ data class CardData(
     val cvv: String,
     val card_holder_name: String,
     val card_expiry_year: String,
-    val card_expiry_month: String
+    val card_expiry_month: String,
+    val isNativeOTPSupported: Boolean?
 )
 
 data class DeviceInfo(
-    val device_type: String,
-    val browser_user_agent: String
+    val device_type: String?,
+    val browser_user_agent: String?,
+
+    val browser_accept_header: String?,
+    val browser_language: String?,
+    val browser_screen_height: String?,
+    val browser_screen_width: String?,
+    val browser_timezone: String?,
+    val browser_window_size: String?,
+    val browser_screen_color_depth: String?,
+    val browser_java_enabled_val: Boolean?,
+    val browser_javascript_enabled_val: Boolean?,
+    val device_channel: String?,
+    val browser_ip_address: String?
 )
 
 data class Extra(
@@ -211,26 +240,44 @@ data class GlobalBinsData(val issuerName: String, val cardType: String, val isDo
 
 data class ResultInfo(val responseCode: String, val totalBins: String)
 
-data class OTPRequest(
-    @SerializedName("payment-id") val paymentId: String?, val otp: String?,
-    val challenge_url: String?
+data class OTPRequest(val payment_id: String?, val otp: String?)
+
+data class OTPResponse(val next: List<String>?, val status: String?, val meta_data: MetaData?)
+
+data class MetaData(val resend_after: String?)
+
+data class CardBinMetaDataRequestList(val card_details: List<CardBinMetaDataRequest>)
+data class CardBinMetaDataRequest(
+    val payment_identifier: String,
+    val payment_reference_type: String
 )
 
-data class OTPResponse(val next: List<String>?, val status: String?)
-
-data class CardBinMetaDataRequestList(val requestList: List<CardBinMetaDataRequest>)
-data class CardBinMetaDataRequest(val paymentIdentifier: String, val paymentReferenceType: String)
-data class CardBinMetaDataResponse(val extendedCardMetaResponseList: List<CardBinMetaDataResponseData>)
+data class CardBinMetaDataResponse(val card_payment_details: List<CardBinMetaDataResponseData>)
 data class CardBinMetaDataResponseData(
-    val paymentIdentifier: String,
-    val paymentReferenceType: String,
-    val cardNetwork: String,
-    val cardIssuer: String,
-    val cardType: String,
-    val cardCategory: String,
-    val isNativeOTPSupported: Boolean,
-    val isInternationalTransactionSupported: Boolean,
-    val isSavedCardSupported: Boolean,
-    val isCvvLessSupported: Boolean,
-    val isEmiSupported: Boolean
+    val payment_identifier: String,
+    val payment_reference_type: String,
+    val card_network: String,
+    val card_issuer: String,
+    val card_type: String,
+    val card_category: String,
+    val is_native_otp_supported: Boolean,
+    val is_international_card: Boolean,
+    val country_code: String,
+    val currency: String,
+    val is_currency_supported: Boolean
+)
+
+data class SavedCardData(val icon: Int, val text: String)
+
+data class SavedCardTokens(
+    val tokenId: String,
+    val expiredAt: String,
+    val cardData: SavedCardDataObject
+)
+
+data class SavedCardDataObject(
+    val last4Digit: String,
+    val networkName: String,
+    val issuerName: String,
+    val cvvRequired: Boolean
 )

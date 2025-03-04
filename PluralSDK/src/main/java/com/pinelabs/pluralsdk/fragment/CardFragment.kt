@@ -2,7 +2,6 @@ package com.pinelabs.pluralsdk.fragment
 
 import android.animation.Animator
 import android.content.Context
-import android.content.Intent
 import android.content.res.Resources
 import android.graphics.Color
 import android.graphics.drawable.Drawable
@@ -11,6 +10,8 @@ import android.graphics.drawable.LayerDrawable
 import android.graphics.drawable.StateListDrawable
 import android.graphics.drawable.VectorDrawable
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.text.Editable
 import android.text.InputFilter
 import android.text.Spannable
@@ -53,7 +54,6 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.gson.Gson
 import com.pinelabs.pluralsdk.R
-import com.pinelabs.pluralsdk.activity.ACSPageActivity
 import com.pinelabs.pluralsdk.activity.LandingActivity
 import com.pinelabs.pluralsdk.adapter.FlexAdapter
 import com.pinelabs.pluralsdk.adapter.PBPBanksAdapter
@@ -61,6 +61,7 @@ import com.pinelabs.pluralsdk.data.model.CardBinMetaDataRequest
 import com.pinelabs.pluralsdk.data.model.CardBinMetaDataRequestList
 import com.pinelabs.pluralsdk.data.model.CardBinMetaDataResponse
 import com.pinelabs.pluralsdk.data.model.CardData
+import com.pinelabs.pluralsdk.data.model.DeviceInfo
 import com.pinelabs.pluralsdk.data.model.Extra
 import com.pinelabs.pluralsdk.data.model.FetchResponse
 import com.pinelabs.pluralsdk.data.model.OTPRequest
@@ -117,6 +118,7 @@ import com.pinelabs.pluralsdk.utils.Constants.Companion.BANK_YES
 import com.pinelabs.pluralsdk.utils.Constants.Companion.BANK_YES_BANK
 import com.pinelabs.pluralsdk.utils.Constants.Companion.BROWSER_ACCEPT_ALL
 import com.pinelabs.pluralsdk.utils.Constants.Companion.BROWSER_ACCEPT_HEADER
+import com.pinelabs.pluralsdk.utils.Constants.Companion.BROWSER_DEVICE_CHANNEL
 import com.pinelabs.pluralsdk.utils.Constants.Companion.BROWSER_IP_ADDRESS
 import com.pinelabs.pluralsdk.utils.Constants.Companion.BROWSER_JAVASCRIPT_ENABLED
 import com.pinelabs.pluralsdk.utils.Constants.Companion.BROWSER_LANGUAGE
@@ -128,22 +130,20 @@ import com.pinelabs.pluralsdk.utils.Constants.Companion.BROWSER_USER_AGENT
 import com.pinelabs.pluralsdk.utils.Constants.Companion.BROWSER_USER_AGENT_ANDROID
 import com.pinelabs.pluralsdk.utils.Constants.Companion.CREDIT_DEBIT_ID
 import com.pinelabs.pluralsdk.utils.Constants.Companion.CT_CARDS
-import com.pinelabs.pluralsdk.utils.Constants.Companion.ERROR_CODE
-import com.pinelabs.pluralsdk.utils.Constants.Companion.ERROR_MESSAGE
 import com.pinelabs.pluralsdk.utils.Constants.Companion.IMAGE_LOGO
 import com.pinelabs.pluralsdk.utils.Constants.Companion.ORDER_ID
+import com.pinelabs.pluralsdk.utils.Constants.Companion.OTP_RESEND
 import com.pinelabs.pluralsdk.utils.Constants.Companion.PAYBYPOINTS_ID
 import com.pinelabs.pluralsdk.utils.Constants.Companion.PAYMENT_ID
 import com.pinelabs.pluralsdk.utils.Constants.Companion.PAYMENT_INITIATED
 import com.pinelabs.pluralsdk.utils.Constants.Companion.PAYMENT_REFERENCE_TYPE_CARD
+import com.pinelabs.pluralsdk.utils.Constants.Companion.PROCESS_PAYMENT_REQUEST
 import com.pinelabs.pluralsdk.utils.Constants.Companion.REDIRECT_URL
-import com.pinelabs.pluralsdk.utils.Constants.Companion.REQ_RETRY_CALLBACK
+import com.pinelabs.pluralsdk.utils.Constants.Companion.RESEND_TIMER
 import com.pinelabs.pluralsdk.utils.Constants.Companion.START_TIME
 import com.pinelabs.pluralsdk.utils.Constants.Companion.TAG_ACS
 import com.pinelabs.pluralsdk.utils.Constants.Companion.TAG_OTP
-import com.pinelabs.pluralsdk.utils.Constants.Companion.TAG_PAYMENT_LISTING
 import com.pinelabs.pluralsdk.utils.Constants.Companion.TOKEN
-import com.pinelabs.pluralsdk.utils.PaymentModes
 import com.pinelabs.pluralsdk.viewmodels.FetchDataViewModel
 import java.util.Calendar
 import java.util.Locale
@@ -195,10 +195,17 @@ class CardFragment : Fragment() {
     private var isCardHolderNameValid = false
     private var isPBPChecked = false
     private var isPBPEnabled = false
+    private var isNativeOTP: Boolean? = false
     private var orderId: String? = null
+    private var paymentId: String? = null
     private var palette: Palette? = null
+    private var startTime: Long? = null
+    private var redirectUrl: String? = null
 
     private lateinit var etCardNumber: EditText
+    private lateinit var etExpiry: EditText
+    private lateinit var etCardHolderName: EditText
+    private lateinit var etCVV: EditText
     private lateinit var btnProceedToPay: Button
     private lateinit var recyclerView: RecyclerView
     private lateinit var constraintLayoutPBPBanner: ConstraintLayout
@@ -213,14 +220,17 @@ class CardFragment : Fragment() {
     private lateinit var textTryAnotherNumber: TextView
 
     private lateinit var spannableString: SpannableString
+    private lateinit var cleanedInput: String
+    private lateinit var processPaymentRequest: ProcessPaymentRequest
 
     private var clevertapDefaultInstance: CleverTapAPI? = null
 
     private var listener: onRetryListener? = null
     private var buttonClicked: Boolean = false
+    private var retryTimer: Float? = null
 
     interface onRetryListener {
-        fun onRetry(isAcs: Boolean, errorMessage:String?)
+        fun onRetry(isAcs: Boolean, errorCode: String?, errorMessage: String?)
     }
 
     override fun onAttach(context: Context) {
@@ -289,10 +299,10 @@ class CardFragment : Fragment() {
         //pbpBankList()
 
         etCardNumber = view.findViewById(R.id.etCardNumber)
-        val etExpiry: EditText = view.findViewById(R.id.etExpiry)
+        etExpiry = view.findViewById(R.id.etExpiry)
         val tvExpiryError: TextView = view.findViewById(R.id.tvExpiryError)
-        val etCardHolderName: EditText = view.findViewById(R.id.etCardHolderName)
-        val etCVV: EditText = view.findViewById(R.id.etCVV)
+        etCardHolderName = view.findViewById(R.id.etCardHolderName)
+        etCVV = view.findViewById(R.id.etCVV)
         val tvCVVError: TextView = view.findViewById(R.id.tvCVVError)
         btnProceedToPay = view.findViewById(R.id.btnProceedToPay)
         val tvCardNumberError: TextView = view.findViewById(R.id.tvCardNumberError)
@@ -316,6 +326,12 @@ class CardFragment : Fragment() {
 
         btnProceedToPay.setOnClickListener {
 
+            /*val optFragment = OtpFragment()
+            val transaction =
+                requireActivity().supportFragmentManager.beginTransaction()
+            transaction.replace(R.id.details_fragment, optFragment, TAG_OTP)
+            transaction.commit()*/
+
             buttonClicked = true
             // Handle payment process here
             val cardNumber = etCardNumber.text.toString().filter { !it.isWhitespace() }
@@ -335,7 +351,8 @@ class CardFragment : Fragment() {
                 cardExpiryMonth,
                 cardExpiryYear,
                 redeemableAmount,
-                mobileNumber
+                mobileNumber,
+                true
             )
             //showMoreBankDialog()
         }
@@ -456,7 +473,7 @@ class CardFragment : Fragment() {
 
                 isEditing = true
 
-                val cleanedInput = s?.toString()?.replace(Regex("\\s+"), "") ?: ""
+                cleanedInput = s?.toString()?.replace(Regex("\\s+"), "") ?: ""
                 val formattedInput = cleanedInput.chunked(4).joinToString(" ")
 
                 //Native otp
@@ -491,13 +508,8 @@ class CardFragment : Fragment() {
                     etCardNumber.background = setColor(requireActivity())
                     isCardNumberValid = false
 
-                    if (cleanedInput.length > 9) {
-                        val cardType = validateCardType(cleanedInput)
-                        println("Valid condition " + validCard(cleanedInput) + " " + cleanedInput.length + " " + isCardNumberValid)
-
-
-                        // Set the brand icon based on the card type
-                        setCardBrandIcon(etCardNumber, cardType)
+                    if (cleanedInput.length > 8) {
+                        getBinData(token, cleanedInput)
                     } else {
                         println("Else condition " + validCard(cleanedInput) + " " + cleanedInput.length + " " + isCardNumberValid)
                     }
@@ -800,7 +812,8 @@ class CardFragment : Fragment() {
         cardExpiryMonth: String,
         cardExpiryYear: String,
         redeemableAmount: Int?,
-        mobileNumber: String?
+        mobileNumber: String?,
+        isNativeOTPSupported: Boolean?
     ) {
         val paymentMode = arrayListOf<String>()
         paymentMode.add(CREDIT_DEBIT_ID)
@@ -809,6 +822,27 @@ class CardFragment : Fragment() {
             amount = amount!! - redeemableAmount!!
         }
         val last4 = cardNumber.substring(cardNumber.length - 4, cardNumber.length)
+
+        val displayMetrics = DisplayMetrics()
+        requireActivity().windowManager.defaultDisplay.getMetrics(displayMetrics)
+        val height = displayMetrics.heightPixels
+        val width = displayMetrics.widthPixels
+        val pixelFormat = requireActivity().windowManager.defaultDisplay.pixelFormat
+
+        val screenSize: String = width.toString() + "x" + height.toString()
+        val deviceInfo = DeviceInfo(
+            null,
+            BROWSER_USER_AGENT_ANDROID,
+            BROWSER_ACCEPT_ALL,
+            Locale.getDefault().language,
+            height.toString(),
+            width.toString(),
+            Utils.getTimeOffset().toString(),
+            screenSize,
+            Utils.getColorDepth(pixelFormat).toString(),
+            true, true, BROWSER_DEVICE_CHANNEL,
+            Utils.getLocalIpAddress().toString()
+        )
 
         val cardDataExtra =
             Extra(
@@ -820,11 +854,21 @@ class CardFragment : Fragment() {
                 null
                 /*mobileNumber!!.filter { !mobileNumber!!.isEmpty() }*/,
                 null,
-                null
+                deviceInfo
             )
-        val cardData = CardData(cardNumber, cvv, cardHolderName, cardExpiryYear, cardExpiryMonth)
-        val processPaymentRequest =
+        val cardData =
+            CardData(
+                cardNumber,
+                cvv,
+                cardHolderName,
+                cardExpiryYear,
+                cardExpiryMonth,
+                isNativeOTPSupported
+            )
+        processPaymentRequest =
             ProcessPaymentRequest(cardData, upi_data = null, null, cardDataExtra, null, null)
+        println("Toke ${token}")
+        println("Process payment request ${Gson().toJson(processPaymentRequest)}")
         mainViewModel.processPayment(token, processPaymentRequest)
 
     }
@@ -1199,26 +1243,21 @@ class CardFragment : Fragment() {
             mainViewModel.process_payment_response.distinctUntilChanged()
                 .observe(viewLifecycleOwner) { response ->
                     if (buttonClicked) {
-
-                        val startTime = System.currentTimeMillis()
+                        startTime = System.currentTimeMillis()
                         val fetchDataResponseHandler =
                             ApiResultHandler<ProcessPaymentResponse>(requireActivity(),
                                 onLoading = {
                                     showProcessPaymentDialog()
                                 }, onSuccess = { data ->
                                     LandingActivity().paymentId = data?.payment_id
+                                    paymentId = data?.payment_id
+                                    redirectUrl = data?.redirect_url
                                     bottomSheetDialog.findViewById<LottieAnimationView>(R.id.img_logo)!!
                                         .addAnimatorListener(object : Animator.AnimatorListener {
                                             override fun onAnimationStart(p0: Animator) {
                                             }
 
                                             override fun onAnimationEnd(p0: Animator) {
-                                                Toast.makeText(
-                                                    activity,
-                                                    "Ended",
-                                                    Toast.LENGTH_SHORT
-                                                )
-                                                    .show()
                                             }
 
                                             override fun onAnimationCancel(p0: Animator) {
@@ -1227,32 +1266,18 @@ class CardFragment : Fragment() {
                                             override fun onAnimationRepeat(p0: Animator) {
                                                 bottomSheetDialog.dismiss()
 
-
-                                                val arguments = Bundle()
-                                                arguments.putString(TOKEN, token)
-                                                arguments.putLong(START_TIME, startTime)
-                                                arguments.putString(
-                                                    REDIRECT_URL,
-                                                    data!!.redirect_url
-                                                )
-                                                arguments.putString(ORDER_ID, data?.order_id)
-                                                arguments.putString(PAYMENT_ID, data?.payment_id)
-                                                //arguments.putString(RETRY_PAGE, retryPage)
-
-                                                val acsFragment = ACSFragment()
-                                                acsFragment.arguments = arguments
-
-                                                requireActivity().supportFragmentManager.popBackStack()
-                                                val transaction =
-                                                    requireActivity().supportFragmentManager.beginTransaction()
-                                                transaction.replace(
-                                                    R.id.details_fragment,
-                                                    acsFragment,
-                                                    TAG_ACS
-                                                )
-                                                transaction.addToBackStack(TAG_ACS)
-                                                transaction.commit()
-
+                                                if (isNativeOTP == true) {
+                                                    generateOtp(
+                                                        data?.payment_id
+                                                    )
+                                                } else {
+                                                    redirectToACS(
+                                                        startTime,
+                                                        data?.redirect_url,
+                                                        data?.order_id,
+                                                        data?.payment_id
+                                                    )
+                                                }
 
                                                 /*val i = Intent(activity, ACSPageActivity::class.java)
                                                 i.putExtra(TOKEN, token)
@@ -1285,7 +1310,11 @@ class CardFragment : Fragment() {
                                     )
                                     requireActivity().finish()*/
 
-                                    listener?.onRetry(false, errorMessage?.error_message)
+                                    listener?.onRetry(
+                                        false,
+                                        errorMessage?.error_code,
+                                        errorMessage?.error_message
+                                    )
                                     /*bottomSheetDialog.findViewById<LottieAnimationView>(R.id.img_logo)!!
                                         .addAnimatorListener(object : Animator.AnimatorListener {
                                             override fun onAnimationStart(p0: Animator) {
@@ -1314,6 +1343,81 @@ class CardFragment : Fragment() {
                                 })
                         fetchDataResponseHandler.handleApiResult(response)
 
+                    }
+                }
+
+            mainViewModel.bin_data_response.distinctUntilChanged()
+                .observe(viewLifecycleOwner) { response ->
+                    val fetchDataResponseHandler =
+                        ApiResultHandler<CardBinMetaDataResponse>(requireActivity(),
+                            onLoading = {},
+                            onSuccess = { data ->
+                                println("Domestic card ${data?.card_payment_details?.get(0)?.card_network}")
+                                isNativeOTP =
+                                    data?.card_payment_details?.get(0)?.is_native_otp_supported
+                                setCardBrandIcon(
+                                    etCardNumber,
+                                    data?.card_payment_details?.get(0)?.card_network
+                                )
+                            },
+                            onFailure = {
+                                val cardType = validateCardType(cleanedInput)
+                                println("Valid condition " + validCard(cleanedInput) + " " + cleanedInput.length + " " + isCardNumberValid)
+                                // Set the brand icon based on the card type
+                                setCardBrandIcon(etCardNumber, cardType)
+                            })
+                    fetchDataResponseHandler.handleApiResult(response)
+                }
+
+            mainViewModel.generate_otp_response.distinctUntilChanged()
+                .observe(viewLifecycleOwner) { response ->
+                    if (buttonClicked) {
+                        val generateOtpResponseHandler =
+                            ApiResultHandler<OTPResponse>(requireActivity(),
+                                onLoading = {
+                                },
+                                onSuccess = { data ->
+
+                                    val arguments = Bundle()
+                                    arguments.putString(TOKEN, token)
+                                    arguments.putString(PAYMENT_ID, paymentId)
+                                    arguments.putString(ORDER_ID, orderId)
+                                    data?.meta_data?.let { metaData ->
+                                        arguments.putString(
+                                            RESEND_TIMER,
+                                            data?.meta_data?.resend_after
+                                        )
+                                    }
+                                    data?.next?.contains(OTP_RESEND)
+                                        ?.let { arguments.putBoolean(OTP_RESEND, it) }
+                                    arguments.putSerializable(
+                                        PROCESS_PAYMENT_REQUEST,
+                                        processPaymentRequest
+                                    )
+
+                                    val optFragment = OtpFragment()
+                                    optFragment.arguments = arguments
+
+                                    val transaction =
+                                        requireActivity().supportFragmentManager.beginTransaction()
+                                    transaction.replace(
+                                        R.id.details_fragment,
+                                        optFragment,
+                                        TAG_OTP
+                                    )
+                                    transaction.addToBackStack(TAG_OTP)
+                                    transaction.commit()
+
+                                },
+                                onFailure = {
+                                    redirectToACS(
+                                        startTime,
+                                        redirectUrl,
+                                        orderId,
+                                        LandingActivity().paymentId
+                                    )
+                                })
+                        generateOtpResponseHandler.handleApiResult(response)
                     }
                 }
         } catch (e: Exception) {
@@ -1371,70 +1475,15 @@ class CardFragment : Fragment() {
         binRequestList.add(binRequest)
         println("bin request " + Gson().toJson(binRequestList))
         mainViewModel.getBinData(token, CardBinMetaDataRequestList(binRequestList))
-        mainViewModel.bin_data_response.distinctUntilChanged()
-            .observe(viewLifecycleOwner) { response ->
-                val fetchDataResponseHandler =
-                    ApiResultHandler<CardBinMetaDataResponse>(requireActivity(),
-                        onLoading = {},
-                        onSuccess = { data ->
-                            println("Domestic card ${data?.extendedCardMetaResponseList?.get(0)?.cardNetwork}")
-                            setCardBrandIcon(
-                                etCardNumber,
-                                data?.extendedCardMetaResponseList?.get(0)?.cardNetwork
-                            )
-                        },
-                        onFailure = {})
-                fetchDataResponseHandler.handleApiResult(response)
-            }
     }
 
-    private fun generateOtp(paymentId: String?, challengeUrl: String?) {
-        val otpRequest = OTPRequest(paymentId, null, challengeUrl)
+    private fun generateOtp(
+        paymentId: String?
+    ) {
+        val otpRequest = OTPRequest(paymentId, null)
         mainViewModel.generatOtp(token, otpRequest)
-        mainViewModel.generate_otp_response.distinctUntilChanged()
-            .observe(viewLifecycleOwner) { response ->
-                val generateOtpResponseHandler =
-                    ApiResultHandler<OTPResponse>(requireActivity(),
-                        onLoading = {},
-                        onSuccess = {
-                            /*val optFragment = OtpFragment()
-                                        val transaction =
-                                            requireActivity().supportFragmentManager.beginTransaction()
-                                        transaction.replace(R.id.details_fragment, optFragment, TAG_OTP)
-                                        transaction.commit()*/
-                        },
-                        onFailure = {})
-                generateOtpResponseHandler.handleApiResult(response)
-            }
     }
 
-    private fun sendOtp(paymentId: String, otp: String) {
-        val otpRequest = OTPRequest(paymentId, otp, null)
-        mainViewModel.submitOtp(token, otpRequest)
-        mainViewModel.submit_otp_response.distinctUntilChanged()
-            .observe(viewLifecycleOwner) { response ->
-                val sendOtpResponseHandler =
-                    ApiResultHandler<OTPResponse>(requireActivity(),
-                        onLoading = {},
-                        onSuccess = {},
-                        onFailure = {})
-                sendOtpResponseHandler.handleApiResult(response)
-            }
-    }
-
-    private fun resendOtp(paymentId: String) {
-        val otpRequest = OTPRequest(paymentId, null, null)
-        mainViewModel.resendOtp(token, otpRequest)
-        mainViewModel.resend_otp_response.distinctUntilChanged()
-            .observe(viewLifecycleOwner) { response ->
-                val resendOtpResponseHandler =
-                    ApiResultHandler<OTPResponse>(requireActivity(),
-                        onLoading = {},
-                        onSuccess = {},
-                        onFailure = {})
-                resendOtpResponseHandler.handleApiResult(response)
-            }
-    }
 
     private fun createPaymentParams(): HashMap<String, String> {
         val displayMetrics = DisplayMetrics()
@@ -1464,5 +1513,64 @@ class CardFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         mainViewModel.process_payment_response.removeObservers(viewLifecycleOwner)
+    }
+
+    public fun redirectToACS(
+        startTime: Long?,
+        redirectUrl: String?,
+        orderId: String?,
+        paymentId: String?
+    ) {
+
+        val arguments = Bundle()
+        arguments.putString(TOKEN, token)
+        arguments.putLong(START_TIME, startTime!!)
+        arguments.putString(
+            REDIRECT_URL,
+            redirectUrl
+        )
+        arguments.putString(ORDER_ID, orderId)
+        arguments.putString(
+            PAYMENT_ID,
+            paymentId
+        )
+        //arguments.putString(RETRY_PAGE, retryPage)
+
+        val acsFragment = ACSFragment()
+        acsFragment.arguments = arguments
+
+        requireActivity().supportFragmentManager.popBackStack()
+        val transaction =
+            requireActivity().supportFragmentManager.beginTransaction()
+        transaction.replace(
+            R.id.details_fragment,
+            acsFragment,
+            TAG_ACS
+        )
+        transaction.addToBackStack(TAG_ACS)
+        transaction.commit()
+
+    }
+
+    fun reset() {
+        etCardNumber.setText("")
+        //etCardNumber.clearFocus()
+        etExpiry.setText("")
+        //etExpiry.clearFocus()
+        etCVV.setText("")
+        //etCVV.clearFocus()
+        etCardHolderName.setText("")
+        //etCardHolderName.clearFocus()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        //reset()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        //onCreate(null)
+        reset()
     }
 }

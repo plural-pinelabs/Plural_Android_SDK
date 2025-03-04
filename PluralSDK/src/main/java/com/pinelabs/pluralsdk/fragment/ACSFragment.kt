@@ -41,7 +41,7 @@ class ACSFragment : Fragment() {
 
     var orderId: String? = null
     var paymentId: String? = null
-    var startTime: Int? = null
+    var startTime: Long? = null
     var token: String? = null
     var redirectUrl: String? = null
 
@@ -51,7 +51,7 @@ class ACSFragment : Fragment() {
     private lateinit var logoAnimation: LottieAnimationView
 
     interface onRetryListener {
-        fun onRetry(isAcs: Boolean, errorMessage:String?)
+        fun onRetry(isAcs: Boolean, errorCode:String?, errorMessage:String?)
     }
 
     override fun onAttach(context: Context) {
@@ -84,7 +84,7 @@ class ACSFragment : Fragment() {
 
         orderId = arguments?.getString(ORDER_ID)
         paymentId = arguments?.getString(PAYMENT_ID)
-        startTime = arguments?.getInt(START_TIME, 0)
+        startTime = arguments?.getLong(START_TIME, 0)
         token = arguments?.getString(TOKEN)
         redirectUrl = arguments?.getString(REDIRECT_URL)
 
@@ -166,7 +166,7 @@ class ACSFragment : Fragment() {
                     //viewModel.getTransactionStatus(token)
                     webAcs.visibility = View.GONE
                     constrainSuccess.visibility = View.VISIBLE
-                    listener?.onRetry(true,"")
+                    listener?.onRetry(true,"", "")
                 }
             }
         }

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="white">#ffffff</color>
+    <color name="transparent">#26FFFFFF</color>
     <color name="header_color">#500080</color>
     <color name="shimmer_grey">#dddddd</color>
     <color name="black">#1C1C1C</color>
@@ -15,4 +16,5 @@
 
     <color name="grey_button_border">#808080</color>
     <color name="grey_button_fill">#C7CBD580</color>
+    <color name="saved_card">#24342BCC</color>
 </resources>

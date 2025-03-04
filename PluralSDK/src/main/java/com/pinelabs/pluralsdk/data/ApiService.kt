@@ -60,7 +60,7 @@ interface ApiService {
         ) token: String, @Body request: CardBinMetaDataRequestList
     ): Response<CardBinMetaDataResponse>
 
-    @POST("otp/initiate")
+    @POST("otp/initiateOtp")
     suspend fun initiateOTP(
         @Query(
             "token",
@@ -68,7 +68,7 @@ interface ApiService {
         ) token: String, @Body request: OTPRequest
     ): Response<OTPResponse>
 
-    @POST("otp/submit")
+    @POST("otp/submitOtp")
     suspend fun submitOTP(
         @Query(
             "token",
@@ -76,7 +76,7 @@ interface ApiService {
         ) token: String, @Body request: OTPRequest
     ): Response<OTPResponse>
 
-    @POST("otp/resend")
+    @POST("otp/resendOtp")
     suspend fun resendOTP(
         @Query(
             "token",

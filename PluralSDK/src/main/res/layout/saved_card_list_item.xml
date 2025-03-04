@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="15dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:id="@+id/img_saved_card"
+            android:layout_width="34dp"
+            android:layout_height="34dp"
+            android:layout_gravity="center"
+            android:src="@drawable/visa" />
+
+        <TextView
+            android:id="@+id/txt_save_card_bank_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginLeft="10dp"
+            android:layout_weight="3"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text=""
+            android:textColor="@color/black"
+            android:textSize="16sp" />
+
+        <View
+            android:id="@+id/view_slash"
+            android:layout_width="1dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:layout_marginLeft="10dp"
+            android:background="@color/shimmer_grey" />
+
+
+        <ImageView
+            android:id="@+id/img_dotted"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginLeft="10dp"
+            android:src="@drawable/dotted" />
+
+        <TextView
+            android:id="@+id/textView7"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginLeft="10dp"
+            android:text="4560"
+            android:textColor="@color/black"
+            android:textSize="14sp" />
+
+        <!-- CVV Field -->
+        <EditText
+            android:id="@+id/etCVV"
+            android:layout_width="75dp"
+            android:layout_height="45dp"
+            android:layout_gravity="center"
+            android:layout_marginLeft="10dp"
+            android:background="@drawable/edittext_default_border"
+            android:fontFamily="@font/roboto_medium"
+            android:hint="@string/cvv"
+            android:inputType="numberPassword"
+            android:maxLength="4"
+            android:padding="12dp"
+            android:textColor="@color/black"
+            android:textColorHint="@color/shimmer_grey"
+            android:textSize="16sp"
+            android:visibility="visible" />
+
+        <ImageView
+            android:id="@+id/img_check"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="12dp"
+            android:visibility="gone"
+            app:srcCompat="@drawable/check_circle" />
+
+    </LinearLayout>
+
+
+    <ImageView
+        android:id="@+id/img_cvv_required"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="45dp"
+        android:src="@drawable/cvv_required" />
+
+    <Button
+        android:id="@+id/btnProceedToPay"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="25dp"
+        android:backgroundTint="@null"
+        android:drawableLeft="@drawable/lock_keyhole_minimalistic"
+        android:drawablePadding="8dp"
+        android:enabled="false"
+        android:fontFamily="@font/roboto_medium"
+        android:paddingLeft="81dp"
+        android:paddingTop="10dp"
+        android:paddingRight="81dp"
+        android:paddingBottom="10dp"
+        android:text="@string/proceed_to_pay"
+        android:visibility="gone"
+        android:textAllCaps="false"
+        android:textColor="@android:color/white"
+        android:textSize="17sp"
+        app:backgroundTint="@null" />
+
+</LinearLayout>

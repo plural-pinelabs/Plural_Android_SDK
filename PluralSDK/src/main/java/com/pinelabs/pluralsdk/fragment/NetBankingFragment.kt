@@ -94,7 +94,7 @@ class NetBankingFragment : Fragment(), NetBankAllAdapter.OnItemClickListener {
     private var listener: onRetryListener? = null
 
     interface onRetryListener {
-        fun onRetry(isAcs: Boolean, errorMessage:String?)
+        fun onRetry(isAcs: Boolean, errorCode:String?,errorMessage:String?)
     }
 
     override fun onAttach(context: Context) {
@@ -206,13 +206,13 @@ class NetBankingFragment : Fragment(), NetBankAllAdapter.OnItemClickListener {
 
                                 })
 
-                                    /*val i = Intent(activity, ACSPageActivity::class.java)
-                                    i.putExtra(TOKEN, token)
-                                    i.putExtra(REDIRECT_URL, response!!.redirect_url)
-                                    i.putExtra(ORDER_ID, response?.order_id)
-                                    i.putExtra(PAYMENT_ID, response?.payment_id)
-                                    startActivity(i)
-                                    requireActivity().finish()*/
+                            /*val i = Intent(activity, ACSPageActivity::class.java)
+                            i.putExtra(TOKEN, token)
+                            i.putExtra(REDIRECT_URL, response!!.redirect_url)
+                            i.putExtra(ORDER_ID, response?.order_id)
+                            i.putExtra(PAYMENT_ID, response?.payment_id)
+                            startActivity(i)
+                            requireActivity().finish()*/
 
                         }, onFailure = { errorMessage ->
                             bottomSheetDialog.dismiss()
@@ -223,7 +223,7 @@ class NetBankingFragment : Fragment(), NetBankAllAdapter.OnItemClickListener {
                         intent.putExtra(ERROR_MESSAGE, errorMessage?.error_message)
                         startActivity(intent)
                         requireActivity().finish()*/
-                            listener?.onRetry(false, errorMessage?.error_message)
+                            listener?.onRetry(false, errorMessage?.error_code, errorMessage?.error_message)
                         })
                 fetchDataResponseHandler.handleApiResult(response)
             }
@@ -259,7 +259,9 @@ class NetBankingFragment : Fragment(), NetBankAllAdapter.OnItemClickListener {
         //val convenienceFeesData = ConvenienceFeesData(131040, 23785, 1100, 655925, 500000, 99999999, 155925, "INR")
         val deviceInfo = DeviceInfo(
             DeviceType.MOBILE.name,
-            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+            null, null, null, null, null, null,
+            null, null, null, null, null
         )
         val extras = Extra(
             paymentMode,

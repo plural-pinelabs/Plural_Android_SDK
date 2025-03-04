@@ -30,12 +30,12 @@ inline fun <reified T> toResultFlow(context: Context, crossinline call: suspend 
                         emit(NetWorkResult.Error(null, errorResponse))
                     }
                 } catch (e: Exception) {
-                    val error = FetchError("-1", API_ERROR)
+                    val error = FetchError("-1", API_ERROR, null)
                     emit(NetWorkResult.Error(null, error))
                 }
             }
         } else {
-            val error = FetchError("-1", API_INTERNET_MESSAGE)
+            val error = FetchError("-1", API_INTERNET_MESSAGE,null)
             emit(NetWorkResult.Error(null, error))
         }
     }.flowOn(Dispatchers.IO)

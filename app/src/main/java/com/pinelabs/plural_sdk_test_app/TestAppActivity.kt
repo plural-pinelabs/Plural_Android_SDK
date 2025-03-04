@@ -47,15 +47,15 @@ class TestAppActivity : AppCompatActivity(), PaymentResultCallBack {
                 this@TestAppActivity
             )}*/
             if (NetworkUtil.isNetworkAvailable(this@TestAppActivity) == true) {
-                generateToken()
-                /*if (edt_redirectURL.text.isNotEmpty())
+                //generateToken()
+                if (edt_redirectURL.text.isNotEmpty())
                     PluralSDKManager().startPayment(
                         this@TestAppActivity,
                         edt_redirectURL.text.toString(),
                         this@TestAppActivity
                     )
                 else
-                    Toast.makeText(this, "Redirect url is empty", Toast.LENGTH_SHORT).show()*/
+                    Toast.makeText(this, "Redirect url is empty", Toast.LENGTH_SHORT).show()
 
             } else {
                 Toast.makeText(this, "Network not available", Toast.LENGTH_SHORT).show()

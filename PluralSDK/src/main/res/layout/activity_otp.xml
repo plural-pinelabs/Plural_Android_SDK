@@ -1,235 +1,277 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white">
+    android:orientation="vertical">
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/constrain_otp"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:paddingLeft="30dp"
-        android:paddingTop="20dp"
-        android:paddingRight="30dp"
-        android:paddingBottom="20dp"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        android:layout_height="match_parent"
+        android:background="@color/white">
 
-        <!-- Title and Back Button -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
+            android:orientation="vertical"
+            android:paddingLeft="30dp"
+            android:paddingTop="20dp"
+            android:paddingRight="30dp"
+            android:paddingBottom="20dp"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
 
-            <ImageButton
-                android:id="@+id/btnBack"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:background="?android:selectableItemBackground"
-                android:scaleType="fitXY"
-                android:src="@drawable/back_button" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="10dp"
-                android:fontFamily="@font/roboto_bold"
-                android:text="@string/authenticate_otp"
-                android:textColor="@android:color/black"
-                android:textSize="16sp" />
-        </LinearLayout>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="5dp"
-            android:layout_marginTop="30dp"
-            android:text="@string/otp_message" />
-
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="5dp"
-            android:background="@drawable/edittext_default_border">
-
-            <EditText
-                android:id="@+id/et_otp"
+            <!-- Title and Back Button -->
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@null"
-                android:backgroundTint="@null"
-                android:fontFamily="@font/roboto_medium"
-                android:hint="@string/enter_otp"
-                android:inputType="number"
-                android:maxLength="4"
-                android:padding="10dp"
-                android:textColor="@color/black"
-                android:textColorHint="@color/shimmer_grey"
-                android:textSize="16sp" />
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
 
-            <TextView
-                android:id="@+id/resend_otp_text"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentRight="true"
-                android:layout_centerInParent="true"
-                android:clickable="true"
-                android:focusable="true"
-                android:fontFamily="@font/roboto_medium"
-                android:padding="10dp"
-                android:text="@string/resend_otp"
-                android:textColor="@color/colorSecondary"
-                android:textSize="12sp" />
-
-            <LinearLayout
-                android:id="@+id/linear_resend_otp_timer"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentRight="true"
-                android:layout_centerInParent="true"
-                android:gravity="center_horizontal"
-                android:padding="10dp"
-                android:visibility="gone">
+                <ImageButton
+                    android:id="@+id/btnBack"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:background="?android:selectableItemBackground"
+                    android:scaleType="fitXY"
+                    android:src="@drawable/back_button" />
 
                 <TextView
-                    android:id="@+id/resend_otp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentRight="true"
-                    android:layout_centerInParent="true"
-                    android:alpha=".6"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:fontFamily="@font/roboto_medium"
-                    android:text="@string/resend_otp_in"
-                    android:textColor="@color/black"
-                    android:textSize="12sp" />
-
-                <TextView
-                    android:id="@+id/resend_otp_timer"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentRight="true"
-                    android:layout_centerInParent="true"
-                    android:layout_marginLeft="5dp"
-                    android:alpha=".6"
-                    android:clickable="true"
-                    android:focusable="true"
+                    android:layout_marginLeft="10dp"
                     android:fontFamily="@font/roboto_bold"
-                    android:text="1:45 min"
-                    android:textColor="@color/black"
-                    android:textSize="12sp" />
-
+                    android:text="@string/authenticate_otp"
+                    android:textColor="@android:color/black"
+                    android:textSize="16sp" />
             </LinearLayout>
-
-        </RelativeLayout>
-
-
-        <LinearLayout
-            android:id="@+id/linear_auto_read"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="5dp"
-            android:layout_marginTop="10dp"
-            android:gravity="center"
-            android:visibility="gone"
-            android:orientation="horizontal">
-
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/stars" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="5dp"
-                android:textColor="@color/header_color"
+                android:layout_marginTop="30dp"
+                android:text="@string/otp_message" />
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:background="@drawable/edittext_default_border">
+
+                <EditText
+                    android:id="@+id/et_otp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@null"
+                    android:backgroundTint="@null"
+                    android:fontFamily="@font/roboto_medium"
+                    android:hint="@string/enter_otp"
+                    android:inputType="number"
+                    android:maxLength="9"
+                    android:padding="10dp"
+                    android:textColor="@color/black"
+                    android:textColorHint="@color/shimmer_grey"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:id="@+id/resend_otp_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerInParent="true"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:fontFamily="@font/roboto_medium"
+                    android:padding="10dp"
+                    android:text="@string/resend_otp"
+                    android:textColor="@color/colorSecondary"
+                    android:textSize="12sp"
+                    android:visibility="gone" />
+
+                <LinearLayout
+                    android:id="@+id/linear_resend_otp_timer"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerInParent="true"
+                    android:gravity="center_horizontal"
+                    android:padding="10dp"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:id="@+id/resend_otp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentRight="true"
+                        android:layout_centerInParent="true"
+                        android:alpha=".6"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:fontFamily="@font/roboto_medium"
+                        android:text="@string/resend_otp_in"
+                        android:textColor="@color/black"
+                        android:textSize="12sp" />
+
+                    <TextView
+                        android:id="@+id/resend_otp_timer"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentRight="true"
+                        android:layout_centerInParent="true"
+                        android:layout_marginLeft="5dp"
+                        android:alpha=".6"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:fontFamily="@font/roboto_bold"
+                        android:text="1:45 min"
+                        android:textColor="@color/black"
+                        android:textSize="12sp" />
+
+                </LinearLayout>
+
+            </RelativeLayout>
+
+
+            <LinearLayout
+                android:id="@+id/linear_auto_read"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dp"
+                android:layout_marginTop="10dp"
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:visibility="gone">
+
+                <ImageView
+                    android:id="@+id/img_stars"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/stars" />
+
+                <TextView
+                    android:id="@+id/txt_wait_auto_read"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="5dp"
+                    android:fontFamily="@font/roboto_medium"
+                    android:text="@string/auto_read"
+                    android:textColor="@color/header_color" />
+
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/linearAutoSubmit"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="30dp"
+            android:layout_marginTop="25dp"
+            android:layout_marginRight="30dp"
+            android:orientation="vertical"
+            android:visibility="gone"
+            app:layout_constraintBottom_toTopOf="@+id/view_seperator"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent">
+
+            <include layout="@layout/button_progress" />
+
+            <TextView
+                android:id="@+id/txt_stop_auto_submit"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="10dp"
+                android:gravity="center"
+                android:text="@string/stop_auto_submit"
+                android:textColor="@color/header_color" />
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/btnProceedToPay"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="30dp"
+            android:layout_marginTop="25dp"
+            android:layout_marginRight="30dp"
+            android:backgroundTint="@null"
+            android:drawableLeft="@drawable/lock_keyhole_minimalistic"
+            android:drawablePadding="8dp"
+            android:enabled="false"
+            android:fontFamily="@font/roboto_medium"
+            android:paddingLeft="81dp"
+            android:paddingTop="10dp"
+            android:paddingRight="81dp"
+            android:paddingBottom="10dp"
+            android:text="@string/verify_continue"
+            android:textAllCaps="false"
+            android:textColor="@android:color/white"
+            android:textSize="17sp"
+            android:visibility="visible"
+            app:backgroundTint="@null"
+            app:layout_constraintBottom_toTopOf="@+id/view_seperator"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent" />
+
+        <View
+            android:id="@+id/view_seperator"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginLeft="50dp"
+            android:layout_marginRight="50dp"
+            android:layout_marginBottom="20dp"
+            android:background="@color/shimmer_grey"
+            app:layout_constraintBottom_toTopOf="@+id/linear_bank"
+            app:layout_constraintLeft_toLeftOf="@+id/btnProceedToPay"
+            app:layout_constraintRight_toRightOf="@+id/btnProceedToPay" />
+
+        <LinearLayout
+            android:id="@+id/linear_bank"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="30dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent">
+
+            <TextView
+                android:id="@+id/txt_acs"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:alpha=".8"
                 android:fontFamily="@font/roboto_medium"
-                android:text="@string/auto_read" />
+                android:text="@string/banks_website"
+                android:textColor="@color/black" />
+
+            <TextView
+                android:id="@+id/txt_acs_website"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dp"
+                android:fontFamily="@font/roboto_medium"
+                android:text="@string/website"
+                android:textColor="@color/header_color"
+                app:layout_constraintLeft_toRightOf="@+id/txt_acs"
+                app:layout_constraintTop_toTopOf="@+id/txt_acs" />
+
+            <ImageView
+                android:id="@+id/img_acs"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:layout_gravity="center"
+                android:src="@drawable/arrow_right_up"
+                app:layout_constraintBottom_toBottomOf="@+id/txt_acs_website"
+                app:layout_constraintLeft_toRightOf="@+id/txt_acs_website"
+                app:layout_constraintTop_toTopOf="@+id/txt_acs_website" />
 
         </LinearLayout>
-    </LinearLayout>
 
-    <Button
-        android:id="@+id/btnProceedToPay"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="25dp"
-        android:backgroundTint="@null"
-        android:drawableLeft="@drawable/lock_keyhole_minimalistic"
-        android:drawablePadding="8dp"
-        android:enabled="false"
-        android:fontFamily="@font/roboto_medium"
-        android:paddingLeft="81dp"
-        android:paddingTop="10dp"
-        android:paddingRight="81dp"
-        android:paddingBottom="10dp"
-        android:layout_marginLeft="30dp"
-        android:layout_marginRight="30dp"
-        android:text="@string/verify_continue"
-        android:textAllCaps="false"
-        android:textColor="@android:color/white"
-        android:textSize="17sp"
-        app:backgroundTint="@null"
-        app:layout_constraintBottom_toTopOf="@+id/view_seperator"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <View
-        android:id="@+id/view_seperator"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_marginLeft="50dp"
-        android:layout_marginRight="50dp"
-        android:layout_marginBottom="20dp"
-        android:background="@color/shimmer_grey"
-        app:layout_constraintBottom_toTopOf="@+id/linear_bank"
-        app:layout_constraintLeft_toLeftOf="@+id/btnProceedToPay"
-        app:layout_constraintRight_toRightOf="@+id/btnProceedToPay" />
+    <include
+        layout="@layout/success_full_screen"
+        android:visibility="gone" />
 
-    <LinearLayout
-        android:id="@+id/linear_bank"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="30dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent">
-
-        <TextView
-            android:id="@+id/txt_acs"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:alpha=".8"
-            android:fontFamily="@font/roboto_medium"
-            android:text="@string/banks_website"
-            android:textColor="@color/black" />
-
-        <TextView
-            android:id="@+id/txt_acs_website"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="5dp"
-            android:fontFamily="@font/roboto_medium"
-            android:text="@string/website"
-            android:textColor="@color/header_color"
-            app:layout_constraintLeft_toRightOf="@+id/txt_acs"
-            app:layout_constraintTop_toTopOf="@+id/txt_acs" />
-
-        <ImageView
-            android:id="@+id/img_acs"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="10dp"
-            android:src="@drawable/arrow_right_up"
-            app:layout_constraintBottom_toBottomOf="@+id/txt_acs_website"
-            app:layout_constraintLeft_toRightOf="@+id/txt_acs_website"
-            app:layout_constraintTop_toTopOf="@+id/txt_acs_website" />
-
-    </LinearLayout>
-
-
-</androidx.constraintlayout.widget.ConstraintLayout>
+</LinearLayout>

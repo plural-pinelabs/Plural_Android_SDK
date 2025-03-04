@@ -5,12 +5,13 @@ class MockData {
     companion object {
 
         //Testing team
-        public val tokenRequest = TokenRequest("784a7c62-946d-4373-b9fe-325506e551b4", "dd28b3135e704c01817a74296af1a49a", "client_credentials")
+        //public val tokenRequest = TokenRequest("784a7c62-946d-4373-b9fe-325506e551b4", "dd28b3135e704c01817a74296af1a49a", "client_credentials")
         /*public val tokenRequest = TokenRequest(
             "111849bd-922b-4377-9da4-32c6f5d68083",
             "20DB51C6CCAE48CDB5DF50A54A465446",
             "client_credentials"
         )*/
+        public val tokenRequest = TokenRequest("64408363-22fa-48f7-a409-3f95bdee1696", "87600ED1BC80452685F5D9B7651BF373", "client_credentials")
 
         //public val tokenRequest = TokenRequest("64408363-22fa-48f7-a409-3f95bdee1696", "87600ED1BC80452685F5D9B7651BF373", "client_credentials")
         //public val tokenRequest = TokenRequest("9436239f-6f44-4395-87df-dd3bb83c01a1", "221374903b514ac1a04424bf38c98186", "client_credentials")
@@ -46,11 +47,11 @@ class MockData {
         )
 
         private val customer = Customer(
-            null,
+            "joe.kumar@gmail.com",
             "joe",
             "kumar",
             "192212",
-            "6351645831",
+            /*"6351645831"*/"9995547485",
             billingAddress,
             shippingAddress
         )

@@ -52,10 +52,12 @@ import com.pinelabs.pluralsdk.data.utils.AmountUtil.convertToRupees
 import com.pinelabs.pluralsdk.data.utils.AmountUtil.roundToDecimal
 import com.pinelabs.pluralsdk.data.utils.ApiResultHandler
 import com.pinelabs.pluralsdk.fragment.ACSFragment
+import com.pinelabs.pluralsdk.fragment.BottomSheetOtp
 import com.pinelabs.pluralsdk.fragment.BottomSheetRetryFragment
 import com.pinelabs.pluralsdk.fragment.BottomSheetRetryUpiFragment
 import com.pinelabs.pluralsdk.fragment.CardFragment
 import com.pinelabs.pluralsdk.fragment.NetBankingFragment
+import com.pinelabs.pluralsdk.fragment.OtpFragment
 import com.pinelabs.pluralsdk.fragment.PaymentOptionListing
 import com.pinelabs.pluralsdk.fragment.UPICollectFragment
 import com.pinelabs.pluralsdk.utils.CleverTapUtil
@@ -64,10 +66,10 @@ import com.pinelabs.pluralsdk.utils.Constants.Companion.ERROR_CODE
 import com.pinelabs.pluralsdk.utils.Constants.Companion.ERROR_MESSAGE
 import com.pinelabs.pluralsdk.utils.Constants.Companion.ORDER_ID
 import com.pinelabs.pluralsdk.utils.Constants.Companion.PAYBYPOINTS_ID
-import com.pinelabs.pluralsdk.utils.Constants.Companion.REQ_RETRY_CALLBACK
 import com.pinelabs.pluralsdk.utils.Constants.Companion.TAG_ACS
 import com.pinelabs.pluralsdk.utils.Constants.Companion.TAG_CARD
 import com.pinelabs.pluralsdk.utils.Constants.Companion.TAG_NETBANKING
+import com.pinelabs.pluralsdk.utils.Constants.Companion.TAG_OTP
 import com.pinelabs.pluralsdk.utils.Constants.Companion.TAG_PAYMENT_LISTING
 import com.pinelabs.pluralsdk.utils.Constants.Companion.TAG_UPI
 import com.pinelabs.pluralsdk.utils.Constants.Companion.TOKEN
@@ -86,7 +88,7 @@ import java.util.regex.Pattern
 class LandingActivity : AppCompatActivity(), Thread.UncaughtExceptionHandler,
     CardFragment.onRetryListener, NetBankingFragment.onRetryListener,
     UPICollectFragment.onRetryListener,
-    ACSFragment.onRetryListener {
+    ACSFragment.onRetryListener, OtpFragment.onRetryListener {
 
     lateinit var customerLayout: FrameLayout
     lateinit var layoutOrginal: ConstraintLayout
@@ -119,11 +121,12 @@ class LandingActivity : AppCompatActivity(), Thread.UncaughtExceptionHandler,
 
     private var clevertapDefaultInstance: CleverTapAPI? = null
 
-    val REQ_USER_CONSENT: Int = 200
-    var smsBroadcastReceiver: SmsBroadcastReceiver? = null
+    /*val REQ_USER_CONSENT: Int = 200
+    var smsBroadcastReceiver: SmsBroadcastReceiver? = null*/
 
     var paymentModes: List<PaymentMode>? = mutableListOf()
     var isAcs = false
+    var errorCode:String?= null
     var errorMessage: String? = null
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -131,14 +134,18 @@ class LandingActivity : AppCompatActivity(), Thread.UncaughtExceptionHandler,
         super.onCreate(savedInstanceState)
         setContentView(R.layout.landing)
 
+        /*val bottomSheetDialog = BottomSheetOtp()
+        bottomSheetDialog.isCancelable = false
+        bottomSheetDialog.show(supportFragmentManager, "")*/
+
 
         clevertapDefaultInstance = CleverTapAPI.getDefaultInstance(applicationContext)
         startTime = System.currentTimeMillis()
 
-        val appSignatureHelper = AppSignatureHelper(this)
+        /*val appSignatureHelper = AppSignatureHelper(this)
         println("Signature ${appSignatureHelper.appSignatures[0]}")
 
-        startSmartUserConsent()
+        startSmartUserConsent()*/
 
         val viewModelFactory = ViewModelFactory(application)
         val viewModelFactoryRetry = ViewModelFactoryRetry(application)
@@ -157,12 +164,12 @@ class LandingActivity : AppCompatActivity(), Thread.UncaughtExceptionHandler,
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
-        if (requestCode === REQ_USER_CONSENT) {
+        /*if (requestCode === REQ_USER_CONSENT) {
             if ((resultCode === RESULT_OK) && (data != null)) {
                 val message: String? = data?.getStringExtra(SmsRetriever.EXTRA_SMS_MESSAGE)
                 getOtpFromMessage(message)
             }
-        }
+        }*/
 
         /*Toast.makeText(this, "Callback reached", Toast.LENGTH_SHORT).show()
         if (requestCode === REQ_RETRY_CALLBACK) {
@@ -287,8 +294,7 @@ class LandingActivity : AppCompatActivity(), Thread.UncaughtExceptionHandler,
                 }"
             )
 
-            val tag =
-                supportFragmentManager.getBackStackEntryAt(supportFragmentManager.backStackEntryCount - 1).name
+            val tag = supportFragmentManager.getBackStackEntryAt(supportFragmentManager.backStackEntryCount-1).name
 
             if (tag.equals(TAG_ACS))
                 this.isAcs = true
@@ -301,8 +307,8 @@ class LandingActivity : AppCompatActivity(), Thread.UncaughtExceptionHandler,
                 viewModel.cancelTransaction(token)
             } else
                 super.onBackPressed()*/
-            if (tag.equals(TAG_ACS)) {
-                onRetry(isAcs, "")
+            if (tag.equals(TAG_ACS) /*|| tag.equals(TAG_OTP)*/) {
+                onRetry(isAcs, "","")
             } else if (deepLink.isNotNullAndBlank() || paymentId.isNotNullAndBlank())
                 showCancelConfirmationDialog(this, tag)
             else
@@ -338,8 +344,7 @@ class LandingActivity : AppCompatActivity(), Thread.UncaughtExceptionHandler,
                                 if (data.is_retry_available) {
                                     val bottomSheetDialog =
                                         BottomSheetRetryFragment(
-                                            txtTransactionamount.text.toString()
-                                                .replace(Regex("\\s+"), ""),
+                                            txtTransactionamount.text.toString().replace(Regex("\\s+"), ""),
                                             isAcs,
                                             paymentModes,
                                             palette,
@@ -352,15 +357,19 @@ class LandingActivity : AppCompatActivity(), Thread.UncaughtExceptionHandler,
                                 } else {
                                     val intent = Intent(this, FailureActivity::class.java)
                                     //intent.putExtra(ORDER_ID, orderId)
+                                    intent.putExtra(ERROR_CODE, errorCode)
+                                    intent.putExtra(ERROR_MESSAGE, errorMessage)
                                     startActivity(intent)
                                     finish()
                                 }
                             }
 
                         }
-                    }, onFailure = {
+                    }, onFailure = { error->
                         val intent = Intent(this, FailureActivity::class.java)
                         //intent.putExtra(ORDER_ID, orderId)
+                        intent.putExtra(ERROR_CODE, error?.error_code)
+                        intent.putExtra(ERROR_MESSAGE, error?.error_message)
                         startActivity(intent)
                         finish()
                         println("Transaction status failure")
@@ -573,7 +582,7 @@ class LandingActivity : AppCompatActivity(), Thread.UncaughtExceptionHandler,
         )
     }
 
-    private fun startSmartUserConsent() {
+    /*private fun startSmartUserConsent() {
         val client = SmsRetriever.getClient(this)
         client.startSmsUserConsent(null)
         val retriever = client.startSmsRetriever()
@@ -588,14 +597,14 @@ class LandingActivity : AppCompatActivity(), Thread.UncaughtExceptionHandler,
         val otpPattern: Pattern = Pattern.compile("(|^)\\d{6}")
         val matcher: Matcher = otpPattern.matcher(message)
         if (matcher.find()) {
-            /*etOTP.setText(matcher.group(0))*/
+            *//*etOTP.setText(matcher.group(0))*//*
             println("OTP " + matcher.group(0))
             Toast.makeText(this@LandingActivity, "OTP " + matcher.group(0), Toast.LENGTH_SHORT)
                 .show()
         }
-    }
+    }*/
 
-    @RequiresApi(Build.VERSION_CODES.O)
+    /*@RequiresApi(Build.VERSION_CODES.O)
     private fun registerBroadcastReceiver() {
         smsBroadcastReceiver = SmsBroadcastReceiver()
         smsBroadcastReceiver!!.smsBroadcastReceiverListener =
@@ -617,15 +626,16 @@ class LandingActivity : AppCompatActivity(), Thread.UncaughtExceptionHandler,
     override fun onStart() {
         super.onStart();
         registerBroadcastReceiver()
-    }
+    }*/
 
-    override fun onStop() {
+    /*override fun onStop() {
         super.onStop()
         unregisterReceiver(smsBroadcastReceiver)
-    }
+    }*/
 
-    override fun onRetry(isAcs: Boolean, errorMessage: String?) {
+    override fun onRetry(isAcs: Boolean, errorCode:String?, errorMessage: String?) {
         this.isAcs = isAcs
+        this.errorCode = errorCode
         this.errorMessage = errorMessage
         retryViewModel.getTransactionStatus(token)
         //loadFragment(fragmentTag)

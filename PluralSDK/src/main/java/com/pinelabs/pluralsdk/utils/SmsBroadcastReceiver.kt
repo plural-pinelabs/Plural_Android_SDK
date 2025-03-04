@@ -10,6 +10,10 @@ import com.google.android.gms.common.api.Status
 class SmsBroadcastReceiver : BroadcastReceiver() {
     var smsBroadcastReceiverListener: SmsBroadcastReceiverListener? = null
 
+    fun init(smsBroadcastReceiverListener: SmsBroadcastReceiverListener?) {
+        this.smsBroadcastReceiverListener = smsBroadcastReceiverListener
+    }
+
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action === SmsRetriever.SMS_RETRIEVED_ACTION) {
             val extras = intent.extras
@@ -19,12 +23,12 @@ class SmsBroadcastReceiver : BroadcastReceiver() {
             when (smsRetreiverStatus!!.statusCode) {
                 CommonStatusCodes
                     .SUCCESS -> {
-                    val messageIntent =
-                        extras.getParcelable<Intent>(SmsRetriever.EXTRA_CONSENT_INTENT)
-                    smsBroadcastReceiverListener!!.onSuccess(messageIntent)
+                    val messageIntent = extras.getParcelable<Intent>(SmsRetriever.EXTRA_CONSENT_INTENT)
+                    println("SMS Receiver "+messageIntent.toString())
+                    smsBroadcastReceiverListener?.onSuccess(messageIntent)
                 }
 
-                CommonStatusCodes.TIMEOUT -> smsBroadcastReceiverListener!!.onFailure()
+                CommonStatusCodes.TIMEOUT -> smsBroadcastReceiverListener?.onFailure()
             }
         }
     }

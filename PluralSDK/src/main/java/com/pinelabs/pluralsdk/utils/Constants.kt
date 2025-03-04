@@ -12,6 +12,7 @@ class Constants {
         const val ORDER_ID = "ORDER_ID"
         const val PAYMENT_ID = "PAYMENT_ID"
         const val START_TIME = "START_TIME"
+        const val PROCESS_PAYMENT_REQUEST = "PROCESS_PAYMENT_REQUEST"
         const val SUCCESS_REDIRECT_URL = "savePluralPgTransactionStatus"
 
         const val SPLASH_TIMER: Long = 2300
@@ -130,12 +131,15 @@ class Constants {
         const val BROWSER_JAVASCRIPT_ENABLED = "browserjavascriptenabledval"
         const val BROWSER_ACCEPT_ALL = "*/*"
         const val BROWSER_USER_AGENT_ANDROID =
-            "Mozilla/5.0 (Linux; Android 10; Pixel 4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.127 Mobile Safari/537.36"
+            "Mozilla/5.0+(Macintosh;+Intel+Mac+OS+X+10_15_7)+AppleWebKit/537.36+(KHTML,+like+Gecko)+Chrome/133.0.0.0+Safari/537.36"
+        const val BROWSER_DEVICE_CHANNEL = "browser"
 
-        const val OTP_RESEND = "RESEND"
+        const val OTP_RESEND = "RESEND_OTP"
         const val OTP_CANCEL = "CANCEL"
+        const val OTP_SUCCESS = "SUCCESS"
+        const val NONE = "NONE"
 
-        val REQ_RETRY_CALLBACK: Int = 300
+        const val RESEND_TIMER = "RESEND_TIMER"
 
     }
 }

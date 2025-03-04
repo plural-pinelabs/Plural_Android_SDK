@@ -22,7 +22,7 @@ object RetrofitBuilder {
 
     private fun getRetrofit(): Retrofit {
         return Retrofit.Builder()
-            .baseUrl(BASE_URL_UAT)
+            .baseUrl(BASE_URL_QA)
             .addConverterFactory(GsonConverterFactory.create())
             .client(clientBuilder.build())
             .build()

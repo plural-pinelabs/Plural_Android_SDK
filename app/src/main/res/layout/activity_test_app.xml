@@ -28,7 +28,7 @@
         android:gravity="center"
         android:hint="Redirect URL"
         android:inputType="text"
-        android:visibility="gone"
+        android:visibility="visible"
         app:layout_constraintBottom_toTopOf="@+id/btn_start_sdk"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent" />

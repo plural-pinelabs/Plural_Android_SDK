@@ -263,6 +263,10 @@
             layout="@layout/pbp_checking_points"
             android:visibility="gone" />
 
+        <!--<include
+            layout=""
+            android:visibility="gone" />-->
+
         <!-- Proceed to Pay Button -->
         <Button
             android:id="@+id/btnProceedToPay"
