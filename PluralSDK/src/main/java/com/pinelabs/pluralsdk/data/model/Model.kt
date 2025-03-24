@@ -1,7 +1,6 @@
 package com.pinelabs.pluralsdk.data.model
 
 import com.google.gson.annotations.SerializedName
-import com.pinelabs.pluralsdk.utils.PaymentModes
 import java.io.Serializable
 
 data class FetchResponse(
@@ -9,8 +8,19 @@ data class FetchResponse(
     val merchantInfo: MerchantInfo? = null,
     val paymentData: PaymentData? = null,
     val paymentModes: List<PaymentMode>? = null,
-    val merchantBrandingData: MerchantBranding? = null,
-    val customerInfo: CustomerInfo? = null  // New field for customer information
+    var merchantBrandingData: MerchantBranding? = null,
+    val customerInfo: CustomerInfo?,  // New field for customer information
+    val shippingAddress: Address,
+    val billingAddress: Address
+)
+
+data class Address(
+    val address1: String?,
+    val address2: String?,
+    val pincode: String?,
+    val city: String?,
+    val state: String?,
+    val country: String?
 )
 
 data class FetchError(
@@ -37,7 +47,14 @@ data class TransactionInfo(
 data class MerchantInfo(
     val merchantId: Int,
     val merchantName: String,
-    val merchantDisplayName: String?
+    val merchantDisplayName: String?,
+    val featureFlags: FeatureFlag?
+)
+
+data class FeatureFlag(
+    var isSavedCardEnabled: Boolean?,
+    var isNativeOTPEnabled: Boolean?,
+    var isDCCEnabled: Boolean?
 )
 
 data class OrignalTransactionAmount(var amount: Int?, val currency: String)
@@ -53,7 +70,7 @@ data class PaymentModeData(
 
 data class issuerDataList(val bankName: String, val merchantPaymentCode: String)
 
-data class MerchantBranding(val logo: Logo?, val brandTheme: BrandTheme?, val palette: Palette?)
+data class MerchantBranding(val logo: Logo?, val brandTheme: BrandTheme?, var palette: Palette?)
 
 data class Logo(val imageSize: String, val imageContent: String)
 
@@ -74,18 +91,41 @@ data class RecyclerViewPaymentOptionData(
 
 // New data class to hold customer information
 data class CustomerInfo(
-    val customerId: String,
-    val firstName: String,
+    val customerId: String?,
+    var customer_id: String?,
+    val firstName: String?,
+    var first_name: String?,
     val lastName: String,
-    val isEditCustomerDetailsAllowed: Boolean,
-    val totalTokens: Int,
-    val mobileNo: String,
-    val emailId: String,
-    val tokens: List<SavedCardTokens>
+    var last_name: String?,
+    val isEditCustomerDetailsAllowed: Boolean?,
+    var is_edit_customer_details_allowed: Boolean?,
+    var is_edit: Boolean?,
+    var countryCode: String?,
+    var country_code: String?,
+    var mobileNo: String?,
+    var mobileNumber: String?,
+    var mobile_number: String?,
+    var email_id: String?,
+    var emailId: String?,
+    val totalTokens: Int?,
+    val tokens: List<SavedCardTokens>?,
+    var shippingAddress: Address? = null,
+    var billingAddress: Address? = null,
+    val shipping_address: Address? = null,
+    val billing_address: Address? = null,
+    val status: String?,
+    val created_at: String?,
+    val updated_at: String?
+) : Serializable
+
+data class CustomerInfoResponse(
+    val status: String?,
+    val customerInfo: CustomerInfo?
 )
 
-
 data class ProcessPaymentRequest(
+    val card_token_data: CardTokenData?,
+    val customer_data: CustomerData?,
     val card_data: CardData?,
     val upi_data: UpiData?,
     val netbanking_data: NetBankingData?,
@@ -120,13 +160,24 @@ data class ProcessPaymentResponse(
     val short_link: String?,
 )
 
+data class CardTokenData(
+    val token_id: String?,
+    val cvv: String?
+)
+
+data class CustomerData(
+    val mobileNo: String?,
+    val email_id: String?
+)
+
 data class CardData(
     val card_number: String,
     val cvv: String,
     val card_holder_name: String,
     val card_expiry_year: String,
     val card_expiry_month: String,
-    val isNativeOTPSupported: Boolean?
+    val isNativeOTPSupported: Boolean?,
+    var save: Boolean?
 )
 
 data class DeviceInfo(
@@ -240,9 +291,17 @@ data class GlobalBinsData(val issuerName: String, val cardType: String, val isDo
 
 data class ResultInfo(val responseCode: String, val totalBins: String)
 
-data class OTPRequest(val payment_id: String?, val otp: String?)
+data class OTPRequest(
+    val payment_id: String?,
+    val otp: String?,
+    val customerId: String?,
+    val otpId: String?,
+    val updateOrderDetails: UpdateOrderDetails?
+)
 
 data class OTPResponse(val next: List<String>?, val status: String?, val meta_data: MetaData?)
+
+data class SavedCardResponse(val otpId: String?, val status: String?, val otpAttemptLeft: Int)
 
 data class MetaData(val resend_after: String?)
 
@@ -280,4 +339,8 @@ data class SavedCardDataObject(
     val networkName: String,
     val issuerName: String,
     val cvvRequired: Boolean
+)
+
+data class UpdateOrderDetails(
+    val customer: CustomerInfo?
 )

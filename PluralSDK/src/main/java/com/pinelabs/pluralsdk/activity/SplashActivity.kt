@@ -30,7 +30,7 @@ class SplashActivity : AppCompatActivity() {
         CleverTapUtil.CT_EVENT_SDK_INITIALISED(clevertapDefaultInstance, this@SplashActivity)
 
         token = intent.getStringExtra(TOKEN).toString()
-        //token ="V3_NjWKlMIxa4IvVPhP31XBZA2TJjiLQQJs5N95raw0dLVH5p%2B5vPGn8EL3DozZkN0L"
+        token = "V3_RSriC2da%2FtXGjxHFA6ck0z0Ft3T7TrlsVpezlSpQTwE2sfycWX5hdK9ZSMA655YN"
 
         logoAnimation = findViewById(R.id.img_logo)
         logoAnimation.setAnimationFromUrl(IMAGE_LOGO)

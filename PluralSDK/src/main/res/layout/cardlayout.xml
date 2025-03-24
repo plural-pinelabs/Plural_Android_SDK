@@ -263,9 +263,9 @@
             layout="@layout/pbp_checking_points"
             android:visibility="gone" />
 
-        <!--<include
-            layout=""
-            android:visibility="gone" />-->
+        <include
+            layout="@layout/saved_card_footer"
+            android:visibility="gone" />
 
         <!-- Proceed to Pay Button -->
         <Button

@@ -1,19 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/constrain_saved_card_selector"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:padding="15dp">
 
     <TextView
         android:id="@+id/txt_save_card"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="20dp"
+        android:layout_marginLeft="5dp"
         android:alpha=".8"
         android:gravity="center"
         android:text="@string/securely_save_card"
         android:textColor="@color/black"
+        android:textSize="14sp"
         app:layout_constraintBottom_toBottomOf="@+id/cb_saved_card"
         app:layout_constraintLeft_toRightOf="@+id/cb_saved_card"
         app:layout_constraintTop_toTopOf="@+id/cb_saved_card" />
@@ -22,18 +24,22 @@
         android:id="@+id/txt_save_card_not_supported"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="5dp"
         android:alpha=".8"
         android:text="@string/securely_save_card_not_supported"
         android:textColor="@color/black"
+        android:textSize="14sp"
+        android:visibility="gone"
         app:layout_constraintLeft_toLeftOf="@+id/txt_save_card"
         app:layout_constraintTop_toBottomOf="@+id/txt_save_card" />
 
     <CheckBox
         android:id="@+id/cb_saved_card"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@drawable/save_card_check"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:background="@drawable/saved_card_select_checkbox_selector"
+        android:button="@null"
+        android:checked="false"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

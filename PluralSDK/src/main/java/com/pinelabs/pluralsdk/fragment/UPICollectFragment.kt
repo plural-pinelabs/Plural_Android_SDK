@@ -371,7 +371,7 @@ class UPICollectFragment : Fragment(), UpiIntentAdapter.OnItemClickListener {
         val upiData = UpiData(UPI, vpa, upiTxnMode)
         val upiTxnData = UpiTransactionData(PaymentModeId.UPI.id)
         val processPaymentRequest =
-            ProcessPaymentRequest(card_data = null, upiData, null, cardDataExtra, upiTxnData, null)
+            ProcessPaymentRequest( null, null, null, upiData, null, cardDataExtra, upiTxnData, null)
         vpaContext = vpa
 
         this.transactionMode = transactionMode

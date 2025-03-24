@@ -4,6 +4,10 @@ class Constants {
     companion object {
         const val APP_VERSION = "1.0"
 
+        const val CUSTOMER_ID = "CUSTOMER_ID"
+        const val OTP_ID = "OTP_ID"
+        const val MOBILE = "MOBILE"
+        const val EMAIL = "EMAIL"
         const val TOKEN = "TOKEN"
         const val ERROR_CODE = "ERROR_CODE"
         const val ERROR_MESSAGE = "ERROR_MESSAGE"
@@ -13,6 +17,7 @@ class Constants {
         const val PAYMENT_ID = "PAYMENT_ID"
         const val START_TIME = "START_TIME"
         const val PROCESS_PAYMENT_REQUEST = "PROCESS_PAYMENT_REQUEST"
+        const val CUSTOMER_DETAILS = "CUSTOMER_DETAILS"
         const val SUCCESS_REDIRECT_URL = "savePluralPgTransactionStatus"
 
         const val SPLASH_TIMER: Long = 2300
@@ -98,12 +103,15 @@ class Constants {
         const val UPI_PROCESSED_ATTEMPTED = "ATTEMPTED"
 
 
+        const val TAG_SAVED_CARD_LISTING = "TAG_SAVED_CARD_LISTING"
         const val TAG_PAYMENT_LISTING = "TAG_PAYMENT_LISTING"
         const val TAG_CARD = "TAG_CARD"
         const val TAG_UPI = "TAG_UPI"
         const val TAG_NETBANKING = "TAG_NETBANKING"
         const val TAG_OTP = "TAG_OTP"
         const val TAG_ACS = "TAG_ACS"
+        const val TAG_BOTTOM_SHEET_OTP = "TAG_BOTTOM_SHEET_OTP"
+        const val TAG_BOTTOM_SHEET_MOBILE = "TAG_BOTTOM_SHEET_MOBILE"
 
         const val CT_CARDS = "cards"
         const val CT_UPI = "upi"
@@ -137,9 +145,14 @@ class Constants {
         const val OTP_RESEND = "RESEND_OTP"
         const val OTP_CANCEL = "CANCEL"
         const val OTP_SUCCESS = "SUCCESS"
+        const val OTP_VALIDATE = "VALIDATED"
+        var OTP_ATTEMPT = 2
         const val NONE = "NONE"
 
         const val RESEND_TIMER = "RESEND_TIMER"
 
+        const val MOBILE_REGEX =
+            "^[+]?\\d{1,4}[\\s-]?\\(?\\d{1,4}\\)?[\\s-]?\\d{1,4}[\\s-]?\\d{1,4}$"
+        const val EMAIL_REGEX = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$"
     }
 }

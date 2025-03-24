@@ -6,6 +6,8 @@ import com.pinelabs.pluralsdk.data.model.CancelTransactionResponse
 import com.pinelabs.pluralsdk.data.model.CardBinMetaDataRequest
 import com.pinelabs.pluralsdk.data.model.CardBinMetaDataRequestList
 import com.pinelabs.pluralsdk.data.model.CardBinMetaDataResponse
+import com.pinelabs.pluralsdk.data.model.CustomerInfo
+import com.pinelabs.pluralsdk.data.model.CustomerInfoResponse
 import com.pinelabs.pluralsdk.data.model.FetchResponse
 import com.pinelabs.pluralsdk.data.model.OTPRequest
 import com.pinelabs.pluralsdk.data.model.OTPResponse
@@ -13,6 +15,7 @@ import com.pinelabs.pluralsdk.data.model.ProcessPaymentRequest
 import com.pinelabs.pluralsdk.data.model.ProcessPaymentResponse
 import com.pinelabs.pluralsdk.data.model.RewardRequest
 import com.pinelabs.pluralsdk.data.model.RewardResponse
+import com.pinelabs.pluralsdk.data.model.SavedCardResponse
 import com.pinelabs.pluralsdk.data.model.TransactionStatusResponse
 import retrofit2.Response
 import retrofit2.http.Body
@@ -83,4 +86,37 @@ interface ApiService {
             encoded = true
         ) token: String, @Body request: OTPRequest
     ): Response<OTPResponse>
+
+    @POST("customer/otp/send")
+    suspend fun sendOTPCustomer(
+        @Query(
+            "token",
+            encoded = true
+        ) token: String?, @Body request: OTPRequest?
+    ): Response<SavedCardResponse>
+
+    @POST("customer/otp/validate")
+    suspend fun validateOTPCustomer(
+        @Query(
+            "token",
+            encoded = true
+        ) token: String?, @Body request: OTPRequest?
+    ): Response<SavedCardResponse>
+
+    @POST("customer/create-inactive")
+    suspend fun createInactive(
+        @Query(
+            "token",
+            encoded = true
+        ) token: String?, @Body request: CustomerInfo?
+    ): Response<CustomerInfo>
+
+    @POST("customer/otp/validate-and-update-order")
+    suspend fun validateUpdateOrder(
+        @Query(
+            "token",
+            encoded = true
+        ) token: String?, @Body request: OTPRequest?
+    ): Response<CustomerInfoResponse>
+
 }

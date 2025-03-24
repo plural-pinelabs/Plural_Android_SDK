@@ -2,6 +2,7 @@ package com.pinelabs.pluralsdk.data.repository
 
 import com.pinelabs.pluralsdk.data.model.CardBinMetaDataRequest
 import com.pinelabs.pluralsdk.data.model.CardBinMetaDataRequestList
+import com.pinelabs.pluralsdk.data.model.CustomerInfo
 import com.pinelabs.pluralsdk.data.model.OTPRequest
 import com.pinelabs.pluralsdk.data.model.ProcessPaymentRequest
 import com.pinelabs.pluralsdk.data.model.RewardRequest
@@ -32,4 +33,17 @@ class RemoteDataSource() {
 
     suspend fun resendOTP(token: String, otpRequest: OTPRequest) =
         RetrofitBuilder.apiService.resendOTP(token, otpRequest)
+
+    suspend fun sendOTPCustomer(token: String?, otpRequest: OTPRequest?) =
+        RetrofitBuilder.apiService.sendOTPCustomer(token, otpRequest)
+
+    suspend fun validateOTPCustomer(token: String?, otpRequest: OTPRequest?) =
+        RetrofitBuilder.apiService.validateOTPCustomer(token, otpRequest)
+
+    suspend fun createInactive(token: String?, customerInfo: CustomerInfo?) =
+        RetrofitBuilder.apiService.createInactive(token, customerInfo)
+
+    suspend fun validateUpdateOrder(token: String?, otpRequest: OTPRequest?) =
+        RetrofitBuilder.apiService.validateUpdateOrder(token, otpRequest)
+
 }

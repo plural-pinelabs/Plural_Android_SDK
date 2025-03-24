@@ -170,7 +170,7 @@ class OtpFragment : Fragment() {
             if (progress == 100) {
                 btnVerifyContinue.visibility = View.VISIBLE
                 linearAutoSubmit.visibility = View.GONE
-                val otpRequest = OTPRequest(paymentId, edtOtp.text.toString())
+                val otpRequest = OTPRequest(paymentId, edtOtp.text.toString(), null, null, null)
                 buttonClicked = true
                 mainViewModel.submitOtp(token, otpRequest)
             }
@@ -260,6 +260,7 @@ class OtpFragment : Fragment() {
                                 showProcessPaymentDialog()
                             },
                             onSuccess = { data ->
+                                bottomSheetDialog.cancel()
                                 if (data?.status?.equals(OTP_SUCCESS) == true) {
                                     val intent =
                                         Intent(requireActivity(), SuccessActivity::class.java)
@@ -383,7 +384,7 @@ class OtpFragment : Fragment() {
 
         btnVerifyContinue.setOnClickListener {
             buttonClicked = true
-            val otpRequest = OTPRequest(paymentId, edtOtp.text.toString())
+            val otpRequest = OTPRequest(paymentId, edtOtp.text.toString(), null, null, null)
             mainViewModel.submitOtp(token, otpRequest)
         }
 
@@ -542,7 +543,7 @@ class OtpFragment : Fragment() {
     }
 
     private fun resendOtp(paymentId: String) {
-        val otpRequest = OTPRequest(paymentId, null)
+        val otpRequest = OTPRequest(paymentId, null, null, null,null)
         mainViewModel.resendOtp(token, otpRequest)
     }
 

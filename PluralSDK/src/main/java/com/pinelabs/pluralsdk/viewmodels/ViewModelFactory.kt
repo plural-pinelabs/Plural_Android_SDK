@@ -17,3 +17,9 @@ class ViewModelFactoryRetry(private val application: Application) : ViewModelPro
         return RetryViewModel(Repository(RemoteDataSource()), application) as T
     }
 }
+
+class ViewModelFactorySavedCard(private val application: Application) : ViewModelProvider.Factory {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        return SavedCardViewModel(Repository(RemoteDataSource()), application) as T
+    }
+}

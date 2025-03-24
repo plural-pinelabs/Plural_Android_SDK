@@ -10,6 +10,8 @@ import com.pinelabs.pluralsdk.data.model.CancelTransactionResponse
 import com.pinelabs.pluralsdk.data.model.CardBinMetaDataRequest
 import com.pinelabs.pluralsdk.data.model.CardBinMetaDataRequestList
 import com.pinelabs.pluralsdk.data.model.CardBinMetaDataResponse
+import com.pinelabs.pluralsdk.data.model.CustomerInfo
+import com.pinelabs.pluralsdk.data.model.CustomerInfoResponse
 import com.pinelabs.pluralsdk.data.model.FetchResponse
 import com.pinelabs.pluralsdk.data.model.OTPRequest
 import com.pinelabs.pluralsdk.data.model.OTPResponse
@@ -17,6 +19,7 @@ import com.pinelabs.pluralsdk.data.model.ProcessPaymentRequest
 import com.pinelabs.pluralsdk.data.model.ProcessPaymentResponse
 import com.pinelabs.pluralsdk.data.model.RewardRequest
 import com.pinelabs.pluralsdk.data.model.RewardResponse
+import com.pinelabs.pluralsdk.data.model.SavedCardResponse
 import com.pinelabs.pluralsdk.data.model.TransactionStatusResponse
 import com.pinelabs.pluralsdk.data.repository.Repository
 import com.pinelabs.pluralsdk.data.utils.NetWorkResult
@@ -44,8 +47,16 @@ class FetchDataViewModel(private val repository: Repository, application: Applic
     private val generateOtp: MutableLiveData<NetWorkResult<OTPResponse>> = MutableLiveData()
     private val submitOtp: MutableLiveData<NetWorkResult<OTPResponse>> = MutableLiveData()
     private val resendOtp: MutableLiveData<NetWorkResult<OTPResponse>> = MutableLiveData()
+    private val savedCardRequestOtp: MutableLiveData<NetWorkResult<SavedCardResponse>> =
+        MutableLiveData()
+    private val savedCardCreateInactive: MutableLiveData<NetWorkResult<CustomerInfo>> =
+        MutableLiveData()
+    private val savedCardValidateUpdateOrder: MutableLiveData<NetWorkResult<CustomerInfoResponse>> =
+        MutableLiveData()
 
     var pbpAmount: MutableLiveData<Int> = MutableLiveData()
+    var otpId: MutableLiveData<String> = MutableLiveData()
+    var mobileNumberValidate: MutableLiveData<Boolean> = MutableLiveData()
 
     val fetch_response: LiveData<NetWorkResult<FetchResponse>> = response
     val process_payment_response: LiveData<NetWorkResult<ProcessPaymentResponse>> =
@@ -60,6 +71,13 @@ class FetchDataViewModel(private val repository: Repository, application: Applic
     val generate_otp_response: LiveData<NetWorkResult<OTPResponse>> = generateOtp
     val submit_otp_response: LiveData<NetWorkResult<OTPResponse>> = submitOtp
     val resend_otp_response: LiveData<NetWorkResult<OTPResponse>> = resendOtp
+    val saved_card_request_otp_response: LiveData<NetWorkResult<SavedCardResponse>> =
+        savedCardRequestOtp
+    val saved_card_create_inactive_response: LiveData<NetWorkResult<CustomerInfo>> =
+        savedCardCreateInactive
+    val saved_card_validate_update_order_response: LiveData<NetWorkResult<CustomerInfoResponse>> =
+        savedCardValidateUpdateOrder
+    var savedCardOtpError: MutableLiveData<String> = MutableLiveData()
 
     private val exceptionHandler: CoroutineContext =
         CoroutineExceptionHandler { context, throwable ->
@@ -150,4 +168,26 @@ class FetchDataViewModel(private val repository: Repository, application: Applic
                 resendOtp.value = values
             }
         }
+
+    fun sendOTPCustomer(token: String?, otpRequest: OTPRequest?) =
+        viewModelScope.launch(exceptionHandler) {
+            repository.sendOTPCustomer(getApplication(), token, otpRequest).collect { values ->
+                savedCardRequestOtp.value = values
+            }
+        }
+
+    fun createInactive(token: String?, customerInfo: CustomerInfo?) =
+        viewModelScope.launch(exceptionHandler) {
+            repository.createInactive(getApplication(), token, customerInfo).collect { values ->
+                savedCardCreateInactive.value = values
+            }
+        }
+
+    fun validateUpdateOrder(token: String?, otpRequest: OTPRequest?) =
+        viewModelScope.launch(exceptionHandler) {
+            repository.validateUpdateOrder(getApplication(), token, otpRequest).collect { values ->
+                savedCardValidateUpdateOrder.value = values
+            }
+        }
+
 }

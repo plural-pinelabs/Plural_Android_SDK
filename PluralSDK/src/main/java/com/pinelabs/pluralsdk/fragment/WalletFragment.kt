@@ -67,7 +67,7 @@ import com.pinelabs.pluralsdk.utils.TransactionMode
 import com.pinelabs.pluralsdk.viewmodels.FetchDataViewModel
 import java.util.EnumSet
 
-class NetBankingFragment : Fragment(), NetBankAllAdapter.OnItemClickListener {
+class WalletFragment : Fragment(), NetBankAllAdapter.OnItemClickListener {
 
     private lateinit var imgBack: ImageButton
     private lateinit var flexNetBanks: FlexboxLayout
@@ -94,7 +94,7 @@ class NetBankingFragment : Fragment(), NetBankAllAdapter.OnItemClickListener {
     private var listener: onRetryListener? = null
 
     interface onRetryListener {
-        fun onRetry(isAcs: Boolean, errorCode:String?,errorMessage:String?)
+        fun onRetry(isAcs: Boolean, errorCode: String?, errorMessage: String?)
     }
 
     override fun onAttach(context: Context) {
@@ -112,7 +112,7 @@ class NetBankingFragment : Fragment(), NetBankAllAdapter.OnItemClickListener {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.netbanking_landing, container, false)
+        return inflater.inflate(R.layout.wallet_landing, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -157,7 +157,7 @@ class NetBankingFragment : Fragment(), NetBankAllAdapter.OnItemClickListener {
                 val fetchDataResponseHandler =
                     ApiResultHandler<ProcessPaymentResponse>(requireActivity(),
                         onLoading = {
-                            if (moreBanksBottomSheetDialog!=null && moreBanksBottomSheetDialog.isShowing) moreBanksBottomSheetDialog.dismiss()
+                            if (moreBanksBottomSheetDialog != null && moreBanksBottomSheetDialog.isShowing) moreBanksBottomSheetDialog.dismiss()
                             showProcessPaymentDialog()
                         }, onSuccess = { response ->
 
@@ -223,7 +223,11 @@ class NetBankingFragment : Fragment(), NetBankAllAdapter.OnItemClickListener {
                         intent.putExtra(ERROR_MESSAGE, errorMessage?.error_message)
                         startActivity(intent)
                         requireActivity().finish()*/
-                            listener?.onRetry(false, errorMessage?.error_code, errorMessage?.error_message)
+                            listener?.onRetry(
+                                false,
+                                errorMessage?.error_code,
+                                errorMessage?.error_message
+                            )
                         })
                 fetchDataResponseHandler.handleApiResult(response)
             }
@@ -274,7 +278,7 @@ class NetBankingFragment : Fragment(), NetBankAllAdapter.OnItemClickListener {
             deviceInfo
         )
         val processPaymentRequest =
-            ProcessPaymentRequest(null, null, null,null,netBankingData, extras, null, null)
+            ProcessPaymentRequest(null, null, null, null, netBankingData, extras, null, null)
         return processPaymentRequest;
     }
 
@@ -368,7 +372,7 @@ class NetBankingFragment : Fragment(), NetBankAllAdapter.OnItemClickListener {
             val gridBankAdapter =
                 NetBanksAdapter(
                     bankList?.subList(0, if (bankList!!.size > 6) 6 else bankList!!.size),
-                    this@NetBankingFragment
+                    this@WalletFragment
                 )
 
             val gridLayoutManager =
@@ -444,7 +448,7 @@ class NetBankingFragment : Fragment(), NetBankAllAdapter.OnItemClickListener {
         recyclerView.layoutManager = layoutManager
         moreBankAdapter = NetBankAllAdapter(
             bankList,
-            this@NetBankingFragment
+            this@WalletFragment
         )
         recyclerView.adapter = moreBankAdapter
     }

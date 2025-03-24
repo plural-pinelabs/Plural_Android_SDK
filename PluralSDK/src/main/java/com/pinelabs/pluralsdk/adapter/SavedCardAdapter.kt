@@ -16,15 +16,15 @@ class SavedCardAdapter(private val savedCardList: List<SavedCardData>) :
         viewType: Int
     ): SavedCardViewHolder {
         val itemView = LayoutInflater.from(parent.context).inflate(
-            R.layout.saved_card_item,
+            R.layout.saved_card_dialog_item,
             parent, false
         )
         return SavedCardViewHolder(itemView)
     }
 
     override fun onBindViewHolder(holder: SavedCardViewHolder, position: Int) {
-        holder.savedCardText.text = savedCardList.get(position).text
-        holder.savedCardImage.setImageResource(savedCardList.get(position).icon)
+        holder.savedCardText.text = savedCardList[position].text
+        holder.savedCardImage.setImageResource(savedCardList[position].icon)
     }
 
     override fun getItemCount(): Int {

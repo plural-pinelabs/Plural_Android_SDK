@@ -4,10 +4,13 @@ import android.content.Context
 import android.graphics.PixelFormat
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
+import com.pinelabs.pluralsdk.utils.Constants.Companion.EMAIL_REGEX
+import com.pinelabs.pluralsdk.utils.Constants.Companion.MOBILE_REGEX
 import java.net.Inet4Address
 import java.net.NetworkInterface
 import java.net.SocketException
 import java.util.TimeZone
+import java.util.regex.Pattern
 
 
 object Utils {
@@ -72,4 +75,17 @@ object Utils {
         }
     }
 
+    fun isValidPhoneNumber(phoneNumber: String?): Boolean {
+        val regex = MOBILE_REGEX
+        val pattern = Pattern.compile(regex)
+        val matcher = pattern.matcher(phoneNumber)
+        return matcher.matches()
+    }
+
+    fun isValidEmail(email: String?): Boolean {
+        val regex = EMAIL_REGEX
+        val pattern = Pattern.compile(regex)
+        val matcher = pattern.matcher(email)
+        return matcher.matches()
+    }
 }

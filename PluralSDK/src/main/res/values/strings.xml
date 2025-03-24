@@ -215,11 +215,23 @@
     <string name="enter_mobile_number">Enter Mobile Number</string>
     <string name="get_otp">Get OTP</string>
     <string name="verify_mobile_number">Verify mobile number</string>
-    <string name="enter_otp_string">Enter the OTP sent to +91 86198 20560 to proceed</string>
+    <string name="enter_otp_string">Enter the OTP sent to </string>
+    <string name="securely_save_card_otp">to securely save your card</string>
+    <string name="to_proceed">to proceed</string>
     <string name="edit_mobile_number">Edit mobile number</string>
+    <string name="skip_saving_card">Skip saving card</string>
     <string name="saved_card">Saved Cards</string>
     <string name="verify_saved_card">Verify your mobile to unlock saved options for a faster checkout</string>
     <string name="stop_auto_submit">Stop auto submit</string>
     <string name="wrong_otp">Wrong OTP, please re-enter</string>
     <string name="submitting_otp">"Submitting OTP ..."</string>
+    <string name="continue_to_pay">Continue to Pay</string>
+    <string name="edit_contact_details">Edit contact details</string>
+    <string name="mobile_number">Mobile No.</string>
+    <string name="email_optional">Email ID (optional)</string>
+    <string name="enter_mobile">Invalid Mobile Number</string>
+    <string name="enter_email">Invalid Email ID</string>
+    <string name="continue_">Continue</string>
+    <string name="verify">Verify</string>
+    <string name="otp_attempt_exceeded">OTP attempts exceeded</string>
 </resources>

@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
@@ -150,6 +151,9 @@ class PaymentOptionListing : Fragment(), PaymentOptionsAdapter.OnItemClickListen
             transaction.addToBackStack(TAG)
             transaction.commit()
         }
+
+        requireActivity().findViewById<LinearLayout>(R.id.saved_card_fragment).visibility = View.GONE
+
     }
 
     fun startShimmer() {

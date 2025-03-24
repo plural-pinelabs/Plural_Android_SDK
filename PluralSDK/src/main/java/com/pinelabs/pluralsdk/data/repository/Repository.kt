@@ -6,6 +6,8 @@ import com.pinelabs.pluralsdk.data.model.CancelTransactionResponse
 import com.pinelabs.pluralsdk.data.model.CardBinMetaDataRequest
 import com.pinelabs.pluralsdk.data.model.CardBinMetaDataRequestList
 import com.pinelabs.pluralsdk.data.model.CardBinMetaDataResponse
+import com.pinelabs.pluralsdk.data.model.CustomerInfo
+import com.pinelabs.pluralsdk.data.model.CustomerInfoResponse
 import com.pinelabs.pluralsdk.data.model.FetchResponse
 import com.pinelabs.pluralsdk.data.model.OTPRequest
 import com.pinelabs.pluralsdk.data.model.OTPResponse
@@ -13,6 +15,7 @@ import com.pinelabs.pluralsdk.data.model.ProcessPaymentRequest
 import com.pinelabs.pluralsdk.data.model.ProcessPaymentResponse
 import com.pinelabs.pluralsdk.data.model.RewardRequest
 import com.pinelabs.pluralsdk.data.model.RewardResponse
+import com.pinelabs.pluralsdk.data.model.SavedCardResponse
 import com.pinelabs.pluralsdk.data.model.TransactionStatusResponse
 import com.pinelabs.pluralsdk.data.utils.NetWorkResult
 import com.pinelabs.pluralsdk.data.utils.toResultFlow
@@ -101,6 +104,46 @@ class Repository(private val remoteDataSource: RemoteDataSource) {
     ): Flow<NetWorkResult<OTPResponse>> {
         return toResultFlow(context) {
             remoteDataSource.resendOTP(token, otpRequest)
+        }
+    }
+
+    suspend fun sendOTPCustomer(
+        context: Context,
+        token: String?,
+        otpRequest: OTPRequest?
+    ): Flow<NetWorkResult<SavedCardResponse>> {
+        return toResultFlow(context) {
+            remoteDataSource.sendOTPCustomer(token, otpRequest)
+        }
+    }
+
+    suspend fun validateOTPCustomer(
+        context: Context,
+        token: String?,
+        otpRequest: OTPRequest?
+    ): Flow<NetWorkResult<SavedCardResponse>> {
+        return toResultFlow(context) {
+            remoteDataSource.validateOTPCustomer(token, otpRequest)
+        }
+    }
+
+    suspend fun createInactive(
+        context: Context,
+        token: String?,
+        customerInfo: CustomerInfo?
+    ): Flow<NetWorkResult<CustomerInfo>> {
+        return toResultFlow(context) {
+            remoteDataSource.createInactive(token, customerInfo)
+        }
+    }
+
+    suspend fun validateUpdateOrder(
+        context: Context,
+        token: String?,
+        otpRequest: OTPRequest?
+    ): Flow<NetWorkResult<CustomerInfoResponse>> {
+        return toResultFlow(context) {
+            remoteDataSource.validateUpdateOrder(token, otpRequest)
         }
     }
 

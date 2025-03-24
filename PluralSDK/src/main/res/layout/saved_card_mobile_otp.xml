@@ -44,7 +44,7 @@
                 android:layout_gravity="center"
                 android:layout_marginTop="20dp"
                 android:layout_marginBottom="5dp"
-                android:src="@drawable/saved_card_dialog" />
+                android:src="@drawable/save_card_otp_drawable_layer" />
 
             <TextView
                 android:id="@+id/textView3"
@@ -53,12 +53,12 @@
                 android:layout_gravity="center"
                 android:layout_marginTop="15dp"
                 android:fontFamily="@font/roboto_bold"
-                android:text="@string/unlock_saved_card"
+                android:text="@string/verify_mobile_number"
                 android:textColor="@color/black"
                 android:textSize="20sp" />
 
             <TextView
-                android:id="@+id/textView4"
+                android:id="@+id/txt_otp_content"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
@@ -84,16 +84,20 @@
         app:layout_constraintRight_toRightOf="@+id/card_pbp"
         app:layout_constraintTop_toBottomOf="@+id/card_pbp">
 
-        <com.pinelabs.pluralsdk.activity.OtpEditText
+        <EditText
             android:id="@+id/edt_mobile_number"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:background="@null"
-            android:cursorVisible="false"
+            android:cursorVisible="true"
             android:digits="1234567890"
             android:ems="10"
+            android:maxLength="6"
             android:fontFamily="@font/roboto_medium"
+            android:gravity="center"
+            android:hint="------"
             android:inputType="number"
+            android:letterSpacing="3"
             android:text=""
             android:textColor="@color/black"
             android:textIsSelectable="false"
@@ -102,14 +106,24 @@
     </RelativeLayout>
 
     <TextView
-        android:id="@+id/txt_edit_mobile_number"
+        android:id="@+id/txt_mobile_error"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="10dp"
+        android:text="@string/wrong_otp"
+        android:textColor="@color/red"
+        android:visibility="gone"
+        app:layout_constraintLeft_toLeftOf="@+id/layout_mobile_number"
+        app:layout_constraintTop_toBottomOf="@+id/layout_mobile_number" />
+
+    <TextView
+        android:id="@+id/txt_footer_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="10dp"
         android:text="@string/edit_mobile_number"
-
         app:layout_constraintLeft_toLeftOf="@+id/layout_mobile_number"
-        app:layout_constraintTop_toBottomOf="@+id/layout_mobile_number" />
+        app:layout_constraintTop_toBottomOf="@+id/txt_mobile_error" />
 
     <LinearLayout
         android:id="@+id/linear_resend_otp_timer"
@@ -123,7 +137,7 @@
         app:layout_constraintTop_toBottomOf="@+id/layout_mobile_number">
 
         <TextView
-            android:id="@+id/resend_otp"
+            android:id="@+id/resend_otp_in"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
@@ -147,7 +161,35 @@
             android:clickable="true"
             android:focusable="true"
             android:fontFamily="@font/roboto_bold"
-            android:text="1:45 min"
+            android:text="00:00 min"
+            android:textColor="@color/black"
+            android:textSize="12sp" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/linear_resend_otp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_centerInParent="true"
+        android:gravity="center_horizontal"
+        android:padding="10dp"
+        android:visibility="gone"
+        app:layout_constraintRight_toRightOf="@+id/layout_mobile_number"
+        app:layout_constraintTop_toBottomOf="@+id/layout_mobile_number">
+
+        <TextView
+            android:id="@+id/resend_otp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerInParent="true"
+            android:alpha=".6"
+            android:clickable="true"
+            android:focusable="true"
+            android:fontFamily="@font/roboto_medium"
+            android:text="@string/resend_otp"
             android:textColor="@color/black"
             android:textSize="12sp" />
 
@@ -163,9 +205,11 @@
         android:drawablePadding="8dp"
         android:enabled="false"
         android:fontFamily="@font/roboto_medium"
+        android:paddingLeft="110dp"
         android:paddingTop="10dp"
+        android:paddingRight="110dp"
         android:paddingBottom="10dp"
-        android:text="@string/get_otp"
+        android:text="@string/verify"
         android:textAllCaps="false"
         android:textColor="@android:color/white"
         android:textSize="17sp"
@@ -173,6 +217,6 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/txt_edit_mobile_number" />
+        app:layout_constraintTop_toBottomOf="@+id/txt_footer_text" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
