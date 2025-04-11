@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/white">
@@ -19,26 +20,27 @@
         android:id="@+id/txt_error"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:fontFamily="@font/roboto_medium"
+        android:layout_marginTop="50dp"
+        android:fontFamily="sans-serif-medium"
         android:text="@string/payment_successfull"
         android:textColor="@color/black"
         android:textSize="18sp"
         android:textStyle="bold"
-        android:layout_marginTop="50dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <FrameLayout
+        android:id="@+id/frame"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="43dp"
         android:background="@drawable/success_confetti"
-        app:layout_constraintLeft_toLeftOf="@id/txt_error"
-        app:layout_constraintRight_toRightOf="@id/txt_error"
         app:layout_constraintBottom_toTopOf="@id/txt_error"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintLeft_toLeftOf="@id/txt_error"
+        app:layout_constraintRight_toRightOf="@id/txt_error"
         app:layout_constraintStart_toStartOf="parent">
 
     </FrameLayout>
@@ -53,4 +55,55 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
+    <LinearLayout
+        android:id="@+id/linear_dcc_details"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="30dp"
+        android:layout_marginTop="15sp"
+        android:layout_marginRight="30dp"
+        android:gravity="center"
+        android:visibility="gone"
+        app:layout_constraintLeft_toLeftOf="@+id/txt_error"
+        app:layout_constraintRight_toRightOf="@+id/txt_error"
+        app:layout_constraintTop_toBottomOf="@+id/txt_error">
+
+        <TextView
+            android:id="@+id/txt_you_paid"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:alpha=".5"
+            android:fontFamily="sans-serif-medium"
+            android:text="@string/you_paid"
+            android:textColor="@color/black" />
+
+        <TextView
+            android:id="@+id/txt_amount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-medium"
+            android:textColor="@color/black" />
+
+        <TextView
+            android:id="@+id/txt_to"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:alpha=".5"
+            android:ellipsize="marquee"
+            android:fontFamily="sans-serif-medium"
+            android:singleLine="true"
+            android:text="@string/to"
+            android:textColor="@color/black" />
+    </LinearLayout>
+
+    <include
+        layout="@layout/dcc_payment_successfull"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="30dp"
+        android:layout_marginTop="60sp"
+        android:layout_marginRight="30dp"
+        app:layout_constraintLeft_toLeftOf="@+id/frame"
+        app:layout_constraintRight_toRightOf="@+id/frame"
+        app:layout_constraintTop_toBottomOf="@+id/txt_error" />
 </androidx.constraintlayout.widget.ConstraintLayout>

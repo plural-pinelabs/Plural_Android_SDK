@@ -54,4 +54,9 @@ dependencies {
     implementation(libs.clevertap)
     //implementation(libs.plural)
 
+    implementation(libs.lottie)
+    implementation(libs.flexbox)
+    implementation(libs.shimmer)
+
+
 }

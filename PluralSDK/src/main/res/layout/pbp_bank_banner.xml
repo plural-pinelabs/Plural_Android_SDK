@@ -26,7 +26,7 @@
             android:layout_centerInParent="true"
             android:layout_marginRight="5dp"
             android:alpha=".8"
-            android:fontFamily="@font/roboto_medium"
+            android:fontFamily="sans-serif-medium"
             android:text="@string/redeem_points"
             android:textColor="@color/black"
             android:textSize="14sp" />
@@ -48,7 +48,7 @@
             android:layout_centerInParent="true"
             android:layout_marginLeft="5dp"
             android:alpha=".5"
-            android:fontFamily="@font/roboto_medium"
+            android:fontFamily="sans-serif-medium"
             android:text="+14"
             android:textColor="@color/black" />
 

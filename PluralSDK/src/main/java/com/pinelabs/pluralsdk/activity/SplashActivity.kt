@@ -2,6 +2,7 @@ package com.pinelabs.pluralsdk.activity
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import com.airbnb.lottie.LottieAnimationView
 import com.clevertap.android.sdk.CleverTapAPI
@@ -11,6 +12,7 @@ import com.pinelabs.pluralsdk.utils.CleverTapUtil
 import com.pinelabs.pluralsdk.utils.Constants.Companion.IMAGE_LOGO
 import com.pinelabs.pluralsdk.utils.Constants.Companion.SPLASH_TIMER
 import com.pinelabs.pluralsdk.utils.Constants.Companion.TOKEN
+import com.pinelabs.pluralsdk.utils.DeviceUtil
 import java.util.TimeZone
 import java.util.Timer
 import java.util.TimerTask
@@ -25,12 +27,14 @@ class SplashActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.splash)
 
+        Utils.println("Device Info ${DeviceUtil.getDeviceName()}")
+
         //CleverTapAPI.setDebugLevel(CleverTapAPI.LogLevel.DEBUG);    //Default Log level
         val clevertapDefaultInstance = CleverTapAPI.getDefaultInstance(this@SplashActivity)
         CleverTapUtil.CT_EVENT_SDK_INITIALISED(clevertapDefaultInstance, this@SplashActivity)
 
         token = intent.getStringExtra(TOKEN).toString()
-        token = "V3_RSriC2da%2FtXGjxHFA6ck0z0Ft3T7TrlsVpezlSpQTwE2sfycWX5hdK9ZSMA655YN"
+        //token = "V3_WgMpeO%2BBG%2BN1EiBmZaeJcO6J14tsDMrzGVeoiaoDVHiCa6UOaRMuN0zQhYmUrRDc"
 
         logoAnimation = findViewById(R.id.img_logo)
         logoAnimation.setAnimationFromUrl(IMAGE_LOGO)

@@ -11,12 +11,12 @@ import coil.decode.SvgDecoder
 import coil.request.CachePolicy
 import coil.request.ImageRequest
 import com.pinelabs.pluralsdk.R
-import com.pinelabs.pluralsdk.utils.NBBANKS
+import com.pinelabs.pluralsdk.data.model.NetBank
 
-class NetBankAllAdapter(
-    private var bankList: List<NBBANKS>?,
+class NetBankAllAdapterNew(
+    private var bankList: List<NetBank?>,
     private val itemClickListener: OnItemClickListener
-) : RecyclerView.Adapter<NetBankAllAdapter.NetBankAllDataHolder>() {
+) : RecyclerView.Adapter<NetBankAllAdapterNew.NetBankAllDataHolder>() {
 
     class NetBankAllDataHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val bankName: TextView = itemView.findViewById(R.id.txt_bank_name)
@@ -30,12 +30,13 @@ class NetBankAllAdapter(
     }
 
     override fun onBindViewHolder(holder: NetBankAllDataHolder, position: Int) {
-        val currentItem: NBBANKS? = bankList?.get(position)
-
-        holder.bankName.text = bankList?.get(position)?.bankName.let { bankName ->
-            if (bankName?.contains(":") == true) bankName?.split(":")
-                ?.get(1) else bankName
+        val currentItem: NetBank? = bankList?.get(position)
+        if (bankList?.get(position)?.bankName?.contains(":") == true){
+            holder.bankName.text = bankList?.get(position)?.bankName?.split(":")?.get(1).toString()
         }
+        else
+            holder.bankName.text = bankList?.get(position)?.bankName.toString()
+
         //bankList?.get(position)?.bankImage?.let { holder.bankImage.setImageResource(it) }
         holder.bankImage.loadSvgOrOther(currentItem?.bankImage)
 
@@ -44,7 +45,7 @@ class NetBankAllAdapter(
         }
     }
 
-    fun filterList(filterlist: List<NBBANKS>) {
+    fun filterList(filterlist: List<NetBank>) {
         bankList = filterlist
         notifyDataSetChanged()
     }
@@ -54,12 +55,10 @@ class NetBankAllAdapter(
     }
 
     interface OnItemClickListener {
-        fun onItemClick(item: NBBANKS?)
+        fun onItemClick(item: NetBank?)
     }
-
 }
-
-public fun ImageView.loadSvgOrOther(myUrl: String?, cache: Boolean = true) {
+fun ImageView.loadSvgOrOther(myUrl: String?, cache: Boolean = true) {
 
     myUrl?.let {
         if (it.lowercase().endsWith("svg")) {
@@ -84,8 +83,8 @@ public fun ImageView.loadSvgOrOther(myUrl: String?, cache: Boolean = true) {
                 } else {
                     memoryCachePolicy(CachePolicy.DISABLED)
                 }
-                /*error(errorImg)
-                placeholder(errorImg)*/
+                error(R.drawable.generic_bank)
+                placeholder(R.drawable.generic_bank)
                 data("$it")
             }.target(this).build()
 
@@ -94,3 +93,4 @@ public fun ImageView.loadSvgOrOther(myUrl: String?, cache: Boolean = true) {
     }
 
 }
+

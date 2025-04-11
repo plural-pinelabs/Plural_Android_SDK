@@ -61,7 +61,7 @@
         android:textColor="#333333"
         android:layout_gravity="center"
         android:gravity="center"
-        android:fontFamily="@font/roboto_bold"
+        android:textStyle="bold"
         android:layout_marginTop="24dp" />
 
     <TextView
@@ -72,7 +72,7 @@
         android:textColor="#1C1C1C"
         android:layout_gravity="center"
         android:gravity="center"
-        android:fontFamily="@font/roboto_medium"
+        android:fontFamily="sans-serif-medium"
         android:layout_marginTop="8dp" />
 
     <TextView
@@ -81,7 +81,7 @@
         android:layout_height="wrap_content"
         android:text=""
         android:textColor="#1C1C1C"
-        android:fontFamily="@font/roboto_medium"
+        android:fontFamily="sans-serif-medium"
         android:layout_marginTop="32dp" />
 
     <!-- Divider line -->
@@ -99,7 +99,7 @@
         android:text="@string/timer_cancel_payment"
         android:textSize="12sp"
         android:textColor="@color/colorSecondary"
-        android:fontFamily="@font/roboto_medium"
+        android:fontFamily="sans-serif-medium"
         android:layout_marginTop="24dp"
         android:clickable="true"
         android:focusable="true"

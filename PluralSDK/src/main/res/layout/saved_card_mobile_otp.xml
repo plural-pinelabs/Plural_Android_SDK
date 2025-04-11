@@ -52,7 +52,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_marginTop="15dp"
-                android:fontFamily="@font/roboto_bold"
+                android:textStyle="bold"
                 android:text="@string/verify_mobile_number"
                 android:textColor="@color/black"
                 android:textSize="20sp" />
@@ -65,7 +65,7 @@
                 android:layout_marginTop="13dp"
                 android:layout_marginBottom="25dp"
                 android:alpha=".8"
-                android:fontFamily="@font/roboto_medium"
+                android:fontFamily="sans-serif-medium"
                 android:gravity="center"
                 android:text="@string/enter_otp_string"
                 android:textColor="@color/black"
@@ -93,7 +93,7 @@
             android:digits="1234567890"
             android:ems="10"
             android:maxLength="6"
-            android:fontFamily="@font/roboto_medium"
+            android:fontFamily="sans-serif-medium"
             android:gravity="center"
             android:hint="------"
             android:inputType="number"
@@ -145,7 +145,7 @@
             android:alpha=".6"
             android:clickable="true"
             android:focusable="true"
-            android:fontFamily="@font/roboto_medium"
+            android:fontFamily="sans-serif-medium"
             android:text="@string/resend_otp_in"
             android:textColor="@color/black"
             android:textSize="12sp" />
@@ -160,7 +160,7 @@
             android:alpha=".6"
             android:clickable="true"
             android:focusable="true"
-            android:fontFamily="@font/roboto_bold"
+            android:textStyle="bold"
             android:text="00:00 min"
             android:textColor="@color/black"
             android:textSize="12sp" />
@@ -188,26 +188,25 @@
             android:alpha=".6"
             android:clickable="true"
             android:focusable="true"
-            android:fontFamily="@font/roboto_medium"
+            android:fontFamily="sans-serif-medium"
             android:text="@string/resend_otp"
             android:textColor="@color/black"
             android:textSize="12sp" />
 
     </LinearLayout>
 
-    <Button
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/btnProceedToPay"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="25dp"
         android:backgroundTint="@null"
-        android:drawableLeft="@drawable/lock_keyhole_minimalistic"
         android:drawablePadding="8dp"
         android:enabled="false"
-        android:fontFamily="@font/roboto_medium"
-        android:paddingLeft="110dp"
+        android:fontFamily="sans-serif-medium"
+        android:paddingLeft="81dp"
         android:paddingTop="10dp"
-        android:paddingRight="110dp"
+        android:paddingRight="81dp"
         android:paddingBottom="10dp"
         android:text="@string/verify"
         android:textAllCaps="false"

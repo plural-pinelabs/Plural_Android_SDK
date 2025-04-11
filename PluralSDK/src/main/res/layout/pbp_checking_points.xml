@@ -23,7 +23,7 @@
         android:id="@+id/txt_check_points"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:fontFamily="@font/roboto_medium"
+        android:fontFamily="sans-serif-medium"
         android:text="@string/checking_point_balance"
         android:textColor="@color/black"
         android:textSize="15sp"

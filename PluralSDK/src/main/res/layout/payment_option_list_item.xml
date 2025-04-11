@@ -23,7 +23,7 @@
         android:layout_centerVertical="true"
         android:layout_toEndOf="@id/img_payment_icon"
         android:layout_toRightOf="@id/img_payment_icon"
-        android:fontFamily="@font/roboto_medium"
+        android:fontFamily="sans-serif-medium"
         android:textColor="@color/black"
         android:textSize="14dp" />
 

@@ -26,8 +26,6 @@ import com.pinelabs.pluralsdk.utils.Constants.Companion.SPACE
 import com.pinelabs.pluralsdk.utils.Constants.Companion.START_BOLD
 import com.pinelabs.pluralsdk.viewmodels.FetchDataViewModel
 import com.pinelabs.pluralsdk.viewmodels.ViewModelFactory
-import java.util.Timer
-import java.util.TimerTask
 
 class FailureActivity : AppCompatActivity() {
 
@@ -41,25 +39,33 @@ class FailureActivity : AppCompatActivity() {
     var orderId: String? = null
     var paymentId: String? = null
 
+    var clevertapDefaultInstance: CleverTapAPI? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.payment_failed)
 
-        val clevertapDefaultInstance = CleverTapAPI.getDefaultInstance(applicationContext)
-
-        orderId = intent.getStringExtra(
-            ORDER_ID
-        )
-        paymentId = intent.getStringExtra(PAYMENT_ID)
+        setStatusBarColor(this, null)
 
         val viewModelFactory = ViewModelFactory(application)
         viewModel = ViewModelProvider(this, viewModelFactory)[FetchDataViewModel::class.java]
 
-        error_code = intent.getStringExtra(ERROR_CODE).toString()
-        error_message = intent.getStringExtra(ERROR_MESSAGE).toString()
-        if (error_message.isEmpty())
-            error_message = ERROR_MESSAGE_DEFAULT
+        getIntentValues()
+        getClevertapInstance()
+        getViews()
+        StartTimer()
+        ObserveData()
 
+    }
+
+    private fun setStatusBarColor(context: Context, palette: Palette?) {
+        val color =
+            if (palette != null) Color.parseColor(palette?.C900) else context.resources.getColor(R.color.header_color)
+        window.statusBarColor = color
+    }
+
+    private fun getClevertapInstance() {
+        clevertapDefaultInstance = CleverTapAPI.getDefaultInstance(applicationContext)
         CleverTapUtil.CT_EVENT_PAYMENT_STATUS_FAILURE(
             clevertapDefaultInstance,
             orderId,
@@ -67,9 +73,23 @@ class FailureActivity : AppCompatActivity() {
             error_code,
             error_message
         )
+    }
 
+    private fun getIntentValues() {
+        orderId = intent.getStringExtra(ORDER_ID)
+        paymentId = intent.getStringExtra(PAYMENT_ID)
+        error_code = intent.getStringExtra(ERROR_CODE).toString()
+        error_message = intent.getStringExtra(ERROR_MESSAGE).toString()
+        if (error_message.isEmpty())
+            error_message = ERROR_MESSAGE_DEFAULT
+    }
+
+    private fun getViews() {
         txtAutoClose = findViewById(R.id.txt_autoclose)
         txtRetry = findViewById(R.id.txt_retry)
+    }
+
+    private fun StartTimer() {
         val timer = object : CountDownTimer(FAILURE_TIMER, 1000) {
             override fun onTick(millisUntilFinished: Long) {
                 val autoCloseString =
@@ -89,9 +109,11 @@ class FailureActivity : AppCompatActivity() {
         timer.start()
 
         txtRetry.text = error_message
+    }
 
+    private fun ObserveData() {
         try {
-            viewModel.fetch_response.observe(this) { response ->
+            viewModel.fetch_data_response.observe(this) { response ->
                 val fetchDataResponseHandler =
                     ApiResultHandler<FetchResponse>(this, onLoading = {
                     }, onSuccess = { data ->
@@ -107,13 +129,5 @@ class FailureActivity : AppCompatActivity() {
         } catch (e: Exception) {
             e.printStackTrace()
         }
-
     }
-
-    private fun setStatusBarColor(context: Context, palette: Palette) {
-        val color =
-            if (palette != null) Color.parseColor(palette?.C900) else context.resources.getColor(R.color.header_color)
-        window.setStatusBarColor(color)
-    }
-
 }

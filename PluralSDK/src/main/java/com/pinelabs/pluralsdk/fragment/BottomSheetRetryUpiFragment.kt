@@ -59,7 +59,7 @@ class BottomSheetRetryUpiFragment : BottomSheetDialogFragment(),
         Toast.makeText(requireContext(), upiList.get(position), Toast.LENGTH_SHORT).show()
     }
 
-    public fun getUpiAppsInstalledInDevice(): List<Int> {
+     fun getUpiAppsInstalledInDevice(): List<Int> {
         if (isAppInstalled(GPAY) && isAppUpiReady(GPAY)) upiList.add(R.drawable.google_pay)
         if (isAppInstalled(PHONEPE) && isAppUpiReady(PHONEPE)) upiList.add(R.drawable.phone_pe)
         if (isAppInstalled(PAYTM) && isAppUpiReady(PAYTM)) upiList.add(R.drawable.paytm)

@@ -1,6 +1,5 @@
 package com.pinelabs.pluralsdk
 
-import android.app.Activity
 import android.content.Context
 import com.pinelabs.pluralsdk.callback.PaymentResultCallBack
 
@@ -9,7 +8,7 @@ class PluralSDK {
 
         lateinit var pluralSDKObject: PluralSDKObject
 
-        @Synchronized
+        //@Synchronized
         fun initializePluralSDK(context: Context?, callback: PaymentResultCallBack) {
             //val callback: PaymentResultCallBack =   activity as PaymentResultCallBack
             pluralSDKObject = PluralSDKObject(context, callback)

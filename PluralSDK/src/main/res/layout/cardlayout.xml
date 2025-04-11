@@ -34,10 +34,10 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="10dp"
-                android:fontFamily="@font/roboto_bold"
                 android:text="@string/cards"
                 android:textColor="@android:color/black"
-                android:textSize="16sp" />
+                android:textSize="16sp"
+                android:textStyle="bold" />
         </LinearLayout>
 
         <!-- Card Number Field -->
@@ -47,11 +47,11 @@
             android:layout_marginTop="30dp"
             android:layout_marginBottom="5dp"
             android:alpha=".6"
-            android:fontFamily="@font/roboto_medium"
             android:paddingLeft="5dp"
             android:text="@string/card_number"
             android:textColor="@color/black"
-            android:textSize="14sp" />
+            android:textSize="14sp"
+            android:textStyle="bold" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -65,7 +65,7 @@
                 android:layout_height="wrap_content"
                 android:background="@drawable/edittext_default_border"
                 android:drawablePadding="8dp"
-                android:fontFamily="@font/roboto_medium"
+                android:fontFamily="sans-serif-medium"
                 android:hint="@string/enter_card_number"
                 android:inputType="number"
                 android:maxLength="23"
@@ -108,7 +108,7 @@
                     android:layout_marginEnd="25dp"
                     android:layout_weight="1"
                     android:alpha=".6"
-                    android:fontFamily="@font/roboto_medium"
+                    android:fontFamily="sans-serif-medium"
                     android:paddingLeft="5dp"
                     android:text="@string/expiry_title"
                     android:textColor="@color/black"
@@ -119,7 +119,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:alpha=".6"
-                    android:fontFamily="@font/roboto_medium"
+                    android:fontFamily="sans-serif-medium"
                     android:paddingLeft="5dp"
                     android:text="@string/cvv_title"
                     android:textColor="@color/black"
@@ -142,10 +142,11 @@
                     android:layout_marginEnd="25dp"
                     android:layout_weight="1"
                     android:background="@drawable/edittext_default_border"
-                    android:fontFamily="@font/roboto_medium"
+                    android:fontFamily="sans-serif-medium"
                     android:hint="@string/expiry"
                     android:inputType="date"
                     android:padding="12dp"
+                    android:text=""
                     android:textColor="@color/black"
                     android:textColorHint="@color/shimmer_grey"
                     android:textSize="16sp" />
@@ -157,11 +158,12 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:background="@drawable/edittext_default_border"
-                    android:fontFamily="@font/roboto_medium"
+                    android:fontFamily="sans-serif-medium"
                     android:hint="@string/cvv"
                     android:inputType="numberPassword"
                     android:maxLength="4"
                     android:padding="12dp"
+                    android:text=""
                     android:textColor="@color/black"
                     android:textColorHint="@color/shimmer_grey"
                     android:textSize="16sp" />
@@ -210,7 +212,7 @@
             android:layout_marginTop="20dp"
             android:layout_marginBottom="5dp"
             android:alpha=".6"
-            android:fontFamily="@font/roboto_medium"
+            android:fontFamily="sans-serif-medium"
             android:paddingLeft="5dp"
             android:text="@string/card_holders_name"
             android:textColor="@color/black"
@@ -221,15 +223,19 @@
             android:id="@+id/etCardHolderName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="70dp"
+            android:layout_marginBottom="20dp"
             android:background="@drawable/edittext_default_border"
-            android:fontFamily="@font/roboto_medium"
+            android:fontFamily="sans-serif-medium"
             android:hint="@string/full_name_on_card"
             android:inputType="textPersonName"
             android:padding="12dp"
             android:textColor="@color/black"
             android:textColorHint="@color/shimmer_grey"
             android:textSize="16sp" />
+
+        <include
+            layout="@layout/saved_card_footer"
+            android:visibility="gone" />
 
         <include
             layout="@layout/pbp_bank_banner"
@@ -263,29 +269,25 @@
             layout="@layout/pbp_checking_points"
             android:visibility="gone" />
 
-        <include
-            layout="@layout/saved_card_footer"
-            android:visibility="gone" />
 
         <!-- Proceed to Pay Button -->
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnProceedToPay"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="25dp"
+            android:layout_marginTop="20dp"
             android:backgroundTint="@null"
-            android:drawableLeft="@drawable/lock_keyhole_minimalistic"
             android:drawablePadding="8dp"
             android:enabled="false"
-            android:fontFamily="@font/roboto_medium"
-            android:paddingLeft="81dp"
-            android:paddingTop="10dp"
-            android:paddingRight="81dp"
-            android:paddingBottom="10dp"
+            android:fontFamily="sans-serif-medium"
             android:text="@string/proceed_to_pay"
             android:textAllCaps="false"
             android:textColor="@android:color/white"
             android:textSize="17sp"
-            app:backgroundTint="@null" />
+            app:backgroundTint="@null"
+            app:icon="@drawable/lock_keyhole_minimalistic"
+            app:iconGravity="textStart"
+            app:iconPadding="10dp"
+            app:iconTint="@color/white" />
     </LinearLayout>
 </ScrollView>

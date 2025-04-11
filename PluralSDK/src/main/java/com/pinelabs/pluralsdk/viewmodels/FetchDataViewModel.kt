@@ -12,6 +12,7 @@ import com.pinelabs.pluralsdk.data.model.CardBinMetaDataRequestList
 import com.pinelabs.pluralsdk.data.model.CardBinMetaDataResponse
 import com.pinelabs.pluralsdk.data.model.CustomerInfo
 import com.pinelabs.pluralsdk.data.model.CustomerInfoResponse
+import com.pinelabs.pluralsdk.data.model.DCCDetails
 import com.pinelabs.pluralsdk.data.model.FetchResponse
 import com.pinelabs.pluralsdk.data.model.OTPRequest
 import com.pinelabs.pluralsdk.data.model.OTPResponse
@@ -23,6 +24,7 @@ import com.pinelabs.pluralsdk.data.model.SavedCardResponse
 import com.pinelabs.pluralsdk.data.model.TransactionStatusResponse
 import com.pinelabs.pluralsdk.data.repository.Repository
 import com.pinelabs.pluralsdk.data.utils.NetWorkResult
+import com.pinelabs.pluralsdk.data.utils.Utils
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.launch
 import java.io.PrintWriter
@@ -33,7 +35,7 @@ import kotlin.coroutines.CoroutineContext
 class FetchDataViewModel(private val repository: Repository, application: Application) :
     AndroidViewModel(application) {
 
-    private val response: MutableLiveData<NetWorkResult<FetchResponse>> = MutableLiveData()
+    private val fetchDataResponse: MutableLiveData<NetWorkResult<FetchResponse>> = MutableLiveData()
     private val responseProcessPayment: MutableLiveData<NetWorkResult<ProcessPaymentResponse>> =
         MutableLiveData()
     private val rewardDataPayment: MutableLiveData<NetWorkResult<RewardResponse>> =
@@ -54,11 +56,16 @@ class FetchDataViewModel(private val repository: Repository, application: Applic
     private val savedCardValidateUpdateOrder: MutableLiveData<NetWorkResult<CustomerInfoResponse>> =
         MutableLiveData()
 
+    var dccAmount: MutableLiveData<String> = MutableLiveData()
+    var dccAmountMessage: MutableLiveData<DCCDetails> = MutableLiveData()
+
+    var paymentId: MutableLiveData<String> = MutableLiveData()
     var pbpAmount: MutableLiveData<Int> = MutableLiveData()
     var otpId: MutableLiveData<String> = MutableLiveData()
     var mobileNumberValidate: MutableLiveData<Boolean> = MutableLiveData()
 
-    val fetch_response: LiveData<NetWorkResult<FetchResponse>> = response
+    val fetch_data_response: LiveData<NetWorkResult<FetchResponse>> = fetchDataResponse
+    val process_payment_data: NetWorkResult<ProcessPaymentResponse>? = null
     val process_payment_response: LiveData<NetWorkResult<ProcessPaymentResponse>> =
         responseProcessPayment
     val reward_response: LiveData<NetWorkResult<RewardResponse>> = rewardDataPayment
@@ -92,20 +99,20 @@ class FetchDataViewModel(private val repository: Repository, application: Applic
             throwable.printStackTrace(PrintWriter(sw))
             val exceptionAsString = sw.toString()
 
-            println("Exception  in viewmodel ${throwable.message} ${exceptionAsString}")
+            Utils.println("Exception  in viewmodel ${throwable.message} ${exceptionAsString}")
         }
 
     fun fetchData(token: String?) = viewModelScope.launch(exceptionHandler) {
         repository.fetchData(getApplication(), token).collect { values ->
-            response.value = values
+            fetchDataResponse.value = values
         }
     }
 
-    fun processPayment(token: String, paymentData: ProcessPaymentRequest) =
+    fun processPayment(token: String?, paymentData: ProcessPaymentRequest?) =
         viewModelScope.launch(exceptionHandler) {
-            println("Launched")
             repository.processPayment(getApplication(), token, paymentData).collect { values ->
                 responseProcessPayment.value = values
+                //process_payment_data = values
             }
         }
 
@@ -130,16 +137,12 @@ class FetchDataViewModel(private val repository: Repository, application: Applic
         transactionStatus.value = null
     }
 
-    fun cancelTransaction(token: String) = viewModelScope.launch(exceptionHandler) {
-        repository.cancelTransaction(getApplication(), token).collect { values ->
-            cancelTransaction.value = values
+    fun cancelTransaction(token: String, cancelPayment: Boolean) =
+        viewModelScope.launch(exceptionHandler) {
+            repository.cancelTransaction(getApplication(), token, cancelPayment).collect { values ->
+                cancelTransaction.value = values
+            }
         }
-    }
-
-    fun updateAmount(amount: Int) {
-        fetch_response.value!!.data!!.paymentData!!.originalTxnAmount!!.amount = amount
-        response.value = fetch_response.value
-    }
 
     fun getBinData(token: String, cardData: CardBinMetaDataRequestList) =
         viewModelScope.launch(exceptionHandler) {

@@ -17,6 +17,7 @@ import com.pinelabs.pluralsdk.adapter.PaymentOptionsAdapter
 import com.pinelabs.pluralsdk.data.model.Palette
 import com.pinelabs.pluralsdk.data.model.PaymentMode
 import com.pinelabs.pluralsdk.data.model.RecyclerViewPaymentOptionData
+import com.pinelabs.pluralsdk.data.utils.Utils
 import com.pinelabs.pluralsdk.utils.Constants.Companion.TAG_CARD
 import com.pinelabs.pluralsdk.utils.Constants.Companion.TAG_NETBANKING
 import com.pinelabs.pluralsdk.utils.Constants.Companion.TAG_PAYMENT_LISTING
@@ -53,8 +54,6 @@ class BottomSheetRetryFragment(
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        println("UPI Bottom sheet")
 
         txt_payment = view.findViewById(R.id.txt_payment)
         txt_payment.text = if (errorMessage?.isBlank() == true)
@@ -118,7 +117,14 @@ class BottomSheetRetryFragment(
                 paymentModeMap.add(paymentModeData)
         }
         /*if (paymentModeMap.size > 5) {*/
-        return paymentModeMap/*.subList(0, 2)*/.also {
+        return if (paymentModeMap.size > 2) paymentModeMap.subList(0, 2).also {
+            it.add(
+                RecyclerViewPaymentOptionData(
+                    PaymentModes.ALL_PAYMENT.paymentModeImage,
+                    PaymentModes.ALL_PAYMENT.paymentModeName
+                )
+            )
+        } else paymentModeMap.also {
             it.add(
                 RecyclerViewPaymentOptionData(
                     PaymentModes.ALL_PAYMENT.paymentModeImage,
@@ -148,7 +154,7 @@ class BottomSheetRetryFragment(
         val selectedFragment = when (paymentOption) {
             PaymentModes.CREDIT_DEBIT.paymentModeName -> CardFragment()
             PaymentModes.UPI.paymentModeName -> UPICollectFragment()
-            PaymentModes.NET_BANKING.paymentModeName -> NetBankingFragment()
+            PaymentModes.NET_BANKING.paymentModeName -> NetBankingFragmentNew()
             else -> PaymentOptionListing()
         }
 

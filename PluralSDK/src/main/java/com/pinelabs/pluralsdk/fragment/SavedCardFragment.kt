@@ -31,6 +31,7 @@ import com.pinelabs.pluralsdk.data.model.ProcessPaymentRequest
 import com.pinelabs.pluralsdk.data.model.ProcessPaymentResponse
 import com.pinelabs.pluralsdk.data.model.SavedCardTokens
 import com.pinelabs.pluralsdk.data.utils.ApiResultHandler
+import com.pinelabs.pluralsdk.data.utils.Utils
 import com.pinelabs.pluralsdk.fragment.CardFragment.onRetryListener
 import com.pinelabs.pluralsdk.utils.Constants.Companion.CREDIT_DEBIT_ID
 import com.pinelabs.pluralsdk.utils.Constants.Companion.IMAGE_LOGO
@@ -106,7 +107,7 @@ class SavedCardFragment(isLanding: Boolean, mobile: String?, email: String?, tok
             requireActivity().onBackPressed()
         }
 
-        mainViewModel.fetch_response.observe(viewLifecycleOwner) { response ->
+        mainViewModel.fetch_data_response.observe(viewLifecycleOwner) { response ->
             val fetchResponse =
                 ApiResultHandler<FetchResponse>(
                     requireActivity(),
@@ -131,14 +132,14 @@ class SavedCardFragment(isLanding: Boolean, mobile: String?, email: String?, tok
         mainViewModel.saved_card_validate_update_order_response.observe(viewLifecycleOwner) { response ->
             val responseHandler =
                 ApiResultHandler<CustomerInfoResponse>(requireActivity(), onLoading = {
-                    println("Update customer loading")
+                    Utils.println("Update customer loading")
                 }, onSuccess = { data ->
-                    println("Update customer info ${data?.customerInfo?.tokens?.size}")
+                    Utils.println("Update customer info ${data?.customerInfo?.tokens?.size}")
                     data?.customerInfo?.tokens?.let { data ->
                         populateData(data)
                     }
                 }, onFailure = { errorMessage ->
-                    println("Update customer info ${errorMessage?.error_message}")
+                    Utils.println("Update customer info ${errorMessage?.error_message}")
                 })
             responseHandler.handleApiResult(response)
         }
@@ -153,6 +154,7 @@ class SavedCardFragment(isLanding: Boolean, mobile: String?, email: String?, tok
                             onLoading = {
                                 showProcessPaymentDialog()
                             }, onSuccess = { data ->
+                                mainViewModel.paymentId.value = data?.payment_id
 
                                 bottomSheetDialog.findViewById<LottieAnimationView>(R.id.img_logo)!!
                                     .addAnimatorListener(object : Animator.AnimatorListener {
@@ -210,6 +212,7 @@ class SavedCardFragment(isLanding: Boolean, mobile: String?, email: String?, tok
                 null,
                 null,
                 null,
+                null,
                 null
             )
         val processPaymentRequest =
@@ -221,9 +224,10 @@ class SavedCardFragment(isLanding: Boolean, mobile: String?, email: String?, tok
                 null,
                 cardDataExtra,
                 null,
-                null
+                null,
+                Utils.createSDKData(requireActivity())
             )
-        println("Process payment request ${Gson().toJson(processPaymentRequest)}")
+        Utils.println("Process payment request ${Gson().toJson(processPaymentRequest)}")
         mainViewModel.processPayment(
             token,
             processPaymentRequest
@@ -235,8 +239,15 @@ class SavedCardFragment(isLanding: Boolean, mobile: String?, email: String?, tok
         this.requireActivity()
             .findViewById<LinearLayout>(R.id.saved_card_fragment).visibility =
             View.GONE
+
+        val fragment = CardFragment()
+        val arguments = Bundle()
+        arguments.putString(TOKEN, token)
+
+        fragment.arguments = arguments
+
         val transaction = requireActivity().supportFragmentManager.beginTransaction()
-        transaction.replace(R.id.details_fragment, CardFragment(), TAG_CARD)
+        transaction.replace(R.id.details_fragment, fragment, TAG_CARD)
         transaction.addToBackStack(TAG_CARD)
         transaction.commit()
     }
@@ -290,7 +301,7 @@ class SavedCardFragment(isLanding: Boolean, mobile: String?, email: String?, tok
         val view = LayoutInflater.from(requireActivity())
             .inflate(R.layout.process_payment_bottom_sheet, null)
 
-        var logoAnimation: LottieAnimationView = view.findViewById(R.id.img_logo)
+        var logoAnimation: LottieAnimationView = view.findViewById(R.id.img_process_logo)
         logoAnimation.setAnimationFromUrl(IMAGE_LOGO)
 
         bottomSheetDialog.setCancelable(false)
@@ -299,7 +310,7 @@ class SavedCardFragment(isLanding: Boolean, mobile: String?, email: String?, tok
         bottomSheetDialog.show()
     }
 
-    public fun redirectToACS(
+    fun redirectToACS(
         startTime: Long?,
         redirectUrl: String?,
         orderId: String?,

@@ -46,7 +46,8 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.clevertap.android.sdk.CleverTapAPI
 import com.clevertap.android.sdk.isNotNullAndBlank
-import com.pinelabs.pluralsdk.PluralSDK
+import com.google.gson.Gson
+import com.google.gson.internal.LinkedTreeMap
 import com.pinelabs.pluralsdk.activity.LandingActivity
 import com.pinelabs.pluralsdk.activity.SuccessActivity
 import com.pinelabs.pluralsdk.adapter.DividerItemDecoratorHorizontal
@@ -56,6 +57,9 @@ import com.pinelabs.pluralsdk.data.model.Palette
 import com.pinelabs.pluralsdk.data.model.PaymentModeData
 import com.pinelabs.pluralsdk.data.model.TransactionStatusResponse
 import com.pinelabs.pluralsdk.data.model.UpiTransactionData
+import com.pinelabs.pluralsdk.data.utils.Utils
+import com.pinelabs.pluralsdk.data.utils.Utils.buttonBackground
+import com.pinelabs.pluralsdk.data.utils.Utils.cleverTapLog
 import com.pinelabs.pluralsdk.utils.CleverTapUtil
 import com.pinelabs.pluralsdk.utils.Constants.Companion.CT_CARDS
 import com.pinelabs.pluralsdk.utils.Constants.Companion.CT_COLLECT
@@ -110,7 +114,7 @@ class UPICollectFragment : Fragment(), UpiIntentAdapter.OnItemClickListener {
     private lateinit var timerTextView: TextView
     private lateinit var btnPayByUpiApp: Button
     private var palette: Palette? = null
-    private val totalTime = 30000L
+    private val totalTime = 600000L
     private val interval = 1000L
 
     internal val UPI_PAYMENT = 0
@@ -132,7 +136,7 @@ class UPICollectFragment : Fragment(), UpiIntentAdapter.OnItemClickListener {
     var upiAppPackageName: String? = null
 
     interface onRetryListener {
-        fun onRetry(isAcs: Boolean, errorCode:String?,errorMessage:String?)
+        fun onRetry(isAcs: Boolean, errorCode: String?, errorMessage: String?)
     }
 
     override fun onAttach(context: Context) {
@@ -157,6 +161,8 @@ class UPICollectFragment : Fragment(), UpiIntentAdapter.OnItemClickListener {
         super.onViewCreated(view, savedInstanceState)
 
         clevertapDefaultInstance = CleverTapAPI.getDefaultInstance(requireActivity())
+        cleverTapLog()
+
         buttonClicked = false
         (activity as LandingActivity).deepLink = null
 
@@ -198,7 +204,7 @@ class UPICollectFragment : Fragment(), UpiIntentAdapter.OnItemClickListener {
             val vpa = etUPIId.text.toString()
             payAction(vpa, UPI_COLLECT, null)
         }
-        btnVerifyContinue.background = buttonBackground(requireActivity())
+        btnVerifyContinue.background = buttonBackground(requireActivity(), palette)
         btnVerifyContinue.isEnabled = false
         btnVerifyContinue.alpha = 0.3f
 
@@ -238,13 +244,13 @@ class UPICollectFragment : Fragment(), UpiIntentAdapter.OnItemClickListener {
                                 ) {
                                     buttonClicked = false
                                     bottomSheetDialog.dismiss()
-                                    listener?.onRetry(false, "","")
+                                    listener?.onRetry(false, "", "")
                                     /*val intent = Intent(requireActivity(), FailureActivity::class.java)
                                     intent.putExtra(ERROR_MESSAGE, UPI_PROCESSED_FAILED)
                                     startActivity(intent)
                                     requireActivity().finish()*/
                                 }
-                                println("Transaction status ${response.data!!.data.status}")
+                                Utils.println("Transaction status ${response.data!!.data.status}")
                             }
                         }, onFailure = { errorMessage ->
                             /*bottomSheetDialog.dismiss()
@@ -268,7 +274,8 @@ class UPICollectFragment : Fragment(), UpiIntentAdapter.OnItemClickListener {
                         onLoading = {
                             showProcessPaymentDialog()
                         }, onSuccess = { response ->
-                            LandingActivity().paymentId = response?.payment_id
+                            //LandingActivity().paymentId = response?.payment_id
+                            mainViewModel.paymentId.value = response?.payment_id
                             if (response!!.deep_link != null && transactionMode == UPI_INTENT) {
                                 (activity as LandingActivity).deepLink =
                                     response!!.deep_link.toString()
@@ -284,7 +291,11 @@ class UPICollectFragment : Fragment(), UpiIntentAdapter.OnItemClickListener {
                             intent.putExtra(ERROR_MESSAGE, errorMessage?.error_message)
                             startActivity(intent)
                             requireActivity().finish()*/
-                            listener?.onRetry(false, errorMessage?.error_code, errorMessage?.error_message)
+                            listener?.onRetry(
+                                false,
+                                errorMessage?.error_code,
+                                errorMessage?.error_message
+                            )
                         })
                 fetchDataResponseHandler.handleApiResult(response)
             }
@@ -307,7 +318,7 @@ class UPICollectFragment : Fragment(), UpiIntentAdapter.OnItemClickListener {
                 checkCircleIcon.visibility = if (isValidUPI) View.VISIBLE else View.GONE
 
                 // Enable/disable button and change color based on validation
-                btnVerifyContinue.background = buttonBackground(requireActivity())
+                btnVerifyContinue.background = buttonBackground(requireActivity(), palette)
 
                 btnVerifyContinue.isEnabled = isValidUPI
                 if (btnVerifyContinue.isEnabled) {
@@ -366,12 +377,12 @@ class UPICollectFragment : Fragment(), UpiIntentAdapter.OnItemClickListener {
             null, upiMethod, null
         )
         val paymentMode = arrayListOf(UPI_ID)
-        val cardDataExtra = Extra(paymentMode, amount, currency, null, null, null, null, null)
+        val cardDataExtra = Extra(paymentMode, amount, currency, null, null, null, null, null, null)
         val upiTxnMode = transactionMode
         val upiData = UpiData(UPI, vpa, upiTxnMode)
         val upiTxnData = UpiTransactionData(PaymentModeId.UPI.id)
         val processPaymentRequest =
-            ProcessPaymentRequest( null, null, null, upiData, null, cardDataExtra, upiTxnData, null)
+            ProcessPaymentRequest(null, null, null, upiData, null, cardDataExtra, upiTxnData, null, Utils.createSDKData(requireActivity()))
         vpaContext = vpa
 
         this.transactionMode = transactionMode
@@ -392,7 +403,7 @@ class UPICollectFragment : Fragment(), UpiIntentAdapter.OnItemClickListener {
 
 
     private fun fetchDataListener() {
-        mainViewModel.fetch_response.observe(viewLifecycleOwner) { response ->
+        mainViewModel.fetch_data_response.observe(viewLifecycleOwner) { response ->
             val fetchDataResponseHandler = ApiResultHandler<FetchResponse>(requireActivity(),
                 onLoading = {
                 }, onSuccess = { data ->
@@ -403,12 +414,18 @@ class UPICollectFragment : Fragment(), UpiIntentAdapter.OnItemClickListener {
                         )
                     }.filter { paymentMode -> paymentMode.paymentModeData != null }.toList()
                     if (paymentModeData.size > 0) {
-                        val pm = paymentModeData.get(0).paymentModeData as? PaymentModeData
-                        pm?.upi_flows?.forEach { upiOption ->
-                            paymentOptionList.add(upiOption)
-                            println(upiOption)
+
+                        when (val pm = paymentModeData.get(0).paymentModeData) {
+                            is LinkedTreeMap<*, *> -> {
+                                val paymentModeData = convertMapToJsonObject(pm)
+                                paymentModeData?.upi_flows?.forEach { upiOption ->
+                                    paymentOptionList.add(upiOption)
+                                    Utils.println(upiOption)
+                                }
+                                makeViewVisible(paymentOptionList)
+                            }
                         }
-                        makeViewVisible(paymentOptionList)
+
                     }
                     amount = data!!.paymentData!!.originalTxnAmount?.amount
                     currency = data.paymentData!!.originalTxnAmount?.currency
@@ -469,7 +486,7 @@ class UPICollectFragment : Fragment(), UpiIntentAdapter.OnItemClickListener {
                 circularProgressBar.progress = 0
 
                 bottomSheetDialog.dismiss()
-                listener?.onRetry(false, "","")
+                listener?.onRetry(false, "", "")
                 /*requireActivity().finish()
                 PluralSDK.getInstance().callback!!.onSuccessOccured("")*/
             }
@@ -588,25 +605,10 @@ class UPICollectFragment : Fragment(), UpiIntentAdapter.OnItemClickListener {
         if (upiOptions.size == 2) divider.visibility = View.VISIBLE
     }
 
-    public fun buttonBackground(context: Context): Drawable {
+    fun convertMapToJsonObject(yourMap: Map<*, *>): PaymentModeData {
+        val gson = Gson().toJsonTree(yourMap).asJsonObject
+        return Gson().fromJson(gson.toString(), PaymentModeData::class.java)
 
-        val stateListDrawable = StateListDrawable()
-
-        // Create different drawables for different states
-        val pressedDrawable = GradientDrawable().apply {
-            if (palette != null) {
-                setColor(Color.parseColor(palette?.C900))
-            } else {
-                setColor(context.resources.getColor(R.color.header_color))
-            }
-            cornerRadius = 16f // Normal corner radius
-        }
-
-        // Add states to the StateListDrawable
-        stateListDrawable.addState(intArrayOf(android.R.attr.state_enabled), pressedDrawable)
-        stateListDrawable.addState(intArrayOf(), pressedDrawable) // Default state
-
-        return stateListDrawable
     }
 
 }

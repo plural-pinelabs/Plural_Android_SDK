@@ -70,10 +70,7 @@ class CleverTapUtil {
                 PARAM_SDK_TYPE to SDK_TYPE_PLATRFORM_ANDROID,
                 PARAM_PLATFORM to SDK_TYPE_PLATRFORM_ANDROID,
                 PARAM_SDK_VERSION to APP_VERSION,
-                PARAM_DEVICE_ID to Settings.Secure.getString(
-                    context.getContentResolver(),
-                    Settings.Secure.ANDROID_ID
-                )
+                PARAM_DEVICE_ID to DeviceUtil.getDeviceId(context)
             )
             cleverTapAPI?.pushEvent(EVENT_SDK_INITIALISED, sdkInitialzedData)
         }

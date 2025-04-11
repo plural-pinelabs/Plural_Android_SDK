@@ -4,7 +4,11 @@ class Constants {
     companion object {
         const val APP_VERSION = "1.0"
 
+        const val DCC_DATA = "DCC_DATA"
+        const val BIN_DATA = "BIN_DATA"
+        const val AMOUNT = "AMOUNT"
         const val CUSTOMER_ID = "CUSTOMER_ID"
+        const val PALETTE = "PALETTE"
         const val OTP_ID = "OTP_ID"
         const val MOBILE = "MOBILE"
         const val EMAIL = "EMAIL"
@@ -19,21 +23,29 @@ class Constants {
         const val PROCESS_PAYMENT_REQUEST = "PROCESS_PAYMENT_REQUEST"
         const val CUSTOMER_DETAILS = "CUSTOMER_DETAILS"
         const val SUCCESS_REDIRECT_URL = "savePluralPgTransactionStatus"
+        const val TRANSACTION_TYPE_SDK = "SDK"
+        const val SDK_TYPE = "ANDROID"
+        const val PLATFORM_TYPE = "NATIVE_MOBILE"
+        const val OS = "Android"
+        const val PLATFORM_VERSION = "v3"
 
         const val SPLASH_TIMER: Long = 2300
         const val FAILURE_TIMER: Long = 5000
         const val UPI_TRANSACTION_STATUS_DELAY = 0L
         const val UPI_TRANSACTION_STATUS_INTERVAL = 5000L
 
-        const val BASE_URL_UAT = "https://api-staging.pluralonline.com/api/v3/checkout-bff/"
-        const val BASE_URL_QA = "https://pluralqa.pinepg.in/api/v3/checkout-bff/"
-        const val BASE_URL_PROD = "https://api.pluralonline.com/api/v3/checkout-bff/"
+        const val BASE_URL_UAT = "api-staging.pluralonline.com"
+        const val BASE_URL_QA = "pluralqa.pinepg.in"
+        const val BASE_URL_PROD = "api.pluralonline.com"
         const val BASE_ANIMATION = "https://d1xlp3rxzdtgvz.cloudfront.net/loaderAnimation/"
         const val BASE_IMAGES = "https://d1xlp3rxzdtgvz.cloudfront.net/bank-icons/bank-logos/"
+        const val HTTPS = "https://"
+        const val BASE_CHECKOUTBFF = "/api/v3/checkout-bff/"
 
         const val IMAGE_LOGO = BASE_ANIMATION + "logo_shimmer.json"
 
         const val API_INTERNET_MESSAGE = "No Internet Connection"
+        const val DEVICE_ROOTED_MESSAGE = "Device is rooted"
         const val API_ERROR = "API_ERROR"
 
         const val CREDIT_DEBIT_LABEL = "Cards"
@@ -112,6 +124,7 @@ class Constants {
         const val TAG_ACS = "TAG_ACS"
         const val TAG_BOTTOM_SHEET_OTP = "TAG_BOTTOM_SHEET_OTP"
         const val TAG_BOTTOM_SHEET_MOBILE = "TAG_BOTTOM_SHEET_MOBILE"
+        const val TAG_ADDRESS = "TAG_ADDRESS"
 
         const val CT_CARDS = "cards"
         const val CT_UPI = "upi"
@@ -154,5 +167,16 @@ class Constants {
         const val MOBILE_REGEX =
             "^[+]?\\d{1,4}[\\s-]?\\(?\\d{1,4}\\)?[\\s-]?\\d{1,4}[\\s-]?\\d{1,4}$"
         const val EMAIL_REGEX = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$"
+
+        const val PBP_LOADING = "PBP_LOADING"
+        const val PBP_BANK_VISIBLE= "PBP_BANK_VISIBLE"
+        const val PBP_CANNOT_CHECK_POINTS = "PBP_CANNOT_CHECK_POINTS"
+        const val PBP_ANOTHER_MOBILE_NUMBER = "PBP_ANOTHER_MOBILE_NUMBER"
+        const val PBP_ANOTHER_CARD_NUMBER = "PBP_ANOTHER_CARD_NUMBER"
+        const val PBP_CHECK_POINTS = "PBP_CHECK_POINTS"
+        const val PBP_ZERO_POINTS = "PBP_ZERO_POINTS"
+        const val PBP_POINTS = "PBP_POINTS"
+
+        const val INR = "INR"
     }
 }

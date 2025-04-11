@@ -15,7 +15,7 @@
         android:layout_marginBottom="20dp"
         android:background="@drawable/button_curved"
         android:backgroundTint="@null"
-        android:fontFamily="@font/roboto_medium"
+        android:fontFamily="sans-serif-medium"
         android:text="@string/pay_by_upi"
         android:textColor="@color/black"
         android:textSize="15sp"

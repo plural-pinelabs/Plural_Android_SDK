@@ -30,7 +30,7 @@
                 android:id="@+id/tvUPITitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:fontFamily="@font/roboto_medium"
+                android:fontFamily="sans-serif-medium"
                 android:paddingStart="4dp"
                 android:paddingEnd="8dp"
                 android:text="UPI"
@@ -84,7 +84,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:fontFamily="@font/roboto_medium"
+                android:fontFamily="sans-serif-medium"
                 android:paddingTop="8dp"
                 android:text="@string/vpa_enter"
                 android:textColor="#8A8A8A"
@@ -105,7 +105,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:background="@android:color/transparent"
-                    android:fontFamily="@font/roboto_bold"
+                    android:textStyle="bold"
                     android:hint="@string/vpa_enter"
                     android:inputType="text"
                     android:padding="0dp"
@@ -128,11 +128,9 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="25dp"
             android:backgroundTint="@null"
-            android:drawableLeft="@drawable/lock_keyhole_minimalistic"
             android:drawablePadding="8dp"
-            android:visibility="gone"
             android:enabled="false"
-            android:fontFamily="@font/roboto_medium"
+            android:fontFamily="sans-serif-medium"
             android:paddingLeft="81dp"
             android:paddingTop="10dp"
             android:paddingRight="81dp"
@@ -141,6 +139,6 @@
             android:textAllCaps="false"
             android:textColor="@android:color/white"
             android:textSize="17sp"
-            app:backgroundTint="@null" />
+            app:backgroundTint="@null"  />
     </LinearLayout>
 </ScrollView>

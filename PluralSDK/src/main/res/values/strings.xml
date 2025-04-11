@@ -11,7 +11,7 @@
     <string name="processing_payment">Processing your payment</string>
     <string name="payment_successfull">Yay! Payment Successful.</string>
     <string name="processing_payment_description">We’ll confirm everything in just a few seconds.</string>
-    <string name="payment_verification">We’re verifying your payment status. Please do not go back or refresh.</string>
+    <string name="payment_verification">We’re verifying your payment status.\n Please do not go back or refresh.</string>
     <string name="upi_payment_request">Or get payment request on UPI ID</string>
     <string name="verify_continue">Verify &amp; Continue</string>
     <string name="vpa_enter">Enter UPI ID</string>
@@ -197,13 +197,14 @@
     <string name="retry_upi_header">Retry with another UPI app</string>
     <string name="retry_upi_content">Please ensure that the UPI app is installed on your phone before trying again.</string>
     <string name="view_other_upi_app">View other UPI apps</string>
-    <string name="securely_save_card">Securely save this card as per <b>RBI guidelines</b></string>
+    <string name="securely_save_card">Securely save this card as per </string>
+    <string name="rbi_guideline"><b><u>RBI guidelines</u></b></string>
     <string name="securely_save_card_not_supported">Saving this card is not supported</string>
     <string name="save_card_future_transaction">Securely save this card for future transactions.</string>
     <string name="secured_card_transaction">Secured card transactions</string>
     <string name="quicker_future_transaction">Quicker future transactions</string>
     <string name="evertything_per_rbi_guideline">Everything as per RBI\’s guidelines</string>
-    
+
     <string name="secure_transaction">Secured card transactions</string>
     <string name="quicker_transaction">Quicker future transactions</string>
     <string name="everything_transaction">Everything as per RBI’s guidelines</string>
@@ -234,4 +235,30 @@
     <string name="continue_">Continue</string>
     <string name="verify">Verify</string>
     <string name="otp_attempt_exceeded">OTP attempts exceeded</string>
+
+    <string name="dcc_select_currency">Select a currency to pay in</string>
+    <string name="dcc_paying_in">Paying in INR</string>
+    <string name="dcc_payment_opt">You opted to pay in </string>
+
+    <string name="address_verification">Address Verification</string>
+    <string name="address_verification_header">To prevent fraud, please enter the address registered with your bank for the credit/debit card you\'re using.</string>
+    <string name="first_name">First Name</string>
+    <string name="last_name">Last Name</string>
+    <string name="email">Email</string>
+    <string name="address_line_1">Address Line 1</string>
+    <string name="address_line_2">Address Line 2 (optional)</string>
+    <string name="city">City</string>
+    <string name="zipcode">Zipcode/ Pincode</string>
+    <string name="state">State</string>
+    <string name="country">Country</string>
+
+    <string name="inr">INR</string>
+    <string name="usd">USD</string>
+
+    <string name="you_paid">You paid </string>
+    <string name="to"> to</string>
+
+    <string name="wallet">Wallet</string>
+    <string name="more_wallet">More Wallets</string>
+
 </resources>

@@ -31,8 +31,8 @@ class Repository(private val remoteDataSource: RemoteDataSource) {
 
     suspend fun processPayment(
         context: Context,
-        token: String,
-        paymentData: ProcessPaymentRequest
+        token: String?,
+        paymentData: ProcessPaymentRequest?
     ): Flow<NetWorkResult<ProcessPaymentResponse>> {
         return toResultFlow(context) {
             remoteDataSource.processPayment(token, paymentData)
@@ -60,10 +60,11 @@ class Repository(private val remoteDataSource: RemoteDataSource) {
 
     suspend fun cancelTransaction(
         context: Context,
-        token: String
+        token: String,
+        cancelPayment: Boolean
     ): Flow<NetWorkResult<CancelTransactionResponse>> {
         return toResultFlow(context) {
-            remoteDataSource.cancelTransaction(token)
+            remoteDataSource.cancelTransaction(token, cancelPayment)
         }
     }
 

@@ -10,6 +10,7 @@ import com.pinelabs.pluralsdk.data.model.SavedCardResponse
 import com.pinelabs.pluralsdk.data.model.TransactionStatusResponse
 import com.pinelabs.pluralsdk.data.repository.Repository
 import com.pinelabs.pluralsdk.data.utils.NetWorkResult
+import com.pinelabs.pluralsdk.data.utils.Utils
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.launch
 import java.io.PrintWriter
@@ -45,7 +46,7 @@ class SavedCardViewModel(private val repository: Repository, application: Applic
             throwable.printStackTrace(PrintWriter(sw))
             val exceptionAsString = sw.toString()
 
-            println("Exception  in viewmodel ${throwable.message} ${exceptionAsString}")
+            Utils.println("Exception  in viewmodel ${throwable.message} ${exceptionAsString}")
         }
 
     fun sendOTPCustomer(token: String?, otpRequest: OTPRequest?) =

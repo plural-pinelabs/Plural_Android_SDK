@@ -49,7 +49,7 @@
         android:id="@+id/rs"
         android:layout_width="wrap_content"
         android:layout_height="0dp"
-        android:fontFamily="@font/roboto_medium"
+        android:fontFamily="sans-serif-medium"
         android:gravity="center"
         android:text="@string/rs"
         android:textColor="@color/black"
@@ -88,8 +88,8 @@
         android:gravity="center"
         android:orientation="horizontal"
         android:paddingLeft="8dp"
-        android:paddingRight="10dp"
         android:paddingTop="5dp"
+        android:paddingRight="10dp"
         android:paddingBottom="5dp"
         app:layout_constraintBottom_toBottomOf="@id/card_pic"
         app:layout_constraintEnd_toEndOf="parent"
@@ -104,7 +104,6 @@
             android:layout_gravity="center"
             android:layout_marginEnd="4dp"
             android:src="@drawable/close"
-            android:tint="@color/black"
             app:tint="@color/black" />
 
         <!-- Cancel Text -->
@@ -113,7 +112,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:fontFamily="@font/roboto_medium"
+            android:fontFamily="sans-serif-medium"
             android:text="@string/cancel"
             android:textColor="@android:color/black"
             android:textSize="14sp" />

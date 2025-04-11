@@ -1,7 +1,9 @@
 package com.pinelabs.pluralsdk.fragment
 
 import android.animation.Animator
+import android.app.Activity
 import android.content.Context
+import android.content.res.ColorStateList
 import android.content.res.Resources
 import android.graphics.Color
 import android.graphics.drawable.Drawable
@@ -10,8 +12,6 @@ import android.graphics.drawable.LayerDrawable
 import android.graphics.drawable.StateListDrawable
 import android.graphics.drawable.VectorDrawable
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.text.Editable
 import android.text.InputFilter
 import android.text.Spannable
@@ -35,7 +35,6 @@ import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.RelativeLayout
 import android.widget.TextView
-import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.widget.addTextChangedListener
@@ -54,6 +53,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.gson.Gson
+import com.pinelabs.pluralsdk.BuildConfig
 import com.pinelabs.pluralsdk.R
 import com.pinelabs.pluralsdk.activity.LandingActivity
 import com.pinelabs.pluralsdk.adapter.FlexAdapter
@@ -61,7 +61,9 @@ import com.pinelabs.pluralsdk.adapter.PBPBanksAdapter
 import com.pinelabs.pluralsdk.data.model.CardBinMetaDataRequest
 import com.pinelabs.pluralsdk.data.model.CardBinMetaDataRequestList
 import com.pinelabs.pluralsdk.data.model.CardBinMetaDataResponse
+import com.pinelabs.pluralsdk.data.model.CardBinMetaDataResponseData
 import com.pinelabs.pluralsdk.data.model.CardData
+import com.pinelabs.pluralsdk.data.model.DccData
 import com.pinelabs.pluralsdk.data.model.DeviceInfo
 import com.pinelabs.pluralsdk.data.model.Extra
 import com.pinelabs.pluralsdk.data.model.FetchResponse
@@ -77,11 +79,14 @@ import com.pinelabs.pluralsdk.data.model.RewardPaymentOption
 import com.pinelabs.pluralsdk.data.model.RewardPointsCardDetails
 import com.pinelabs.pluralsdk.data.model.RewardRequest
 import com.pinelabs.pluralsdk.data.model.RewardResponse
+import com.pinelabs.pluralsdk.data.model.SDKData
 import com.pinelabs.pluralsdk.data.model.SavedCardResponse
 import com.pinelabs.pluralsdk.data.utils.AmountUtil.convertToRupees
 import com.pinelabs.pluralsdk.data.utils.ApiResultHandler
 import com.pinelabs.pluralsdk.data.utils.ColumnUtil
 import com.pinelabs.pluralsdk.data.utils.Utils
+import com.pinelabs.pluralsdk.data.utils.Utils.buttonBackground
+import com.pinelabs.pluralsdk.data.utils.Utils.cleverTapLog
 import com.pinelabs.pluralsdk.utils.BankConstant.Companion.ALLAHABAD
 import com.pinelabs.pluralsdk.utils.BankConstant.Companion.ANDHRA
 import com.pinelabs.pluralsdk.utils.BankConstant.Companion.AU
@@ -99,6 +104,8 @@ import com.pinelabs.pluralsdk.utils.BankConstant.Companion.SOUTH_INDIAN_BANK
 import com.pinelabs.pluralsdk.utils.BankConstant.Companion.UNION_BANK
 import com.pinelabs.pluralsdk.utils.BankConstant.Companion.YES
 import com.pinelabs.pluralsdk.utils.CleverTapUtil
+import com.pinelabs.pluralsdk.utils.Constants.Companion.AMOUNT
+import com.pinelabs.pluralsdk.utils.Constants.Companion.APP_VERSION
 import com.pinelabs.pluralsdk.utils.Constants.Companion.BANK_ALLAHABAD
 import com.pinelabs.pluralsdk.utils.Constants.Companion.BANK_ANDHRA
 import com.pinelabs.pluralsdk.utils.Constants.Companion.BANK_AU_SMALL
@@ -118,37 +125,46 @@ import com.pinelabs.pluralsdk.utils.Constants.Companion.BANK_STATE_BANK
 import com.pinelabs.pluralsdk.utils.Constants.Companion.BANK_UNION
 import com.pinelabs.pluralsdk.utils.Constants.Companion.BANK_YES
 import com.pinelabs.pluralsdk.utils.Constants.Companion.BANK_YES_BANK
+import com.pinelabs.pluralsdk.utils.Constants.Companion.BIN_DATA
 import com.pinelabs.pluralsdk.utils.Constants.Companion.BROWSER_ACCEPT_ALL
-import com.pinelabs.pluralsdk.utils.Constants.Companion.BROWSER_ACCEPT_HEADER
 import com.pinelabs.pluralsdk.utils.Constants.Companion.BROWSER_DEVICE_CHANNEL
-import com.pinelabs.pluralsdk.utils.Constants.Companion.BROWSER_IP_ADDRESS
-import com.pinelabs.pluralsdk.utils.Constants.Companion.BROWSER_JAVASCRIPT_ENABLED
-import com.pinelabs.pluralsdk.utils.Constants.Companion.BROWSER_LANGUAGE
-import com.pinelabs.pluralsdk.utils.Constants.Companion.BROWSER_SCREEN_COLOR_DEPTH
-import com.pinelabs.pluralsdk.utils.Constants.Companion.BROWSER_SCREEN_HEIGHT
-import com.pinelabs.pluralsdk.utils.Constants.Companion.BROWSER_SCREEN_WIDTH
-import com.pinelabs.pluralsdk.utils.Constants.Companion.BROWSER_TIME_ZONE
-import com.pinelabs.pluralsdk.utils.Constants.Companion.BROWSER_USER_AGENT
 import com.pinelabs.pluralsdk.utils.Constants.Companion.BROWSER_USER_AGENT_ANDROID
 import com.pinelabs.pluralsdk.utils.Constants.Companion.CREDIT_DEBIT_ID
 import com.pinelabs.pluralsdk.utils.Constants.Companion.CT_CARDS
 import com.pinelabs.pluralsdk.utils.Constants.Companion.CUSTOMER_ID
+import com.pinelabs.pluralsdk.utils.Constants.Companion.DCC_DATA
 import com.pinelabs.pluralsdk.utils.Constants.Companion.IMAGE_LOGO
 import com.pinelabs.pluralsdk.utils.Constants.Companion.MOBILE
 import com.pinelabs.pluralsdk.utils.Constants.Companion.ORDER_ID
+import com.pinelabs.pluralsdk.utils.Constants.Companion.OS
 import com.pinelabs.pluralsdk.utils.Constants.Companion.OTP_ID
 import com.pinelabs.pluralsdk.utils.Constants.Companion.OTP_RESEND
+import com.pinelabs.pluralsdk.utils.Constants.Companion.PALETTE
 import com.pinelabs.pluralsdk.utils.Constants.Companion.PAYBYPOINTS_ID
 import com.pinelabs.pluralsdk.utils.Constants.Companion.PAYMENT_ID
 import com.pinelabs.pluralsdk.utils.Constants.Companion.PAYMENT_INITIATED
 import com.pinelabs.pluralsdk.utils.Constants.Companion.PAYMENT_REFERENCE_TYPE_CARD
+import com.pinelabs.pluralsdk.utils.Constants.Companion.PBP_ANOTHER_CARD_NUMBER
+import com.pinelabs.pluralsdk.utils.Constants.Companion.PBP_ANOTHER_MOBILE_NUMBER
+import com.pinelabs.pluralsdk.utils.Constants.Companion.PBP_BANK_VISIBLE
+import com.pinelabs.pluralsdk.utils.Constants.Companion.PBP_CANNOT_CHECK_POINTS
+import com.pinelabs.pluralsdk.utils.Constants.Companion.PBP_CHECK_POINTS
+import com.pinelabs.pluralsdk.utils.Constants.Companion.PBP_LOADING
+import com.pinelabs.pluralsdk.utils.Constants.Companion.PBP_POINTS
+import com.pinelabs.pluralsdk.utils.Constants.Companion.PBP_ZERO_POINTS
+import com.pinelabs.pluralsdk.utils.Constants.Companion.PLATFORM_TYPE
+import com.pinelabs.pluralsdk.utils.Constants.Companion.PLATFORM_VERSION
 import com.pinelabs.pluralsdk.utils.Constants.Companion.PROCESS_PAYMENT_REQUEST
 import com.pinelabs.pluralsdk.utils.Constants.Companion.REDIRECT_URL
 import com.pinelabs.pluralsdk.utils.Constants.Companion.RESEND_TIMER
+import com.pinelabs.pluralsdk.utils.Constants.Companion.SDK_TYPE
 import com.pinelabs.pluralsdk.utils.Constants.Companion.START_TIME
 import com.pinelabs.pluralsdk.utils.Constants.Companion.TAG_ACS
 import com.pinelabs.pluralsdk.utils.Constants.Companion.TAG_OTP
 import com.pinelabs.pluralsdk.utils.Constants.Companion.TOKEN
+import com.pinelabs.pluralsdk.utils.Constants.Companion.TRANSACTION_TYPE_SDK
+import com.pinelabs.pluralsdk.utils.DCC_STATUS
+import com.pinelabs.pluralsdk.utils.DeviceUtil
 import com.pinelabs.pluralsdk.viewmodels.FetchDataViewModel
 import com.pinelabs.pluralsdk.viewmodels.SavedCardViewModel
 import java.util.Calendar
@@ -192,9 +208,12 @@ class CardFragment : Fragment() {
     private var amount: Int? = null
     private var pbpCardNumber: String? = null
     private var currency: String? = null
-    private lateinit var bottomSheetDialog: BottomSheetDialog
-    private lateinit var bottomSheetSavedCardInfo: BottomSheetDialogFragment
+    private var dccList: DccData? = null
+    private var binData: CardBinMetaDataResponseData? = null
+    private var bottomSheetDialog: BottomSheetDialog? = null
+    private var bottomSheetSavedCardInfo: BottomSheetDialogFragment? = null
     private lateinit var bottomSheetOtp: BottomSheetDialogFragment
+    private var bottomSheetDccDialog: BottomSheetDialogFragment? = null
     private val mainViewModel by activityViewModels<FetchDataViewModel>()
     private val savedCardViewModel by activityViewModels<SavedCardViewModel>()
 
@@ -206,7 +225,11 @@ class CardFragment : Fragment() {
     private var isPBPEnabled = false
     private var isSavedCardChecked = false
     private var isSavedCardEnabled = false
+    private var isDCCEnabled = false
+    private var isDCCEligible = false
     private var isNativeOTP: Boolean? = false
+    private var isSaveCard: Boolean? = false
+
     private var orderId: String? = null
     private var customerId: String? = null
     private var paymentId: String? = null
@@ -214,6 +237,7 @@ class CardFragment : Fragment() {
     private var startTime: Long? = null
     private var redirectUrl: String? = null
     private var skipSavedCard: Boolean = false
+    private var buttonText: String? = null
 
     private lateinit var etCardNumber: EditText
     private lateinit var etExpiry: EditText
@@ -230,6 +254,7 @@ class CardFragment : Fragment() {
     private lateinit var constraintLayoutCheckingPoints: ConstraintLayout
     private lateinit var constraintLayoutSavedCard: ConstraintLayout
     private lateinit var checkBoxSavedCard: CheckBox
+    private lateinit var textRbiGuideline: TextView
     private lateinit var linearCheckPoint: LinearLayout
     private lateinit var textCheckPoints: TextView
     private lateinit var textTryAnotherNumber: TextView
@@ -273,15 +298,19 @@ class CardFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        //println("SDK Details ${Gson().toJson(createSDKData())}")
+
+        bottomSheetDialog = BottomSheetDialog(requireActivity())
+        isSavedCardEnabled = false
         buttonClicked = false
-        val activityButton = requireActivity().findViewById<ConstraintLayout>(R.id.layout_orginal)
+        val activityButton = requireActivity().findViewById<ConstraintLayout>(R.id.header_layout)
         activityButton.visibility = View.VISIBLE
 
-        println("Require activity name ${requireActivity().packageName}")
+        Utils.println("Require activity name ${requireActivity().packageName}")
         clevertapDefaultInstance = CleverTapAPI.getDefaultInstance(requireActivity())
+        cleverTapLog()
 
         token = arguments?.getString(TOKEN).toString()
-        bottomSheetDialog = BottomSheetDialog(requireActivity())
 
         getView(view)
 
@@ -340,36 +369,36 @@ class CardFragment : Fragment() {
 
         btnProceedToPay.setOnClickListener {
 
-            /*val optFragment = OtpFragment()
-            val transaction =
-                requireActivity().supportFragmentManager.beginTransaction()
-            transaction.replace(R.id.details_fragment, optFragment, TAG_OTP)
-            transaction.commit()*/
-
-
             buttonClicked = true
             // Handle payment process here
-            val cardNumber = etCardNumber.text.toString().filter { !it.isWhitespace() }
-            CleverTapUtil.CT_EVENT_PAYMENT_METHOD(
-                clevertapDefaultInstance, CT_CARDS, PAYMENT_INITIATED,
-                cardNumber, null, null
-            )
-            val cvv = etCVV.text.toString()
-            val cardHolderName = etCardHolderName.text.toString()
-            val cardExpiry = etExpiry.text.toString()
-            val cardExpiryMonth = cardExpiry.split("/")[0]
-            val cardExpiryYear = "20" + cardExpiry.split("/")[1]
-            payAction(
-                cardNumber,
-                cvv,
-                cardHolderName,
-                cardExpiryMonth,
-                cardExpiryYear,
-                redeemableAmount,
-                mobileNumber,
-                isNativeOTP,
-                false
-            )
+
+            val processPaymentRequest = createProcessPaymentRequest()
+
+            if (isDCCEligible) {
+                showDCCDialog(binData, dccList)
+                //showAddressPage(processPaymentRequest)
+            } else if (isSavedCardChecked) {
+                val otpRequest = OTPRequest(null, null, customerId, null, null)
+                savedCardViewModel.sendOTPCustomer(token, otpRequest)
+            } else if (isSavedCardEnabled && !skipSavedCard) {
+                val argument = Bundle()
+                argument.putString(
+                    CUSTOMER_ID,
+                    customerId
+                )
+                argument.putString(TOKEN, token)
+                argument.putString(
+                    MOBILE,
+                    mobileNumber
+                )
+                argument.putParcelable(
+                    PROCESS_PAYMENT_REQUEST,
+                    processPaymentRequest
+                )
+                showSavedCardDialog(argument)
+            } else {
+                mainViewModel.processPayment(token, processPaymentRequest)
+            }
             //showMoreBankDialog()
 
 
@@ -443,47 +472,16 @@ class CardFragment : Fragment() {
         constraintLayoutSavedCard = view.findViewById(R.id.constrain_saved_card_selector)
         textTryAnotherNumber =
             constraintLayoutAnotherNumber.findViewById(R.id.txt_try_another_number)
+        textRbiGuideline = view.findViewById(R.id.txt_rbi_guideline)
+        textRbiGuideline.setOnClickListener {
+            showSavedCardDialog(null)
+        }
+
         checkBoxSavedCard = view.findViewById(R.id.cb_saved_card)
         checkBoxSavedCard.isEnabled = false
         checkBoxSavedCard.setOnCheckedChangeListener { buttonView, isChecked ->
             if (isChecked) {
                 isSavedCardChecked = true
-
-                /*val argument = Bundle()
-                argument.putString(CUSTOMER_ID, customerId)
-                argument.putString(TOKEN, token)
-                argument.putString(MOBILE, mobileNumber)
-
-                bottomSheetSavedCardInfo = BottomSheetSavedCard(false)
-                bottomSheetSavedCardInfo.arguments = argument
-
-                bottomSheetSavedCardInfo.isCancelable = false
-                bottomSheetSavedCardInfo.show(requireActivity().supportFragmentManager, "")*/
-
-                buttonClicked = true
-                // Handle payment process here
-                val cardNumber = etCardNumber.text.toString().filter { !it.isWhitespace() }
-                CleverTapUtil.CT_EVENT_PAYMENT_METHOD(
-                    clevertapDefaultInstance, CT_CARDS, PAYMENT_INITIATED,
-                    cardNumber, null, null
-                )
-                val cvv = etCVV.text.toString()
-                val cardHolderName = etCardHolderName.text.toString()
-                val cardExpiry = etExpiry.text.toString()
-                val cardExpiryMonth = cardExpiry.split("/")[0]
-                val cardExpiryYear = "20" + cardExpiry.split("/")[1]
-                payAction(
-                    cardNumber,
-                    cvv,
-                    cardHolderName,
-                    cardExpiryMonth,
-                    cardExpiryYear,
-                    redeemableAmount,
-                    mobileNumber,
-                    isNativeOTP,
-                    true
-                )
-
             } else {
                 isSavedCardChecked = false
             }
@@ -556,10 +554,8 @@ class CardFragment : Fragment() {
                         checkReward(formattedInput, null)
                     } else {
                         isPBPChecked = false
-                        pbpBankVisbile()
+                        pbpVisibility(PBP_BANK_VISIBLE)
                     }
-
-
 
                 if (cleanedInput.length > 19) {
                     tvCardNumberError.text = "Your card number cannot exceed 19 digits"
@@ -577,7 +573,7 @@ class CardFragment : Fragment() {
                     if (cleanedInput.length > 8) {
                         getBinData(token, cleanedInput)
                     } else {
-                        println("Else condition " + validCard(cleanedInput) + " " + cleanedInput.length + " " + isCardNumberValid)
+                        Utils.println("Else condition " + validCard(cleanedInput) + " " + cleanedInput.length + " " + isCardNumberValid)
                     }
                     if (cleanedInput.length <= 4) {
                         etCardNumber.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null)
@@ -611,36 +607,36 @@ class CardFragment : Fragment() {
         val orderDetails = OrderDetails(orderDetailsAmount)
         val rewardRequest = RewardRequest("POINTS", rewardPaymentOption, orderDetails)
 
-        //token = "S01D5yKritUp4KsG4IVJWyGpa1YQ3A0I6WOqLNdyr%2F6fMc%3D"
         mainViewModel.rewardData(token, rewardRequest)
         mainViewModel.reward_response.removeObservers(this)
         mainViewModel.reward_response.observe(viewLifecycleOwner) { response ->
             val rewardResponseHandler = ApiResultHandler<RewardResponse>(requireActivity(),
                 onLoading = {
-                    LoadingVisbile()
+                    pbpVisibility(PBP_LOADING)
                 }, onSuccess = { data ->
-                    bottomSheetDialog.dismiss()
+                    bottomSheetDialog?.dismiss()
                     if (data!!.is_eligible) {
                         if (data.redeemable_amount != null && data.payment_option_metadata != null) {
                             //data.payment_option_metadata.pay_by_point_option_data.redeemable_points=0
                             if (data.payment_option_metadata.pay_by_point_option_data.redeemable_points == 0) {
-                                zeroPoints()
+                                pbpVisibility(PBP_ZERO_POINTS)
                             } else {
                                 redeemableAmount = data!!.redeemable_amount.value
+                                pbpVisibility(PBP_POINTS)
                                 pbpPoints(
                                     data!!.payment_option_metadata.pay_by_point_option_data.redeemable_points,
                                     data!!.redeemable_amount.value
                                 )
                             }
                         } else {
-                            checkPoints()
+                            pbpVisibility(PBP_CHECK_POINTS)
                         }
                     } else {
                         isPBPChecked = false
                         if (mobileNumber != null && !mobileNumber!!.isEmpty())
-                            anotherMobileNumber()
+                            pbpVisibility(PBP_ANOTHER_MOBILE_NUMBER)
                         else
-                            anotherCardNumber()
+                            pbpVisibility(PBP_ANOTHER_CARD_NUMBER)
                     }
                     /*Toast.makeText(
                         requireActivity(),
@@ -649,8 +645,8 @@ class CardFragment : Fragment() {
                     ).show()*/
                 }, onFailure = {
                     isPBPChecked = false
-                    bottomSheetDialog.dismiss()
-                    unableToCheckPoints()
+                    bottomSheetDialog?.dismiss()
+                    pbpVisibility(PBP_CANNOT_CHECK_POINTS)
                 }
             )
             rewardResponseHandler.handleApiResult(response)
@@ -864,116 +860,24 @@ class CardFragment : Fragment() {
     private fun validateCardType(cardNumber: String): String? {
         for ((cardType, regex) in cardTypes) {
             if (regex.matches(cardNumber)) {
-                println("Card type" + cardType)
+                Utils.println("Card type" + cardType)
                 return cardType
             }
         }
         return null
     }
 
-    private fun payAction(
-        cardNumber: String,
-        cvv: String,
-        cardHolderName: String,
-        cardExpiryMonth: String,
-        cardExpiryYear: String,
-        redeemableAmount: Int?,
-        mobileNumber: String?,
-        isNativeOTPSupported: Boolean?,
-        isSaveCard: Boolean?
-    ) {
-        val paymentMode = arrayListOf<String>()
-        paymentMode.add(CREDIT_DEBIT_ID)
-        if (isPBPChecked) {
-            paymentMode.add(PAYBYPOINTS_ID)
-            amount = amount!! - redeemableAmount!!
-        }
-        val last4 = cardNumber.substring(cardNumber.length - 4, cardNumber.length)
-
-        val displayMetrics = DisplayMetrics()
-        requireActivity().windowManager.defaultDisplay.getMetrics(displayMetrics)
-        val height = displayMetrics.heightPixels
-        val width = displayMetrics.widthPixels
-        val pixelFormat = requireActivity().windowManager.defaultDisplay.pixelFormat
-
-        val screenSize: String = width.toString() + "x" + height.toString()
-        val deviceInfo = DeviceInfo(
-            null,
-            BROWSER_USER_AGENT_ANDROID,
-            BROWSER_ACCEPT_ALL,
-            Locale.getDefault().language,
-            height.toString(),
-            width.toString(),
-            Utils.getTimeOffset().toString(),
-            screenSize,
-            Utils.getColorDepth(pixelFormat).toString(),
-            true, true, BROWSER_DEVICE_CHANNEL,
-            Utils.getLocalIpAddress().toString()
-        )
-
-        val cardDataExtra =
-            Extra(
-                paymentMode,
-                amount,
-                currency,
-                last4,
-                redeemableAmount,
-                null
-                /*mobileNumber!!.filter { !mobileNumber!!.isEmpty() }*/,
-                null,
-                deviceInfo
-            )
-        val cardData =
-            CardData(
-                cardNumber,
-                cvv,
-                cardHolderName,
-                cardExpiryYear,
-                cardExpiryMonth,
-                isNativeOTPSupported,
-                if (skipSavedCard) false else isSaveCard
-            )
-        processPaymentRequest =
-            ProcessPaymentRequest(
-                null,
-                null,
-                cardData,
-                upi_data = null,
-                null,
-                cardDataExtra,
-                null,
-                null
-            )
-        println("Toke ${token}")
-        println("Process payment request ${Gson().toJson(processPaymentRequest)}")
-        if (isSavedCardEnabled && !::bottomSheetSavedCardInfo.isInitialized && !skipSavedCard) {
-            val argument = Bundle()
-            argument.putString(CUSTOMER_ID, customerId)
-            argument.putString(TOKEN, token)
-            argument.putString(MOBILE, mobileNumber)
-            argument.putSerializable(PROCESS_PAYMENT_REQUEST, processPaymentRequest)
-
-            bottomSheetSavedCardInfo = BottomSheetSavedCard(isSavedCardChecked)
-            bottomSheetSavedCardInfo.arguments = argument
-
-            bottomSheetSavedCardInfo.isCancelable = false
-            bottomSheetSavedCardInfo.show(requireActivity().supportFragmentManager, "")
-        } else
-            mainViewModel.processPayment(token, processPaymentRequest)
-
-    }
-
     private fun showProcessPaymentDialog() {
         val view = LayoutInflater.from(requireActivity())
             .inflate(R.layout.process_payment_bottom_sheet, null)
 
-        var logoAnimation: LottieAnimationView = view.findViewById(R.id.img_logo)
+        var logoAnimation: LottieAnimationView = view.findViewById(R.id.img_process_logo)
         logoAnimation.setAnimationFromUrl(IMAGE_LOGO)
 
-        bottomSheetDialog.setCancelable(false)
-        bottomSheetDialog.setCanceledOnTouchOutside(false)
-        bottomSheetDialog.setContentView(view)
-        bottomSheetDialog.show()
+        bottomSheetDialog?.setCancelable(false)
+        bottomSheetDialog?.setCanceledOnTouchOutside(false)
+        bottomSheetDialog?.setContentView(view)
+        bottomSheetDialog?.show()
     }
 
     private fun showPBPMobileNumberDialog() {
@@ -1019,7 +923,7 @@ class CardFragment : Fragment() {
         edt_mobile_number.setText(mobileNumber)
         val img_close: ImageView = view.findViewById(R.id.img_close)
         img_close.setOnClickListener {
-            bottomSheetDialog.dismiss()
+            bottomSheetDialog?.dismiss()
         }
         txt_check_point.setOnClickListener {
             mobileNumber = edt_mobile_number.text.toString()
@@ -1028,9 +932,9 @@ class CardFragment : Fragment() {
             progress_check_points.visibility = View.VISIBLE
             checkReward(etCardNumber.text.toString(), edt_mobile_number.text.toString())
         }
-        bottomSheetDialog.setContentView(view)
-        bottomSheetDialog.behavior.state = BottomSheetBehavior.STATE_EXPANDED
-        bottomSheetDialog.show()
+        bottomSheetDialog?.setContentView(view)
+        bottomSheetDialog?.behavior?.state = BottomSheetBehavior.STATE_EXPANDED
+        bottomSheetDialog?.show()
     }
 
     fun getBankList(): List<PBPBank> {
@@ -1069,17 +973,17 @@ class CardFragment : Fragment() {
         val recyclerView: RecyclerView = view.findViewById(R.id.bank_list)
         val close: ImageView = view.findViewById(R.id.img_close)
         close.setOnClickListener {
-            bottomSheetDialog.dismiss()
+            bottomSheetDialog?.dismiss()
         }
         recyclerView.layoutManager = GridLayoutManager(requireContext(), 2)
         val adapter = PBPBanksAdapter(getPBPBankList())
         recyclerView.adapter = adapter
-        bottomSheetDialog.setContentView(view)
-        bottomSheetDialog.show()
+        bottomSheetDialog?.setContentView(view)
+        bottomSheetDialog?.show()
     }
 
     private fun pbpBankList() {
-        pbpBankVisbile()
+        pbpVisibility(PBP_BANK_VISIBLE)
         constraintLayoutPBPBanner.setOnClickListener {
             showMoreBankDialog()
         }
@@ -1091,25 +995,13 @@ class CardFragment : Fragment() {
         recyclerView.layoutManager = layoutManager
 
         val mNoOfColumns: Int = ColumnUtil.calculateNoOfColumns(requireActivity(), 160F)
-        println("No of columns ${mNoOfColumns}")
+        Utils.println("No of columns ${mNoOfColumns}")
 
         val myRecyclerViewAdapter = FlexAdapter(getBankList(), mNoOfColumns)
         recyclerView.adapter = myRecyclerViewAdapter
     }
 
-    fun pbpBankVisbile() {
-        constraintLayoutPBPBanner.visibility = View.VISIBLE
-        linearCheckPoint.visibility = View.GONE
-        constraintLayoutCannotCheck.visibility = View.GONE
-        constraintLayoutAnotherNumber.visibility = View.GONE
-        constraintLayoutAnotherCard.visibility = View.GONE
-        constraintLayoutNoBalance.visibility = View.GONE
-        constraintLayoutRedeemPoints.visibility = View.GONE
-        constraintLayoutCheckingPoints.visibility = View.GONE
-    }
-
-    fun LoadingVisbile() {
-        constraintLayoutCheckingPoints.visibility = View.VISIBLE
+    fun pbpVisibility(state: String) {
         constraintLayoutPBPBanner.visibility = View.GONE
         linearCheckPoint.visibility = View.GONE
         constraintLayoutCannotCheck.visibility = View.GONE
@@ -1117,80 +1009,44 @@ class CardFragment : Fragment() {
         constraintLayoutAnotherCard.visibility = View.GONE
         constraintLayoutNoBalance.visibility = View.GONE
         constraintLayoutRedeemPoints.visibility = View.GONE
-    }
-
-    fun unableToCheckPoints() {
-        constraintLayoutPBPBanner.visibility = View.GONE
-        linearCheckPoint.visibility = View.GONE
-        constraintLayoutCannotCheck.visibility = View.VISIBLE
-        constraintLayoutAnotherNumber.visibility = View.GONE
-        constraintLayoutAnotherCard.visibility = View.GONE
-        constraintLayoutNoBalance.visibility = View.GONE
-        constraintLayoutRedeemPoints.visibility = View.GONE
         constraintLayoutCheckingPoints.visibility = View.GONE
-    }
 
-    fun checkPoints() {
-        constraintLayoutPBPBanner.visibility = View.GONE
-        linearCheckPoint.visibility = View.VISIBLE
-        if (palette != null) {
-            textCheckPoints.setTextColor(Color.parseColor(palette?.C900))
+        when (state) {
+            PBP_BANK_VISIBLE -> constraintLayoutPBPBanner.visibility = View.VISIBLE
+            PBP_LOADING -> constraintLayoutCheckingPoints.visibility = View.VISIBLE
+            PBP_CANNOT_CHECK_POINTS -> constraintLayoutCannotCheck.visibility = View.VISIBLE
+            PBP_ANOTHER_MOBILE_NUMBER -> constraintLayoutAnotherNumber.visibility = View.VISIBLE
+            PBP_ANOTHER_CARD_NUMBER -> constraintLayoutAnotherCard.visibility = View.VISIBLE
+            PBP_CHECK_POINTS -> {
+                linearCheckPoint.visibility = View.VISIBLE
+                if (palette != null) {
+                    textCheckPoints.setTextColor(Color.parseColor(palette?.C900))
 
-            val layerDrawable = linearCheckPoint.background as LayerDrawable
-            val gradientDrawable =
-                layerDrawable.findDrawableByLayerId(R.id.header) as GradientDrawable
-            gradientDrawable.setColor(Color.parseColor(palette?.C900))
+                    val layerDrawable = linearCheckPoint.background as LayerDrawable
+                    val gradientDrawable =
+                        layerDrawable.findDrawableByLayerId(R.id.header) as GradientDrawable
+                    gradientDrawable.setColor(Color.parseColor(palette?.C900))
+                }
+            }
+
+            PBP_ZERO_POINTS -> {
+                constraintLayoutNoBalance.visibility = View.VISIBLE
+                if (palette != null) {
+                    val icon: ImageView = constraintLayoutNoBalance.findViewById(R.id.img_pbp)
+                    val layerDrawable = ContextCompat.getDrawable(
+                        requireActivity(),
+                        R.drawable.pbp_no_balance_layerlist
+                    ) as LayerDrawable
+                    val gradientDrawable =
+                        layerDrawable.findDrawableByLayerId(R.id.icon_bg) as VectorDrawable
+                    gradientDrawable.setTint(Color.parseColor(palette?.C900))
+                    icon.setImageDrawable(layerDrawable)
+                }
+            }
+
+            PBP_POINTS -> constraintLayoutRedeemPoints.visibility = View.VISIBLE
+
         }
-        constraintLayoutCannotCheck.visibility = View.GONE
-        constraintLayoutAnotherNumber.visibility = View.GONE
-        constraintLayoutAnotherCard.visibility = View.GONE
-        constraintLayoutNoBalance.visibility = View.GONE
-        constraintLayoutRedeemPoints.visibility = View.GONE
-        constraintLayoutCheckingPoints.visibility = View.GONE
-    }
-
-    fun anotherMobileNumber() {
-        constraintLayoutPBPBanner.visibility = View.GONE
-        linearCheckPoint.visibility = View.GONE
-        constraintLayoutCannotCheck.visibility = View.GONE
-        constraintLayoutAnotherNumber.visibility = View.VISIBLE
-        constraintLayoutAnotherCard.visibility = View.GONE
-        constraintLayoutNoBalance.visibility = View.GONE
-        constraintLayoutRedeemPoints.visibility = View.GONE
-        constraintLayoutCheckingPoints.visibility = View.GONE
-    }
-
-    fun anotherCardNumber() {
-        constraintLayoutPBPBanner.visibility = View.GONE
-        linearCheckPoint.visibility = View.GONE
-        constraintLayoutCannotCheck.visibility = View.GONE
-        constraintLayoutAnotherNumber.visibility = View.GONE
-        constraintLayoutAnotherCard.visibility = View.VISIBLE
-        constraintLayoutNoBalance.visibility = View.GONE
-        constraintLayoutRedeemPoints.visibility = View.GONE
-        constraintLayoutCheckingPoints.visibility = View.GONE
-    }
-
-    fun zeroPoints() {
-        constraintLayoutPBPBanner.visibility = View.GONE
-        linearCheckPoint.visibility = View.GONE
-        constraintLayoutCannotCheck.visibility = View.GONE
-        constraintLayoutAnotherNumber.visibility = View.GONE
-        constraintLayoutAnotherCard.visibility = View.GONE
-        constraintLayoutNoBalance.visibility = View.VISIBLE
-        if (palette != null) {
-            val icon: ImageView = constraintLayoutNoBalance.findViewById(R.id.img_pbp)
-            val layerDrawable = ContextCompat.getDrawable(
-                requireActivity(),
-                R.drawable.pbp_no_balance_layerlist
-            ) as LayerDrawable
-            val gradientDrawable =
-                layerDrawable.findDrawableByLayerId(R.id.icon_bg) as VectorDrawable
-            gradientDrawable.setTint(Color.parseColor(palette?.C900))
-            icon.setImageDrawable(layerDrawable)
-        }
-        constraintLayoutRedeemPoints.visibility = View.GONE
-        constraintLayoutCheckingPoints.visibility = View.GONE
     }
 
     fun allViewsInvisible() {
@@ -1205,14 +1061,6 @@ class CardFragment : Fragment() {
     }
 
     fun pbpPoints(redeemablePoints: Int, redeemableAmount: Int) {
-        constraintLayoutCheckingPoints.visibility = View.GONE
-        constraintLayoutPBPBanner.visibility = View.GONE
-        linearCheckPoint.visibility = View.GONE
-        constraintLayoutCannotCheck.visibility = View.GONE
-        constraintLayoutAnotherNumber.visibility = View.GONE
-        constraintLayoutAnotherCard.visibility = View.GONE
-        constraintLayoutNoBalance.visibility = View.GONE
-        constraintLayoutRedeemPoints.visibility = View.VISIBLE
         if (palette != null) {
             val icon: ImageView = constraintLayoutRedeemPoints.findViewById(R.id.img_pbp)
             val layerDrawable = ContextCompat.getDrawable(
@@ -1292,26 +1140,29 @@ class CardFragment : Fragment() {
                     ApiResultHandler<SavedCardResponse>(requireActivity(), onLoading = {
                     }, onSuccess = { data ->
 
-                        savedCardViewModel.otpId.value = data?.otpId
+                        if (paymentId == null && buttonClicked) {
+                            savedCardViewModel.otpId.value = data?.otpId
 
-                        if (bottomSheetSavedCardInfo.isVisible) bottomSheetSavedCardInfo.dismiss()
+                            if (bottomSheetSavedCardInfo?.isVisible == true) bottomSheetSavedCardInfo?.dismiss()
 
-                        if (!::bottomSheetOtp.isInitialized || !bottomSheetOtp.isVisible) {
+                            if (!::bottomSheetOtp.isInitialized || !bottomSheetOtp.isVisible) {
 
-                            val argument = Bundle()
-                            argument.putString(MOBILE, mobileNumber)
-                            argument.putString(TOKEN, token)
-                            argument.putString(CUSTOMER_ID, customerId)
-                            argument.putString(OTP_ID, data?.otpId)
+                                val argument = Bundle()
+                                argument.putString(MOBILE, mobileNumber)
+                                argument.putString(TOKEN, token)
+                                argument.putString(CUSTOMER_ID, customerId)
+                                argument.putString(OTP_ID, data?.otpId)
 
-                            bottomSheetOtp = BottomSheetOtp(palette)
-                            bottomSheetOtp.arguments = argument
+                                bottomSheetOtp = BottomSheetOtp(palette)
+                                bottomSheetOtp.arguments = argument
 
-                            bottomSheetOtp.isCancelable = false
-                            bottomSheetOtp.show(requireActivity().supportFragmentManager, "")
+                                bottomSheetOtp.isCancelable = false
+                                bottomSheetOtp.show(requireActivity().supportFragmentManager, "")
+                            }
+
+                            Utils.println("Otp response ${data?.otpId}}")
                         }
 
-                        println("Otp response ${data?.otpId}}")
                     }, onFailure = { errorMessage ->
 
                     })
@@ -1322,29 +1173,37 @@ class CardFragment : Fragment() {
                 val responseHandler =
                     ApiResultHandler<SavedCardResponse>(requireActivity(), onLoading = {
                     }, onSuccess = { data ->
-                        buttonClicked = true
-                        // Handle payment process here
-                        val cardNumber = etCardNumber.text.toString().filter { !it.isWhitespace() }
-                        CleverTapUtil.CT_EVENT_PAYMENT_METHOD(
-                            clevertapDefaultInstance, CT_CARDS, PAYMENT_INITIATED,
-                            cardNumber, null, null
-                        )
-                        val cvv = etCVV.text.toString()
-                        val cardHolderName = etCardHolderName.text.toString()
-                        val cardExpiry = etExpiry.text.toString()
-                        val cardExpiryMonth = cardExpiry.split("/")[0]
-                        val cardExpiryYear = "20" + cardExpiry.split("/")[1]
-                        payAction(
-                            cardNumber,
-                            cvv,
-                            cardHolderName,
-                            cardExpiryMonth,
-                            cardExpiryYear,
-                            redeemableAmount,
-                            mobileNumber,
-                            isNativeOTP,
-                            true
-                        )
+                        if (paymentId == null && buttonClicked) {
+                            buttonClicked = true
+                            // Handle payment process here
+                            /*val cardNumber =
+                                etCardNumber.text.toString().filter { !it.isWhitespace() }
+                            CleverTapUtil.CT_EVENT_PAYMENT_METHOD(
+                                clevertapDefaultInstance, CT_CARDS, PAYMENT_INITIATED,
+                                cardNumber, null, null
+                            )
+                            val cvv = etCVV.text.toString()
+                            val cardHolderName = etCardHolderName.text.toString()
+                            val cardExpiry = etExpiry.text.toString()
+                            val cardExpiryMonth = cardExpiry.split("/")[0]
+                            val cardExpiryYear = "20" + cardExpiry.split("/")[1]
+                            payAction(
+                                cardNumber,
+                                cvv,
+                                cardHolderName,
+                                cardExpiryMonth,
+                                cardExpiryYear,
+                                redeemableAmount,
+                                mobileNumber,
+                                isNativeOTP,
+                                true
+                            )*/
+
+                            isSaveCard = true
+                            val processPaymentRequest = createProcessPaymentRequest()
+                            mainViewModel.processPayment(token, processPaymentRequest)
+                        }
+
                     }, onFailure = { errorMessage ->
 
                     })
@@ -1355,20 +1214,21 @@ class CardFragment : Fragment() {
                 .observe(viewLifecycleOwner) { pbpAmount ->
                     if (pbpAmount != null) {
                         val redeemableAmount = amount!! - redeemableAmount!!
-                        btnProceedToPay.text = getString(R.string.pay) + " " + convertToRupees(
+                        buttonText = getString(R.string.pay) + " " + convertToRupees(
                             requireContext(),
                             redeemableAmount
                         )
+                        btnProceedToPay.text = buttonText
                     } else {
-                        btnProceedToPay.text =
-                            getString(R.string.pay) + " " + convertToRupees(
-                                requireContext(),
-                                amount!!
-                            )
+                        buttonText = getString(R.string.pay) + " " + convertToRupees(
+                            requireContext(),
+                            amount!!
+                        )
+                        btnProceedToPay.text = buttonText
                     }
                 }
 
-            mainViewModel.fetch_response.distinctUntilChanged()
+            mainViewModel.fetch_data_response.distinctUntilChanged()
                 .observe(viewLifecycleOwner) { response ->
                     val fetchDataResponseHandler =
                         ApiResultHandler<FetchResponse>(requireActivity(),
@@ -1377,18 +1237,25 @@ class CardFragment : Fragment() {
                                 amount = data!!.paymentData!!.originalTxnAmount?.amount
                                 currency = data!!.paymentData!!.originalTxnAmount?.currency
                                 palette = data?.merchantBrandingData?.palette
+                                if (palette != null) {
+                                    textRbiGuideline.setTextColor(Color.parseColor(palette?.C900))
+                                }
                                 orderId = data?.transactionInfo?.orderId
                                 customerId =
                                     if (data?.customerInfo?.customerId != null) data?.customerInfo?.customerId else data?.customerInfo?.customer_id
                                 mobileNumber = data?.customerInfo?.mobileNo
-                                btnProceedToPay.background = buttonBackground(requireActivity())
+                                btnProceedToPay.background =
+                                    buttonBackground(requireActivity(), palette)
                                 if (data.customerInfo != null && data.customerInfo.mobileNo != null)
                                     mobileNumber = data.customerInfo.mobileNo
-                                btnProceedToPay.text =
-                                    getString(R.string.pay) + " " + convertToRupees(
-                                        requireContext(),
-                                        amount!!
-                                    )
+                                data?.dccData.let { dccList ->
+                                    this.dccList = dccList
+                                }
+                                buttonText = getString(R.string.pay) + " " + convertToRupees(
+                                    requireContext(),
+                                    amount!!
+                                )
+                                btnProceedToPay.text = buttonText
                                 val paymentModeData = data!!.paymentModes!!.filter { paymentMode ->
                                     paymentMode.paymentModeId.equals(
                                         PAYBYPOINTS_ID
@@ -1400,33 +1267,46 @@ class CardFragment : Fragment() {
                                 }
 
                                 data?.merchantInfo?.featureFlags?.let { flag ->
-                                    if (flag?.isSavedCardEnabled != null && flag?.isSavedCardEnabled!! && mobileNumber!=null && data?.customerInfo?.isEditCustomerDetailsAllowed == true) {
+                                    /*if (flag?.isSavedCardEnabled != null && flag?.isSavedCardEnabled!! && mobileNumber != null && data?.customerInfo?.isEditCustomerDetailsAllowed == true) {
                                         constraintLayoutSavedCard.visibility = View.VISIBLE
                                         isSavedCardEnabled = true
                                     }
+                                    if (flag?.isDCCEnabled == true) isDCCEnabled = true*/
                                 }
                             }, onFailure = {}
                         )
                     fetchDataResponseHandler.handleApiResult(response)
                 }
 
+
+            /*val fetchData =
+                ApiResultHandler<ProcessPaymentResponse>(requireActivity(), onLoading = {
+
+                }, onSuccess = {
+
+                }, onFailure = {
+
+                })
+            fetchData.handleApiResult(mainViewModel?.process_payment_data)*/
+
             mainViewModel.process_payment_response.distinctUntilChanged()
                 .observe(viewLifecycleOwner) { response ->
-                    if (isSavedCardEnabled || buttonClicked) {
+                    if (buttonClicked) {
                         startTime = System.currentTimeMillis()
                         val fetchDataResponseHandler =
                             ApiResultHandler<ProcessPaymentResponse>(requireActivity(),
                                 onLoading = {
                                     if (::bottomSheetOtp.isInitialized && bottomSheetOtp.isVisible) bottomSheetOtp.dismiss()
-                                    if (::bottomSheetSavedCardInfo.isInitialized && bottomSheetSavedCardInfo.isVisible) bottomSheetSavedCardInfo.dismiss()
+                                    if (bottomSheetSavedCardInfo?.isVisible == true) bottomSheetSavedCardInfo?.dismiss()
 
                                     showProcessPaymentDialog()
                                 }, onSuccess = { data ->
 
-                                    LandingActivity().paymentId = data?.payment_id
+                                    //LandingActivity().paymentId = data?.payment_id
+                                    mainViewModel.paymentId.value = data?.payment_id
                                     paymentId = data?.payment_id
                                     redirectUrl = data?.redirect_url
-                                    bottomSheetDialog.findViewById<LottieAnimationView>(R.id.img_logo)!!
+                                    bottomSheetDialog?.findViewById<LottieAnimationView>(R.id.img_process_logo)!!
                                         .addAnimatorListener(object : Animator.AnimatorListener {
                                             override fun onAnimationStart(p0: Animator) {
                                             }
@@ -1438,13 +1318,13 @@ class CardFragment : Fragment() {
                                             }
 
                                             override fun onAnimationRepeat(p0: Animator) {
-                                                bottomSheetDialog.dismiss()
 
                                                 if (isNativeOTP == true) {
                                                     generateOtp(
                                                         data?.payment_id
                                                     )
                                                 } else {
+                                                    bottomSheetDialog?.dismiss()
                                                     redirectToACS(
                                                         startTime,
                                                         data?.redirect_url,
@@ -1471,7 +1351,7 @@ class CardFragment : Fragment() {
 
                                 }, onFailure = { errorMessage ->
 
-                                    bottomSheetDialog.dismiss()
+                                    bottomSheetDialog?.dismiss()
                                     /*val i = Intent(activity, ACSPageActivity::class.java)
                                     i.putExtra(TOKEN, token)
                                     i.putExtra(START_TIME, startTime)
@@ -1526,19 +1406,65 @@ class CardFragment : Fragment() {
                         ApiResultHandler<CardBinMetaDataResponse>(requireActivity(),
                             onLoading = {},
                             onSuccess = { data ->
-                                println("Domestic card ${data?.card_payment_details?.get(0)?.card_network}")
+                                //FORCE_OPT_OUT data?.card_payment_details?.get(0)?.is_currency_supported = false
+                                //NATIVE- data?.card_payment_details?.get(0)?.is_native_otp_supported=true
+                                Utils.println("Domestic card ${data?.card_payment_details?.get(0)?.card_network}")
                                 isNativeOTP =
                                     data?.card_payment_details?.get(0)?.is_native_otp_supported
                                 setCardBrandIcon(
                                     etCardNumber,
                                     data?.card_payment_details?.get(0)?.card_network
                                 )
+                                binData = data?.card_payment_details?.get(0)
+                                if (isDCCEnabled && data?.card_payment_details?.get(0)?.is_international_card == true && data?.card_payment_details?.get(
+                                        0
+                                    )?.is_currency_supported == true
+                                ) {
+                                    isDCCEligible = true
+                                    btnProceedToPay.text = getString(R.string.continue_)
+                                } else {
+                                    isDCCEligible = false
+                                    btnProceedToPay.text = buttonText
+                                }
+
                             },
                             onFailure = {
-                                val cardType = validateCardType(cleanedInput)
-                                println("Valid condition " + validCard(cleanedInput) + " " + cleanedInput.length + " " + isCardNumberValid)
-                                // Set the brand icon based on the card type
-                                setCardBrandIcon(etCardNumber, cardType)
+                                /*val data = CardBinMetaDataResponseData(
+                                    "",
+                                    "",
+                                    "VISA",
+                                    "INTL HDQTRS-CENTER OWNED",
+                                    "DEBIT",
+                                    "CONSUMER",
+                                    false,
+                                    true,
+                                    "USA",
+                                    "USD",
+                                    true,
+                                    246,
+                                    0.246890,
+                                    9
+                                )
+                                binData = data
+                                if (isDCCEnabled && data?.is_international_card == true && data?.is_currency_supported == true
+                                ) {
+                                    isDCCEligible = true
+                                    btnProceedToPay.text = getString(R.string.continue_)
+                                } else {
+                                    isDCCEligible = false
+                                    btnProceedToPay.text = buttonText
+                                }*/
+                                try {
+                                    if (cleanedInput != null) {
+                                        val cardType = validateCardType(cleanedInput)
+                                        Utils.println("Valid condition " + validCard(cleanedInput) + " " + cleanedInput.length + " " + isCardNumberValid)
+                                        // Set the brand icon based on the card type
+                                        setCardBrandIcon(etCardNumber, cardType)
+                                    }
+                                } catch (e: Exception) {
+
+                                }
+
                             })
                     fetchDataResponseHandler.handleApiResult(response)
                 }
@@ -1551,6 +1477,7 @@ class CardFragment : Fragment() {
                                 onLoading = {
                                 },
                                 onSuccess = { data ->
+                                    bottomSheetDialog?.dismiss()
 
                                     val arguments = Bundle()
                                     arguments.putString(TOKEN, token)
@@ -1564,7 +1491,7 @@ class CardFragment : Fragment() {
                                     }
                                     data?.next?.contains(OTP_RESEND)
                                         ?.let { arguments.putBoolean(OTP_RESEND, it) }
-                                    arguments.putSerializable(
+                                    arguments.putParcelable(
                                         PROCESS_PAYMENT_REQUEST,
                                         processPaymentRequest
                                     )
@@ -1584,11 +1511,12 @@ class CardFragment : Fragment() {
 
                                 },
                                 onFailure = {
+                                    bottomSheetDialog?.dismiss()
                                     redirectToACS(
                                         startTime,
                                         redirectUrl,
                                         orderId,
-                                        LandingActivity().paymentId
+                                        paymentId
                                     )
                                 })
                         generateOtpResponseHandler.handleApiResult(response)
@@ -1622,74 +1550,36 @@ class CardFragment : Fragment() {
         return (dp * Resources.getSystem().displayMetrics.density).toInt()
     }
 
-    public fun buttonBackground(context: Context): Drawable {
-
-        val stateListDrawable = StateListDrawable()
-
-        // Create different drawables for different states
-        val pressedDrawable = GradientDrawable().apply {
-            if (palette != null) {
-                setColor(Color.parseColor(palette?.C900))
-            } else {
-                setColor(context.resources.getColor(R.color.header_color))
-            }
-            cornerRadius = 16f // Normal corner radius
-        }
-
-        // Add states to the StateListDrawable
-        stateListDrawable.addState(intArrayOf(android.R.attr.state_enabled), pressedDrawable)
-        stateListDrawable.addState(intArrayOf(), pressedDrawable) // Default state
-
-        return stateListDrawable
-    }
-
     private fun getBinData(token: String, cardNumber: String) {
         val binRequest = CardBinMetaDataRequest(cardNumber, PAYMENT_REFERENCE_TYPE_CARD)
         val binRequestList = arrayListOf<CardBinMetaDataRequest>()
         binRequestList.add(binRequest)
-        println("bin request " + Gson().toJson(binRequestList))
-        mainViewModel.getBinData(token, CardBinMetaDataRequestList(binRequestList))
+        Utils.println("bin request " + Gson().toJson(binRequestList))
+        val cardBinData = CardBinMetaDataRequestList(card_details = binRequestList)
+        if (isDCCEnabled) {
+            cardBinData.amount = amount
+            cardBinData.markup_required = true
+            cardBinData.dcc_details_required = true
+        }
+        mainViewModel.getBinData(token, cardBinData)
     }
 
     private fun generateOtp(
         paymentId: String?
     ) {
-        val otpRequest = OTPRequest(paymentId, null, null, null, null)
+        val otpRequest = OTPRequest(payment_id = paymentId)
         mainViewModel.generatOtp(token, otpRequest)
     }
 
 
-    private fun createPaymentParams(): HashMap<String, String> {
-        val displayMetrics = DisplayMetrics()
-        requireActivity().windowManager.defaultDisplay.getMetrics(displayMetrics)
-        val height = displayMetrics.heightPixels
-        val width = displayMetrics.widthPixels
-        val pixelFormat = requireActivity().windowManager.defaultDisplay.pixelFormat
-        println("Screen size " + height + " " + width)
-        println("Ip address " + Utils.getLocalIpAddress())
-
-        var browserDetails = HashMap<String, String>()
-        browserDetails.put(BROWSER_ACCEPT_HEADER, BROWSER_ACCEPT_ALL)
-        browserDetails.put(BROWSER_LANGUAGE, Locale.getDefault().language)
-        browserDetails.put(BROWSER_SCREEN_HEIGHT, height.toString())
-        browserDetails.put(BROWSER_SCREEN_WIDTH, width.toString())
-        browserDetails.put(BROWSER_TIME_ZONE, Utils.getTimeOffset().toString())
-        browserDetails.put(
-            BROWSER_USER_AGENT,
-            BROWSER_USER_AGENT_ANDROID
-        )
-        browserDetails.put(BROWSER_IP_ADDRESS, Utils.getLocalIpAddress().toString())
-        browserDetails.put(BROWSER_SCREEN_COLOR_DEPTH, Utils.getColorDepth(pixelFormat).toString())
-        browserDetails.put(BROWSER_JAVASCRIPT_ENABLED, "true")
-        return browserDetails
-    }
-
     override fun onDestroyView() {
         super.onDestroyView()
-        mainViewModel.process_payment_response.removeObservers(viewLifecycleOwner)
+        mainViewModel.process_payment_response.removeObservers(requireActivity())
+        savedCardViewModel.saved_card_validate_otp_response.removeObservers(requireActivity())
+        savedCardViewModel.saved_card_request_otp_response.removeObservers(requireActivity())
     }
 
-    public fun redirectToACS(
+    fun redirectToACS(
         startTime: Long?,
         redirectUrl: String?,
         orderId: String?,
@@ -1728,13 +1618,9 @@ class CardFragment : Fragment() {
 
     fun reset() {
         etCardNumber.setText("")
-        //etCardNumber.clearFocus()
         etExpiry.setText("")
-        //etExpiry.clearFocus()
         etCVV.setText("")
-        //etCVV.clearFocus()
         etCardHolderName.setText("")
-        //etCardHolderName.clearFocus()
     }
 
     override fun onResume() {
@@ -1745,6 +1631,117 @@ class CardFragment : Fragment() {
     override fun onPause() {
         super.onPause()
         //onCreate(null)
-        reset()
+        //reset()
     }
+
+    fun showSavedCardDialog(bundle: Bundle?) {
+        bottomSheetSavedCardInfo = BottomSheetSavedCard(palette)
+        bottomSheetSavedCardInfo?.arguments = bundle
+
+        bottomSheetSavedCardInfo?.isCancelable = false
+        bottomSheetSavedCardInfo?.show(requireActivity().supportFragmentManager, "")
+    }
+
+    fun showDCCDialog(bindata: CardBinMetaDataResponseData?, dccData: DccData?) {
+        val bundle = Bundle()
+        bundle.putParcelable(DCC_DATA, dccData)
+        bundle.putParcelable(BIN_DATA, bindata)
+        amount?.let { bundle.putInt(AMOUNT, it) }
+        bundle.putString(TOKEN, token)
+        bundle.putParcelable(PROCESS_PAYMENT_REQUEST, processPaymentRequest)
+        bundle.putParcelable(PALETTE, palette)
+
+        bottomSheetDccDialog = BottomSheetDcc()
+        bottomSheetDccDialog?.arguments = bundle
+
+        bottomSheetDccDialog?.isCancelable = false
+        bottomSheetDccDialog?.show(requireActivity().supportFragmentManager, "")
+    }
+
+    fun createProcessPaymentRequest(): ProcessPaymentRequest {
+
+        val cardNumber = etCardNumber.text.toString().filter { !it.isWhitespace() }
+        val cvv = etCVV.text.toString()
+        val cardHolderName = etCardHolderName.text.toString()
+        val cardExpiry = etExpiry.text.toString()
+        val cardExpiryMonth = cardExpiry.split("/")[0]
+        val cardExpiryYear = "20" + cardExpiry.split("/")[1]
+
+        CleverTapUtil.CT_EVENT_PAYMENT_METHOD(
+            clevertapDefaultInstance, CT_CARDS, PAYMENT_INITIATED,
+            cardNumber, null, null
+        )
+
+        val paymentMode = arrayListOf<String>()
+        paymentMode.add(CREDIT_DEBIT_ID)
+        if (isPBPChecked) {
+            paymentMode.add(PAYBYPOINTS_ID)
+            amount = amount!! - redeemableAmount!!
+        }
+        val last4 = cardNumber.substring(cardNumber.length - 4, cardNumber.length)
+
+        val displayMetrics = DisplayMetrics()
+        requireActivity().windowManager.defaultDisplay.getMetrics(displayMetrics)
+        val height = displayMetrics.heightPixels
+        val width = displayMetrics.widthPixels
+        val pixelFormat = requireActivity().windowManager.defaultDisplay.pixelFormat
+        var dccStatus: String? =
+            if (isDCCEnabled && binData?.is_international_card == true && binData?.is_currency_supported == false)
+                DCC_STATUS.FORCE_OPT_OUT.toString()
+            else null
+
+        val screenSize: String = width.toString() + "x" + height.toString()
+        val deviceInfo = DeviceInfo(
+            null,
+            BROWSER_USER_AGENT_ANDROID,
+            BROWSER_ACCEPT_ALL,
+            Locale.getDefault().language,
+            height.toString(),
+            width.toString(),
+            Utils.getTimeOffset().toString(),
+            screenSize,
+            Utils.getColorDepth(pixelFormat).toString(),
+            true, true, DeviceUtil.getDeviceId(requireActivity()),
+            Utils.getLocalIpAddress().toString()
+        )
+
+        val cardDataExtra =
+            Extra(
+                paymentMode,
+                amount,
+                currency,
+                last4,
+                redeemableAmount,
+                null
+                /*mobileNumber!!.filter { !mobileNumber!!.isEmpty() }*/,
+                null,
+                deviceInfo,
+                null,
+                dccStatus
+            )
+        val cardData =
+            CardData(
+                cardNumber,
+                cvv,
+                cardHolderName,
+                cardExpiryYear,
+                cardExpiryMonth,
+                isNativeOTP,
+                if (skipSavedCard) false else isSaveCard
+            )
+        processPaymentRequest =
+            ProcessPaymentRequest(
+                null,
+                null,
+                cardData,
+                upi_data = null,
+                null,
+                cardDataExtra,
+                null,
+                null,
+                Utils.createSDKData(requireActivity())
+            )
+        return processPaymentRequest
+    }
+
 }

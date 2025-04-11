@@ -1,10 +1,8 @@
 package com.pinelabs.pluralsdk.activity
 
-import android.R.attr
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.content.res.ColorStateList
 import android.content.res.Resources
 import android.graphics.Bitmap
@@ -21,7 +19,6 @@ import android.util.Base64
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.WindowManager
 import android.webkit.WebView
 import android.widget.Button
 import android.widget.FrameLayout
@@ -40,14 +37,15 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.distinctUntilChanged
 import com.clevertap.android.sdk.CleverTapAPI
 import com.clevertap.android.sdk.isNotNullAndBlank
-import com.google.android.gms.auth.api.phone.SmsRetriever
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.google.gson.Gson
 import com.pinelabs.pluralsdk.PluralSDK
 import com.pinelabs.pluralsdk.R
 import com.pinelabs.pluralsdk.data.model.CancelTransactionResponse
 import com.pinelabs.pluralsdk.data.model.CustomerInfo
 import com.pinelabs.pluralsdk.data.model.CustomerInfoResponse
+import com.pinelabs.pluralsdk.data.model.DCCDetails
 import com.pinelabs.pluralsdk.data.model.FetchResponse
 import com.pinelabs.pluralsdk.data.model.MerchantBranding
 import com.pinelabs.pluralsdk.data.model.OTPRequest
@@ -58,13 +56,14 @@ import com.pinelabs.pluralsdk.data.model.TransactionStatusResponse
 import com.pinelabs.pluralsdk.data.utils.AmountUtil.convertToRupees
 import com.pinelabs.pluralsdk.data.utils.AmountUtil.roundToDecimal
 import com.pinelabs.pluralsdk.data.utils.ApiResultHandler
+import com.pinelabs.pluralsdk.data.utils.Utils
 import com.pinelabs.pluralsdk.fragment.ACSFragment
+import com.pinelabs.pluralsdk.fragment.AddressFragment
 import com.pinelabs.pluralsdk.fragment.BottomSheetMobileNumber
 import com.pinelabs.pluralsdk.fragment.BottomSheetOtp
 import com.pinelabs.pluralsdk.fragment.BottomSheetRetryFragment
-import com.pinelabs.pluralsdk.fragment.BottomSheetRetryUpiFragment
 import com.pinelabs.pluralsdk.fragment.CardFragment
-import com.pinelabs.pluralsdk.fragment.NetBankingFragment
+import com.pinelabs.pluralsdk.fragment.NetBankingFragmentNew
 import com.pinelabs.pluralsdk.fragment.OtpFragment
 import com.pinelabs.pluralsdk.fragment.PaymentOptionListing
 import com.pinelabs.pluralsdk.fragment.SavedCardFragment
@@ -73,13 +72,13 @@ import com.pinelabs.pluralsdk.utils.CleverTapUtil
 import com.pinelabs.pluralsdk.utils.CleverTapUtil.Companion.CT_EVENT_PAYMENT_CANCELLED
 import com.pinelabs.pluralsdk.utils.Constants.Companion.CUSTOMER_DETAILS
 import com.pinelabs.pluralsdk.utils.Constants.Companion.CUSTOMER_ID
+import com.pinelabs.pluralsdk.utils.Constants.Companion.DCC_DATA
 import com.pinelabs.pluralsdk.utils.Constants.Companion.EMAIL
 import com.pinelabs.pluralsdk.utils.Constants.Companion.ERROR_CODE
 import com.pinelabs.pluralsdk.utils.Constants.Companion.ERROR_MESSAGE
 import com.pinelabs.pluralsdk.utils.Constants.Companion.MOBILE
 import com.pinelabs.pluralsdk.utils.Constants.Companion.ORDER_ID
 import com.pinelabs.pluralsdk.utils.Constants.Companion.OTP_ID
-import com.pinelabs.pluralsdk.utils.Constants.Companion.OTP_VALIDATE
 import com.pinelabs.pluralsdk.utils.Constants.Companion.PAYBYPOINTS_ID
 import com.pinelabs.pluralsdk.utils.Constants.Companion.TAG_ACS
 import com.pinelabs.pluralsdk.utils.Constants.Companion.TAG_BOTTOM_SHEET_MOBILE
@@ -95,10 +94,12 @@ import com.pinelabs.pluralsdk.viewmodels.ViewModelFactory
 import com.pinelabs.pluralsdk.viewmodels.ViewModelFactoryRetry
 import com.pinelabs.pluralsdk.viewmodels.ViewModelFactorySavedCard
 
+
 class LandingActivity : AppCompatActivity(), Thread.UncaughtExceptionHandler,
-    CardFragment.onRetryListener, NetBankingFragment.onRetryListener,
+    CardFragment.onRetryListener, NetBankingFragmentNew.onRetryListener,
     UPICollectFragment.onRetryListener,
-    ACSFragment.onRetryListener, OtpFragment.onRetryListener, SavedCardFragment.onRetryListener {
+    ACSFragment.onRetryListener, OtpFragment.onRetryListener, SavedCardFragment.onRetryListener,
+    AddressFragment.onRetryListener {
 
     lateinit var customerLayout: FrameLayout
     lateinit var layoutOrginal: ConstraintLayout
@@ -122,8 +123,6 @@ class LandingActivity : AppCompatActivity(), Thread.UncaughtExceptionHandler,
     var deepLink: String? = null
     var paymentId: String? = null
 
-    //private lateinit var window: Window
-
     private var amount: Int? = null
     private var palette: Palette? = null
 
@@ -133,15 +132,14 @@ class LandingActivity : AppCompatActivity(), Thread.UncaughtExceptionHandler,
 
     private var clevertapDefaultInstance: CleverTapAPI? = null
 
-    /*val REQ_USER_CONSENT: Int = 200
-    var smsBroadcastReceiver: SmsBroadcastReceiver? = null*/
-
     var paymentModes: List<PaymentMode>? = mutableListOf()
     var isAcs = false
     var errorCode: String? = null
     var errorMessage: String? = null
 
     private var customerInfo: CustomerInfo? = null
+    private var dccAmountMessage: DCCDetails? = null
+    private var merchantName: String? = null
 
     private lateinit var bottomSheetDialogOtp: BottomSheetDialogFragment
     lateinit var bottomSheetDialogMobile: BottomSheetDialogFragment
@@ -151,18 +149,10 @@ class LandingActivity : AppCompatActivity(), Thread.UncaughtExceptionHandler,
         super.onCreate(savedInstanceState)
         setContentView(R.layout.landing)
 
-        /* val bottomSheetDialog = BottomSheetOtp()
-         bottomSheetDialog.isCancelable = false
-         bottomSheetDialog.show(supportFragmentManager, "")*/
-
-
         clevertapDefaultInstance = CleverTapAPI.getDefaultInstance(applicationContext)
         startTime = System.currentTimeMillis()
 
-        /*val appSignatureHelper = AppSignatureHelper(this)
-        println("Signature ${appSignatureHelper.appSignatures[0]}")
-
-        startSmartUserConsent()*/
+        setStatusBarColor(this)
 
         val viewModelFactory = ViewModelFactory(application)
         val viewModelFactoryRetry = ViewModelFactoryRetry(application)
@@ -175,34 +165,13 @@ class LandingActivity : AppCompatActivity(), Thread.UncaughtExceptionHandler,
 
         token = intent.getStringExtra(TOKEN).toString()
 
-        getViews()
+        initializeViews()
         fetchData(token)
         setupCancelAction()
         observerFetchData()
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-
-        /*if (requestCode === REQ_USER_CONSENT) {
-            if ((resultCode === RESULT_OK) && (data != null)) {
-                val message: String? = data?.getStringExtra(SmsRetriever.EXTRA_SMS_MESSAGE)
-                getOtpFromMessage(message)
-            }
-        }*/
-
-        /*Toast.makeText(this, "Callback reached", Toast.LENGTH_SHORT).show()
-        if (requestCode === REQ_RETRY_CALLBACK) {
-            if ((resultCode === RESULT_OK) && (data != null)) {
-                val retryPage: String? = data?.getStringExtra(RETRY_PAGE)
-                println("Retry page ${retryPage}")
-                showPaymentListingFragment(retryPage)
-            }
-        }*/
-
-    }
-
-    fun getViews() {
+    private fun initializeViews() {
 
         imgMerchantimage = findViewById(R.id.img_pic_header)
         txtMerchantname = findViewById(R.id.txt_merchant_name_orginal)
@@ -215,12 +184,12 @@ class LandingActivity : AppCompatActivity(), Thread.UncaughtExceptionHandler,
         customerLayout = findViewById(R.id.box_layout_orginal)
         cardProfilePic = findViewById(R.id.card_pic_orginal)
 
-        layoutOrginal = findViewById(R.id.layout_orginal)
-        layoutShimmer = findViewById(R.id.layout_shimmer)
+        layoutOrginal = findViewById(R.id.header_layout)
+        layoutShimmer = findViewById(R.id.header_layout_shimmer)
 
         viewModel.pbpAmount.observe(this) { pbpAmount ->
             if (pbpAmount != null) {
-                println("Transaction amount ${convertToRupees(this, pbpAmount)}")
+                Utils.println("Transaction amount ${convertToRupees(this, pbpAmount)}")
                 txtTransactionamount.text = convertToRupees(this, pbpAmount)
                 txtTransactionamountStrike.text = convertToRupees(this, amount!!)
                 txtTransactionamountStrike.visibility = View.VISIBLE
@@ -229,10 +198,21 @@ class LandingActivity : AppCompatActivity(), Thread.UncaughtExceptionHandler,
                 txtTransactionamountStrike.visibility = View.GONE
             }
         }
+
+        viewModel.dccAmount.observe(this) { dccAmount ->
+            txtTransactionamount.text = dccAmount
+            txtTransactionamountStrike.visibility = View.GONE
+        }
+        viewModel.dccAmountMessage.observe(this) { dccMessage ->
+            if (dccMessage != null) {
+                this.dccAmountMessage = dccMessage
+                this.dccAmountMessage?.merchantName = merchantName
+            }
+        }
         showPaymentListingFragment()
     }
 
-    fun showPaymentListingFragment() {
+    private fun showPaymentListingFragment() {
         val arguments = Bundle()
         arguments.putString(TOKEN, token)
 
@@ -244,7 +224,7 @@ class LandingActivity : AppCompatActivity(), Thread.UncaughtExceptionHandler,
         transaction.commit()
     }
 
-    fun showSavedCardFragment() {
+    private fun showSavedCardFragment() {
         findViewById<LinearLayout>(R.id.saved_card_fragment).visibility = View.VISIBLE
         val savedCardFragment = SavedCardFragment(
             true,
@@ -259,7 +239,7 @@ class LandingActivity : AppCompatActivity(), Thread.UncaughtExceptionHandler,
         transaction.commit()
     }
 
-    fun fetchData(token: String) {
+    private fun fetchData(token: String) {
         viewModel.fetchData(token)
     }
 
@@ -278,7 +258,7 @@ class LandingActivity : AppCompatActivity(), Thread.UncaughtExceptionHandler,
         }
     }
 
-    public fun showCancelConfirmationDialog(activity: Activity, tag: String?) {
+    fun showCancelConfirmationDialog(activity: Activity, tag: String?) {
         val bottomSheetDialog = BottomSheetDialog(activity)
         val view =
             LayoutInflater.from(activity).inflate(R.layout.cancel_confirmation_bottom_sheet, null)
@@ -300,14 +280,14 @@ class LandingActivity : AppCompatActivity(), Thread.UncaughtExceptionHandler,
 
         btnYes.setOnClickListener {
             bottomSheetDialog.dismiss()
-            if (tag != null) {
+            if (tag != null && !findViewById<LinearLayout>(R.id.saved_card_fragment).isVisible) {
                 supportFragmentManager.popBackStack()
-                viewModel.cancelTransaction(token)
             } else {
                 //Toast.makeText(this, "Transaction cancelled", Toast.LENGTH_SHORT).show()
                 activity.finish()
                 PluralSDK.getInstance().callback?.onCancelTransaction()
             }
+            viewModel.cancelTransaction(token, if (paymentId == null) false else true)
         }
 
         btnNo.setOnClickListener {
@@ -322,7 +302,7 @@ class LandingActivity : AppCompatActivity(), Thread.UncaughtExceptionHandler,
 
         if (supportFragmentManager.backStackEntryCount > 0) {
 
-            println(
+            Utils.println(
                 "Back presss ${supportFragmentManager.backStackEntryCount} ${
                     supportFragmentManager.getBackStackEntryAt(
                         supportFragmentManager.backStackEntryCount - 1
@@ -358,7 +338,10 @@ class LandingActivity : AppCompatActivity(), Thread.UncaughtExceptionHandler,
                 super.onBackPressed()*/
             if (tag.equals(TAG_ACS) /*|| tag.equals(TAG_OTP)*/) {
                 onRetry(isAcs, "", "")
-            } else if (deepLink.isNotNullAndBlank() || paymentId.isNotNullAndBlank())
+            } else if (deepLink.isNotNullAndBlank() || paymentId.isNotNullAndBlank() || (supportFragmentManager.backStackEntryCount < 2 && findViewById<LinearLayout>(
+                    R.id.saved_card_fragment
+                ).isVisible)
+            )
                 showCancelConfirmationDialog(this, tag)
             else
                 supportFragmentManager.popBackStack()
@@ -377,16 +360,21 @@ class LandingActivity : AppCompatActivity(), Thread.UncaughtExceptionHandler,
 //    }
 
     fun observerFetchData() {
+        viewModel.paymentId.observe(this) { response ->
+            paymentId = response
+        }
         retryViewModel.transaction_status_response.distinctUntilChanged()
             .observe(this) { response ->
                 val fetchDataResponseHandler =
                     ApiResultHandler<TransactionStatusResponse>(this, onLoading = {
                     }, onSuccess = { data ->
-                        println("Transaction status landing")
+                        Utils.println("Transaction status landing")
                         data?.data?.let { data ->
+                            //data.status = UPI_PROCESSED_STATUS
                             if (data.status.equals(UPI_PROCESSED_STATUS)) {
                                 val intent = Intent(this, SuccessActivity::class.java)
-                                intent.putExtra(ORDER_ID, data?.order_id)
+                                intent.putExtra(ORDER_ID, data.order_id)
+                                intent.putExtra(DCC_DATA, dccAmountMessage)
                                 startActivity(intent)
                                 finish()
                             } else {
@@ -422,7 +410,7 @@ class LandingActivity : AppCompatActivity(), Thread.UncaughtExceptionHandler,
                         intent.putExtra(ERROR_MESSAGE, error?.error_message)
                         startActivity(intent)
                         finish()
-                        println("Transaction status failure")
+                        Utils.println("Transaction status failure")
                     })
                 fetchDataResponseHandler.handleApiResult(response)
 
@@ -444,17 +432,17 @@ class LandingActivity : AppCompatActivity(), Thread.UncaughtExceptionHandler,
                             argument.putString(MOBILE, customerInfo?.mobileNumber)
                             argument.putString(CUSTOMER_ID, customerInfo?.customer_id)
                             argument.putString(OTP_ID, data?.otpId)
-                            argument.putSerializable(CUSTOMER_DETAILS, customerInfo)
+                            argument.putParcelable(CUSTOMER_DETAILS, customerInfo)
 
                             bottomSheetDialogOtp = BottomSheetOtp(palette)
                             bottomSheetDialogOtp.arguments = argument
                             bottomSheetDialogOtp.isCancelable = true
                             bottomSheetDialogOtp.show(supportFragmentManager, TAG_BOTTOM_SHEET_OTP)
 
-                            println("Otp response ${data?.otpId}}")
+                            Utils.println("Otp response ${data?.otpId}}")
                         }
                     }, onFailure = { errorMessage ->
-                        println("otp request error ${errorMessage?.error_message}")
+                        Utils.println("otp request error ${errorMessage?.error_message}")
                     })
                 responseHandler.handleApiResult(response)
 
@@ -468,7 +456,7 @@ class LandingActivity : AppCompatActivity(), Thread.UncaughtExceptionHandler,
                         val otpRequest = OTPRequest(null, null, data?.customer_id, null, null)
                         viewModel.sendOTPCustomer(token, otpRequest)
                     }, onFailure = { errorMessage ->
-                        println("Create active inactive error${errorMessage?.error_message}")
+                        Utils.println("Create active inactive error${errorMessage?.error_message}")
                     })
                 responseHandler.handleApiResult(response)
             }
@@ -507,19 +495,21 @@ class LandingActivity : AppCompatActivity(), Thread.UncaughtExceptionHandler,
                             viewModel.savedCardOtpError.value = getString(R.string.wrong_otp)
                         }
 
-                        println("Validate & update customer info ${data?.customerInfo?.tokens?.size}")
+                        Utils.println("Validate & update customer info ${data?.customerInfo?.tokens?.size}")
                     }, onFailure = { errorMessage ->
-                        println("Validate & update customer info ${errorMessage?.error_message}")
+                        Utils.println("Validate & update customer info ${errorMessage?.error_message}")
                     })
                 responseHandler.handleApiResult(response)
             }
 
-            viewModel.fetch_response.observe(this) { response ->
+            viewModel.fetch_data_response.observe(this) { response ->
                 val fetchDataResponseHandler =
                     ApiResultHandler<FetchResponse>(this@LandingActivity, onLoading = {
                         startShimmer()
                     }, onSuccess = { data ->
+                        merchantName = data?.merchantInfo?.merchantName
                         //orderId = response.order_id
+                        Utils.println("Fetch data " + Gson().toJson(data))
                         setView(data)
 
                         paymentModes = response.data?.paymentModes?.filter { paymentMode ->
@@ -733,13 +723,14 @@ class LandingActivity : AppCompatActivity(), Thread.UncaughtExceptionHandler,
     }
 
     private fun setStatusBarColor(context: Context) {
+        val window = window
         val color =
             if (palette != null) Color.parseColor(palette?.C900) else context.resources.getColor(R.color.header_color)
-        getWindow().setStatusBarColor(color)
+        window.statusBarColor = color
     }
 
     override fun uncaughtException(t: Thread, e: Throwable) {
-        println("Exception caught")
+        Utils.println("Exception caught")
         clevertapDefaultInstance = CleverTapAPI.getDefaultInstance(applicationContext)
         CleverTapUtil.CT_EVENT_SDK_ERROR(
             clevertapDefaultInstance,
@@ -747,57 +738,6 @@ class LandingActivity : AppCompatActivity(), Thread.UncaughtExceptionHandler,
             e.printStackTrace().toString()
         )
     }
-
-    /*private fun startSmartUserConsent() {
-        val client = SmsRetriever.getClient(this)
-        client.startSmsUserConsent(null)
-        val retriever = client.startSmsRetriever()
-        retriever.addOnSuccessListener {
-
-        }
-    }
-
-    private fun getOtpFromMessage(message: String?) {
-        println("OTP " + message)
-
-        val otpPattern: Pattern = Pattern.compile("(|^)\\d{6}")
-        val matcher: Matcher = otpPattern.matcher(message)
-        if (matcher.find()) {
-            *//*etOTP.setText(matcher.group(0))*//*
-            println("OTP " + matcher.group(0))
-            Toast.makeText(this@LandingActivity, "OTP " + matcher.group(0), Toast.LENGTH_SHORT)
-                .show()
-        }
-    }*/
-
-    /*@RequiresApi(Build.VERSION_CODES.O)
-    private fun registerBroadcastReceiver() {
-        smsBroadcastReceiver = SmsBroadcastReceiver()
-        smsBroadcastReceiver!!.smsBroadcastReceiverListener =
-            object : SmsBroadcastReceiverListener {
-                override fun onSuccess(intent: Intent?) {
-                    print("SMS Success ")
-                    startActivityForResult(intent!!, REQ_USER_CONSENT)
-                }
-
-                override fun onFailure() {
-                }
-            }
-
-        val intentFilter = IntentFilter(SmsRetriever.SMS_RETRIEVED_ACTION)
-        registerReceiver(smsBroadcastReceiver, intentFilter, Context.RECEIVER_EXPORTED)
-    }
-
-    @RequiresApi(Build.VERSION_CODES.O)
-    override fun onStart() {
-        super.onStart();
-        registerBroadcastReceiver()
-    }*/
-
-    /*override fun onStop() {
-        super.onStop()
-        unregisterReceiver(smsBroadcastReceiver)
-    }*/
 
     override fun onRetry(isAcs: Boolean, errorCode: String?, errorMessage: String?) {
         this.isAcs = isAcs
@@ -807,9 +747,9 @@ class LandingActivity : AppCompatActivity(), Thread.UncaughtExceptionHandler,
         //loadFragment(fragmentTag)
     }
 
-    fun showMobileNumberPopup() {
+    private fun showMobileNumberPopup() {
         val arguments = Bundle()
-        arguments.putSerializable(CUSTOMER_DETAILS, customerInfo)
+        arguments.putParcelable(CUSTOMER_DETAILS, customerInfo)
         arguments.putString(TOKEN, token)
         arguments.putString(MOBILE, txtMerchantMobileNumber.text.toString())
         arguments.putString(EMAIL, txtMerchantEmailId.text.toString())

@@ -30,7 +30,7 @@ flexbox = "3.0.0"
 
 coil = "1.4.0"
 
-play-service-auth = "21.3.0"
+
 play-service-phone = "18.1.0"
 
 [libraries]
@@ -68,7 +68,6 @@ clevertap = { group = "com.clevertap.android", name = "clevertap-android-sdk", v
 coil = { group = "io.coil-kt", name = "coil", version.ref = "coil" }
 coil-svg = { group = "io.coil-kt", name = "coil-svg", version.ref = "coil" }
 
-play-service-auth = { group = "com.google.android.gms", name = "play-services-auth", version.ref = "play-service-auth" }
 play-service-phone = { group = "com.google.android.gms", name = "play-services-auth-api-phone", version.ref = "play-service-phone" }
 
 [plugins]

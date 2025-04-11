@@ -4,11 +4,11 @@
     android:layout_height="match_parent">
 
     <include
-        android:id="@+id/layout_shimmer"
-        layout="@layout/header_shimmer"/>
+        android:id="@+id/header_layout_shimmer"
+        layout="@layout/header_layout_shimmer"/>
 
     <include
-        android:id="@+id/layout_orginal"
-        layout="@layout/header_orginal"/>
+        android:id="@+id/header_layout"
+        layout="@layout/header_layout"/>
 
 </LinearLayout>

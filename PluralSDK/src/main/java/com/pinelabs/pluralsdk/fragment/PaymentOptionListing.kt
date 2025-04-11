@@ -5,7 +5,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
-import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
@@ -23,9 +22,8 @@ import com.pinelabs.pluralsdk.data.model.Palette
 import com.pinelabs.pluralsdk.data.model.PaymentMode
 import com.pinelabs.pluralsdk.data.model.RecyclerViewPaymentOptionData
 import com.pinelabs.pluralsdk.data.utils.ApiResultHandler
-import com.pinelabs.pluralsdk.utils.CleverTapUtil
+import com.pinelabs.pluralsdk.data.utils.Utils.cleverTapLog
 import com.pinelabs.pluralsdk.utils.Constants.Companion.PAYBYPOINTS_ID
-import com.pinelabs.pluralsdk.utils.Constants.Companion.PAYMENT_INITIATED
 import com.pinelabs.pluralsdk.utils.Constants.Companion.TAG_CARD
 import com.pinelabs.pluralsdk.utils.Constants.Companion.TAG_NETBANKING
 import com.pinelabs.pluralsdk.utils.Constants.Companion.TAG_UPI
@@ -58,15 +56,16 @@ class PaymentOptionListing : Fragment(), PaymentOptionsAdapter.OnItemClickListen
         token = arguments?.getString(TOKEN).toString()
 
 
-        val activityButton = requireActivity().findViewById<ConstraintLayout>(R.id.layout_orginal)
+        val activityButton = requireActivity().findViewById<ConstraintLayout>(R.id.header_layout)
         activityButton.visibility = View.VISIBLE
 
         clevertapDefaultInstance = CleverTapAPI.getDefaultInstance(requireActivity())
+        cleverTapLog()
 
         recyclerPaymentOptions = view.findViewById(R.id.recycler_payment_options)
         shimmerLayout = view.findViewById(R.id.shimmerFrameLayout)
         startShimmer()
-        mainViewModel.fetch_response
+        mainViewModel.fetch_data_response
             .observe(viewLifecycleOwner) { response ->
                 val fetchDataResponseHandler = ApiResultHandler<FetchResponse>(requireActivity(),
                     onLoading = {
@@ -131,7 +130,7 @@ class PaymentOptionListing : Fragment(), PaymentOptionsAdapter.OnItemClickListen
         val selectedFragment = when (paymentOption) {
             PaymentModes.CREDIT_DEBIT.paymentModeName -> CardFragment()
             PaymentModes.UPI.paymentModeName -> UPICollectFragment()
-            PaymentModes.NET_BANKING.paymentModeName -> NetBankingFragment()
+            PaymentModes.NET_BANKING.paymentModeName -> NetBankingFragmentNew()
             else -> null
         }
 

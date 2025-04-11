@@ -30,7 +30,7 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="8dp"
             android:ellipsize="end"
-            android:fontFamily="@font/roboto_medium"
+            android:fontFamily="sans-serif-medium"
             android:maxLines="1"
             android:text="TextView"
             android:textColor="@color/black"

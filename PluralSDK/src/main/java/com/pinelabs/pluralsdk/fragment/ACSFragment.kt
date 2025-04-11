@@ -2,6 +2,7 @@ package com.pinelabs.pluralsdk.fragment
 
 import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.graphics.Bitmap
 import android.os.Build
 import android.os.Bundle
@@ -24,6 +25,8 @@ import com.clevertap.android.sdk.CleverTapAPI
 import com.pinelabs.pluralsdk.R
 import com.pinelabs.pluralsdk.data.model.FetchResponse
 import com.pinelabs.pluralsdk.data.utils.ApiResultHandler
+import com.pinelabs.pluralsdk.data.utils.Utils
+import com.pinelabs.pluralsdk.data.utils.Utils.cleverTapLog
 import com.pinelabs.pluralsdk.utils.CleverTapUtil
 import com.pinelabs.pluralsdk.utils.Constants.Companion.IMAGE_LOGO
 import com.pinelabs.pluralsdk.utils.Constants.Companion.ORDER_ID
@@ -79,7 +82,7 @@ class ACSFragment : Fragment() {
 
         requireActivity().getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
 
-        val activityButton = requireActivity().findViewById<ConstraintLayout>(R.id.layout_orginal)
+        val activityButton = requireActivity().findViewById<ConstraintLayout>(R.id.header_layout)
         activityButton.visibility = View.GONE
 
         orderId = arguments?.getString(ORDER_ID)
@@ -89,6 +92,7 @@ class ACSFragment : Fragment() {
         redirectUrl = arguments?.getString(REDIRECT_URL)
 
         clevertapDefaultInstance = CleverTapAPI.getDefaultInstance(requireActivity())
+        cleverTapLog()
         val endTime = System.currentTimeMillis()
         val processTime = endTime - startTime!!
         clevertapDefaultInstance?.let {
@@ -99,18 +103,8 @@ class ACSFragment : Fragment() {
         }
 
         constrainSuccess = view.findViewById(R.id.constrain_success)
-        logoAnimation = view.findViewById(R.id.img_logo)
+        logoAnimation = view.findViewById(R.id.img_success_logo)
         logoAnimation.setAnimationFromUrl(IMAGE_LOGO)
-
-        /*val callback: OnBackPressedCallback =
-            object : OnBackPressedCallback(true *//* enabled by default *//*) {
-                override fun handleOnBackPressed() {
-                    // Handle the back button even
-                    Log.d("BACKBUTTON", "Back button clicks")
-                }
-            }
-
-        requireActivity().onBackPressedDispatcher.addCallback(requireActivity(),callback)*/
 
         webAcs = view.findViewById(R.id.web_acs)
         webAcs.settings.javaScriptEnabled = true
@@ -140,14 +134,14 @@ class ACSFragment : Fragment() {
 
         //mainViewModel.fetchData(token)
         try {
-            mainViewModel.fetch_response
+            mainViewModel.fetch_data_response
                 .observe(viewLifecycleOwner) { response ->
                     val fetchDataResponseHandler =
                         ApiResultHandler<FetchResponse>(requireActivity(), onLoading = {
                         }, onSuccess = { data ->
 
                         }, onFailure = { errorMessage ->
-                            println("Failure")
+                            Utils.println("Failure")
                         })
                     fetchDataResponseHandler.handleApiResult(response)
                 }
@@ -158,8 +152,9 @@ class ACSFragment : Fragment() {
         webAcs.webViewClient = object : WebViewClient() {
             override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
                 super.onPageStarted(view, url, favicon)
-                println("URL $url")
-                if (url!!.contains("responsehandler")) {
+                Utils.println("URL $url")
+                ("URL $url")
+                if (url!!.contains("responsehandler", ignoreCase = true)) {
                     CleverTapUtil.CT_EVENT_PAYMENT_STATUS_SUCCESS(
                         clevertapDefaultInstance, orderId, paymentId
                     )
@@ -200,11 +195,15 @@ class ACSFragment : Fragment() {
 
         @JavascriptInterface
         fun postMessage(response: String?) {
-            println("Response from java script ${response}")
+            Utils.println("Response from java script ${response}")
 
             CleverTapUtil.CT_EVENT_PAYMENT_STATUS_SUCCESS(
                 clevertapDefaultInstance, orderId, paymentId
             )
+            //viewModel.getTransactionStatus(token)
+            webAcs.visibility = View.GONE
+            constrainSuccess.visibility = View.VISIBLE
+            listener?.onRetry(true,"", "")
 
         }
     }

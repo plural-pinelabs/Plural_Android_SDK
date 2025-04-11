@@ -7,12 +7,13 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.pinelabs.pluralsdk.R
+import com.pinelabs.pluralsdk.data.model.NetBank
 import com.pinelabs.pluralsdk.utils.NBBANKS
 
-class NetBanksAdapter(
-    private val bankList: List<NBBANKS>?,
-    private val itemClickListener: NetBankAllAdapter.OnItemClickListener
-) : RecyclerView.Adapter<NetBanksAdapter.NetBankViewHolder>() {
+class NetBanksAdapterNew(
+    private val bankList: List<NetBank?>,
+    private val itemClickListener: NetBankAllAdapterNew.OnItemClickListener
+) : RecyclerView.Adapter<NetBanksAdapterNew.NetBankViewHolder>() {
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int
@@ -23,7 +24,7 @@ class NetBanksAdapter(
     }
 
     override fun onBindViewHolder(holder: NetBankViewHolder, position: Int) {
-        val currentItem: NBBANKS? = bankList?.get(position)
+        val currentItem: NetBank? = bankList?.get(position)
         holder.bankName.text = bankList?.get(position)?.bankName.let { bankName ->
             if (bankName?.contains(":") == true) bankName?.split(":")
                 ?.get(1) else bankName

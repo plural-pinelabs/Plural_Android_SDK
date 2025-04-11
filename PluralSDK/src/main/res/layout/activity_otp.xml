@@ -41,7 +41,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="10dp"
-                    android:fontFamily="@font/roboto_bold"
+                    android:textStyle="bold"
                     android:text="@string/authenticate_otp"
                     android:textColor="@android:color/black"
                     android:textSize="16sp" />
@@ -66,7 +66,7 @@
                     android:layout_height="wrap_content"
                     android:background="@null"
                     android:backgroundTint="@null"
-                    android:fontFamily="@font/roboto_medium"
+                    android:fontFamily="sans-serif-medium"
                     android:hint="@string/enter_otp"
                     android:inputType="number"
                     android:maxLength="9"
@@ -83,7 +83,7 @@
                     android:layout_centerInParent="true"
                     android:clickable="true"
                     android:focusable="true"
-                    android:fontFamily="@font/roboto_medium"
+                    android:fontFamily="sans-serif-medium"
                     android:padding="10dp"
                     android:text="@string/resend_otp"
                     android:textColor="@color/colorSecondary"
@@ -109,7 +109,7 @@
                         android:alpha=".6"
                         android:clickable="true"
                         android:focusable="true"
-                        android:fontFamily="@font/roboto_medium"
+                        android:fontFamily="sans-serif-medium"
                         android:text="@string/resend_otp_in"
                         android:textColor="@color/black"
                         android:textSize="12sp" />
@@ -124,7 +124,7 @@
                         android:alpha=".6"
                         android:clickable="true"
                         android:focusable="true"
-                        android:fontFamily="@font/roboto_bold"
+                        android:textStyle="bold"
                         android:text="1:45 min"
                         android:textColor="@color/black"
                         android:textSize="12sp" />
@@ -155,7 +155,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="5dp"
-                    android:fontFamily="@font/roboto_medium"
+                    android:fontFamily="sans-serif-medium"
                     android:text="@string/auto_read"
                     android:textColor="@color/header_color" />
 
@@ -188,7 +188,7 @@
                 android:textColor="@color/header_color" />
         </LinearLayout>
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnProceedToPay"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -196,20 +196,18 @@
             android:layout_marginTop="25dp"
             android:layout_marginRight="30dp"
             android:backgroundTint="@null"
-            android:drawableLeft="@drawable/lock_keyhole_minimalistic"
             android:drawablePadding="8dp"
             android:enabled="false"
-            android:fontFamily="@font/roboto_medium"
-            android:paddingLeft="81dp"
-            android:paddingTop="10dp"
-            android:paddingRight="81dp"
-            android:paddingBottom="10dp"
+            android:fontFamily="sans-serif-medium"
             android:text="@string/verify_continue"
             android:textAllCaps="false"
             android:textColor="@android:color/white"
             android:textSize="17sp"
-            android:visibility="visible"
             app:backgroundTint="@null"
+            app:icon="@drawable/lock_keyhole_minimalistic"
+            app:iconGravity="textStart"
+            app:iconPadding="10dp"
+            app:iconTint="@color/white"
             app:layout_constraintBottom_toTopOf="@+id/view_seperator"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent" />
@@ -240,7 +238,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:alpha=".8"
-                android:fontFamily="@font/roboto_medium"
+                android:fontFamily="sans-serif-medium"
                 android:text="@string/banks_website"
                 android:textColor="@color/black" />
 
@@ -249,7 +247,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="5dp"
-                android:fontFamily="@font/roboto_medium"
+                android:fontFamily="sans-serif-medium"
                 android:text="@string/website"
                 android:textColor="@color/header_color"
                 app:layout_constraintLeft_toRightOf="@+id/txt_acs"

@@ -1,18 +1,46 @@
+import com.android.build.api.dsl.Packaging
+
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
-    `maven-publish`
+    id("kotlin-parcelize")
 }
 
 android {
     namespace = "com.pinelabs.pluralsdk"
     compileSdk = 34
 
+    lint {
+        baseline = file("lint-baseline.xml")
+    }
+
+    buildFeatures {
+        buildConfig = true
+    }
+
     defaultConfig {
         minSdk = 24
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        consumerProguardFiles("consumer-rules.pro")
+        consumerProguardFiles("proguard-rules.pro")
+
+        buildConfigField(
+            "String",
+            "SHA256_UAT",
+            "\"c2hhMjU2LzRnZU5TQkpuem9BYVc2K3puR2x3YmhYZWdSS1Q0c0s2bEdUZ0w2YmVZQmM9\""
+        )
+        buildConfigField("String", "SHA256_QA", "\"c2hhMjU2LzVwNjZBekxRU0kzdjdUd2RBeGVuQUswY0dU\"")
+        buildConfigField(
+            "String",
+            "SHA256_PROD",
+            "\"c2hhMjU2L2dmVUJRQzB1WWNmQ2k3d21CdWllcnZjNWlNWGZnSXE3U2JQcVNyeU1LZDA9\""
+        )
+
+    }
+
+    fun Packaging.() {
+        resources.excludes.add("proguard-rules.pro")
+        resources.excludes.add("proguard.txt")
     }
 
     buildTypes {
@@ -42,7 +70,7 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 
-    implementation(libs.retrofit)
+    //implementation(libs.retrofit)
     implementation(libs.retrofit.converter.gson)
     implementation(libs.retrofit.logging.interceptor)
 
@@ -64,19 +92,11 @@ dependencies {
     implementation(libs.coil)
     implementation(libs.coil.svg)
 
-    implementation(libs.play.service.auth)
     implementation(libs.play.service.phone)
+
+    //implementation(files("libs/flexbox-3.0.0.aar"))
+    /*implementation(files("libs/retrofit-2.9.0.jar"))
+    implementation(files("libs/converter-gson-2.9.0.jar"))
+    implementation(files("libs/logging-interceptor-4.10.0.jar"))*/
 }
 
-afterEvaluate {
-    publishing {
-        publications {
-            create<MavenPublication>("maven") {
-                from (components["release"])
-                groupId = "com.pinelabs"
-                artifactId = "plural-sdk"
-                version = "1.0"
-            }
-        }
-    }
-}

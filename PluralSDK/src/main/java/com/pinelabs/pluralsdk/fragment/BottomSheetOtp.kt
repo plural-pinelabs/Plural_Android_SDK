@@ -27,6 +27,7 @@ import com.pinelabs.pluralsdk.data.model.CustomerInfo
 import com.pinelabs.pluralsdk.data.model.OTPRequest
 import com.pinelabs.pluralsdk.data.model.Palette
 import com.pinelabs.pluralsdk.data.model.UpdateOrderDetails
+import com.pinelabs.pluralsdk.data.utils.Utils.buttonBackground
 import com.pinelabs.pluralsdk.utils.Constants.Companion.CUSTOMER_DETAILS
 import com.pinelabs.pluralsdk.utils.Constants.Companion.CUSTOMER_ID
 import com.pinelabs.pluralsdk.utils.Constants.Companion.MOBILE
@@ -34,7 +35,6 @@ import com.pinelabs.pluralsdk.utils.Constants.Companion.OTP_ATTEMPT
 import com.pinelabs.pluralsdk.utils.Constants.Companion.OTP_ID
 import com.pinelabs.pluralsdk.utils.Constants.Companion.SPACE
 import com.pinelabs.pluralsdk.utils.Constants.Companion.TAG_BOTTOM_SHEET_MOBILE
-import com.pinelabs.pluralsdk.utils.Constants.Companion.TAG_OTP
 import com.pinelabs.pluralsdk.utils.Constants.Companion.TOKEN
 import com.pinelabs.pluralsdk.viewmodels.FetchDataViewModel
 import com.pinelabs.pluralsdk.viewmodels.SavedCardViewModel
@@ -83,7 +83,7 @@ class BottomSheetOtp(palette: Palette?) : BottomSheetDialogFragment() {
         token = arguments?.getString(TOKEN)
         otpId = arguments?.getString(OTP_ID)
         customerId = arguments?.getString(CUSTOMER_ID)
-        customerInfo = arguments?.getSerializable(CUSTOMER_DETAILS) as CustomerInfo?
+        customerInfo = arguments?.getParcelable(CUSTOMER_DETAILS)
 
         mainViewModel.otpId.observe(viewLifecycleOwner) { otpId ->
             this.otpId = otpId
@@ -121,7 +121,7 @@ class BottomSheetOtp(palette: Palette?) : BottomSheetDialogFragment() {
         }
 
         val buttonClick = view.findViewById<Button>(R.id.btnProceedToPay)
-        buttonClick.background = buttonBackground(requireActivity())
+        buttonClick.background = buttonBackground(requireActivity(), palette)
         buttonClick.isEnabled = false
         buttonClick.alpha = 0.3F
 
@@ -235,27 +235,6 @@ class BottomSheetOtp(palette: Palette?) : BottomSheetDialogFragment() {
             txtOtpError.visibility = View.VISIBLE
             txtOtpError.text = getString(R.string.wrong_otp)
         }
-    }
-
-    fun buttonBackground(context: Context): Drawable {
-
-        val stateListDrawable = StateListDrawable()
-
-        // Create different drawables for different states
-        val pressedDrawable = GradientDrawable().apply {
-            if (palette != null) {
-                setColor(Color.parseColor(palette?.C900))
-            } else {
-                setColor(context.resources.getColor(R.color.header_color))
-            }
-            cornerRadius = 16f // Normal corner radius
-        }
-
-        // Add states to the StateListDrawable
-        stateListDrawable.addState(intArrayOf(android.R.attr.state_enabled), pressedDrawable)
-        stateListDrawable.addState(intArrayOf(), pressedDrawable) // Default state
-
-        return stateListDrawable
     }
 
     private fun startTimer() {

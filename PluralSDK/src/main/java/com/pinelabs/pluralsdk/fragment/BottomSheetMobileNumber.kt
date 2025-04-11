@@ -26,6 +26,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.pinelabs.pluralsdk.R
 import com.pinelabs.pluralsdk.data.model.CustomerInfo
 import com.pinelabs.pluralsdk.data.model.Palette
+import com.pinelabs.pluralsdk.data.utils.Utils.buttonBackground
 import com.pinelabs.pluralsdk.data.utils.Utils.isValidEmail
 import com.pinelabs.pluralsdk.data.utils.Utils.isValidPhoneNumber
 import com.pinelabs.pluralsdk.utils.Constants.Companion.CUSTOMER_DETAILS
@@ -45,7 +46,7 @@ class BottomSheetMobileNumber(palette: Palette?) : BottomSheetDialogFragment() {
     private lateinit var imgClose: ImageView
     private val mainViewModel by activityViewModels<FetchDataViewModel>()
 
-    private lateinit var customerInfo: CustomerInfo
+    private var customerInfo: CustomerInfo? = null
     private var token: String? = null
     private var customerId: String? = null
 
@@ -64,16 +65,20 @@ class BottomSheetMobileNumber(palette: Palette?) : BottomSheetDialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        customerInfo = arguments?.getSerializable(CUSTOMER_DETAILS) as CustomerInfo
+        customerInfo = arguments?.getParcelable<CustomerInfo>(CUSTOMER_DETAILS)
         token = arguments?.getString(TOKEN)
 
-        mobile = if (customerInfo?.mobileNo!=null) customerInfo?.mobileNo else arguments?.getString(MOBILE)
-        email = if (customerInfo?.emailId!=null) customerInfo?.emailId else arguments?.getString(EMAIL)
+        mobile =
+            if (customerInfo?.mobileNo != null) customerInfo?.mobileNo else arguments?.getString(
+                MOBILE
+            )
+        email =
+            if (customerInfo?.emailId != null) customerInfo?.emailId else arguments?.getString(EMAIL)
 
         relativeMobileNumber = view.findViewById(R.id.layout_mobile_number)
 
         btnSavedCardPay = view.findViewById(R.id.btnProceedToPay)
-        btnSavedCardPay.background = buttonBackground(requireActivity())
+        btnSavedCardPay.background = buttonBackground(requireActivity(), palette)
         btnSavedCardPay.isEnabled = false
         btnSavedCardPay.alpha = 0.3f
 
@@ -145,37 +150,16 @@ class BottomSheetMobileNumber(palette: Palette?) : BottomSheetDialogFragment() {
                 txtEmailError.visibility = View.VISIBLE
                 edtEmail.setBackgroundResource(R.drawable.edittext_error_border)
             } else {
-                customerInfo.mobileNumber = edtMobileNumber.text.toString()
-                customerInfo.countryCode = "91"
-                customerInfo.emailId = edtEmail.text.toString()
-                customerInfo.is_edit = false
+                customerInfo?.mobileNumber = edtMobileNumber.text.toString()
+                customerInfo?.countryCode = "91"
+                customerInfo?.emailId = edtEmail.text.toString()
+                customerInfo?.is_edit = false
                 mainViewModel.createInactive(token, customerInfo)
             }
             /*val otpRequest = OTPRequest(null, null, "cust-v1-250211051430-aa-EhHAv8", null, null)
             mainViewModel.sendOTPCustomer(token, otpRequest)*/
         }
 
-    }
-
-    public fun buttonBackground(context: Context): Drawable {
-
-        val stateListDrawable = StateListDrawable()
-
-        // Create different drawables for different states
-        val pressedDrawable = GradientDrawable().apply {
-            if (palette != null) {
-                setColor(Color.parseColor(palette?.C900))
-            } else {
-            setColor(context.resources.getColor(R.color.header_color))
-            }
-            cornerRadius = 16f // Normal corner radius
-        }
-
-        // Add states to the StateListDrawable
-        stateListDrawable.addState(intArrayOf(android.R.attr.state_enabled), pressedDrawable)
-        stateListDrawable.addState(intArrayOf(), pressedDrawable) // Default state
-
-        return stateListDrawable
     }
 
     fun setColor(context: Context): Drawable {

@@ -2,7 +2,7 @@ package com.pinelabs.pluralsdk.utils
 
 import com.pinelabs.pluralsdk.R
 
-enum class NBBANKS(var bankCode: Int, var bankName: String, val bankImage: String) {
+enum class NBBANKS(var bankCode: Int, var bankName: String?, var bankImage: String) {
     AXIS(R.string.axis_bank_code, "", BankConstant.AXIS),
     HDFC(R.string.hdfc_bank_code, "", BankConstant.HDFC),
     JK(R.string.jk_bank_code, "", BankConstant.JK),
@@ -76,7 +76,7 @@ enum class NBBANKS(var bankCode: Int, var bankName: String, val bankImage: Strin
     DHANLAKSHMI(R.string.dhanlaxmi_corporate_bank_code, "", BankConstant.DHANLAKSHMI),
     BARCLAYS(R.string.barclays_bank_code, "", BankConstant.BARCLAYS),
     ZOROASTRAIN(R.string.zoroastrain_bank_code, "", BankConstant.ZOROASTRAIN),
-    AU(R.string.au_small_finance_bank, "", BankConstant.AU),
+    AU(R.string.au_small_finance_bank_code, "", BankConstant.AU),
     ALLAHABAD(R.string.allahabad_bank_code, "", BankConstant.ALLAHABAD),
     SBI(R.string.sbi_bank_code, "", BankConstant.SBI),
     FINCARE(R.string.fincare_bank_code, "", BankConstant.FINCARE),

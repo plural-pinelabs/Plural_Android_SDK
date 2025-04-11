@@ -55,7 +55,7 @@ class BankConstant {
         //const val NKGSB = BASE_IMAGES+"nkgsb_co_op_bank.svg"
         const val TJSB = BASE_IMAGES+"tjsb.png"
         const val KALYAN_JANATA = BASE_IMAGES+"kalyan_janata.png"
-        const val MEHSANA = BASE_IMAGES+"mehsana.svg"
+        const val MEHSANA = BASE_IMAGES+"mehsana.png"
         const val BANDHAN = BASE_IMAGES+"bandhan_bank.svg"
         //const val DIGIBANK = BASE_IMAGES+".svg"
         const val IDFC = BASE_IMAGES+"idfc_first_bank.svg"

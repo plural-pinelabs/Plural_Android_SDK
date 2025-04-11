@@ -10,7 +10,7 @@ import com.pinelabs.pluralsdk.data.utils.RetrofitBuilder
 
 class RemoteDataSource() {
     suspend fun fetchData(token: String?) = RetrofitBuilder.apiService.fetchData(token)
-    suspend fun processPayment(token: String, paymentData: ProcessPaymentRequest) =
+    suspend fun processPayment(token: String?, paymentData: ProcessPaymentRequest?) =
         RetrofitBuilder.apiService.processPayment(token, paymentData)
 
     suspend fun reward(token: String, rewardData: RewardRequest) =
@@ -19,8 +19,8 @@ class RemoteDataSource() {
     suspend fun transactionStatus(token: String?) =
         RetrofitBuilder.apiService.statusOfTransaction(token)
 
-    suspend fun cancelTransaction(token: String) =
-        RetrofitBuilder.apiService.cancelTransaction(token, true)
+    suspend fun cancelTransaction(token: String, cancelPayment: Boolean) =
+        RetrofitBuilder.apiService.cancelTransaction(token, cancelPayment)
 
     suspend fun binData(token: String, cardData: CardBinMetaDataRequestList) =
         RetrofitBuilder.apiService.getBinData(token, cardData)

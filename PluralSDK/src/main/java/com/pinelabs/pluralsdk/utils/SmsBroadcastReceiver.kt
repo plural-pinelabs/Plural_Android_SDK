@@ -6,6 +6,7 @@ import android.content.Intent
 import com.google.android.gms.auth.api.phone.SmsRetriever
 import com.google.android.gms.common.api.CommonStatusCodes
 import com.google.android.gms.common.api.Status
+import com.pinelabs.pluralsdk.data.utils.Utils
 
 class SmsBroadcastReceiver : BroadcastReceiver() {
     var smsBroadcastReceiverListener: SmsBroadcastReceiverListener? = null
@@ -24,7 +25,7 @@ class SmsBroadcastReceiver : BroadcastReceiver() {
                 CommonStatusCodes
                     .SUCCESS -> {
                     val messageIntent = extras.getParcelable<Intent>(SmsRetriever.EXTRA_CONSENT_INTENT)
-                    println("SMS Receiver "+messageIntent.toString())
+                    Utils.println("SMS Receiver "+messageIntent.toString())
                     smsBroadcastReceiverListener?.onSuccess(messageIntent)
                 }
 
@@ -35,7 +36,6 @@ class SmsBroadcastReceiver : BroadcastReceiver() {
 
     interface SmsBroadcastReceiverListener {
         fun onSuccess(intent: Intent?)
-
         fun onFailure()
     }
 }

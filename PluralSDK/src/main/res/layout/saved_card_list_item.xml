@@ -116,7 +116,7 @@
                 android:layout_centerInParent="true"
                 android:layout_marginLeft="10dp"
                 android:background="@drawable/edittext_default_border"
-                android:fontFamily="@font/roboto_medium"
+                android:fontFamily="sans-serif-medium"
                 android:hint="@string/cvv"
                 android:inputType="numberPassword"
                 android:maxLength="4"
@@ -158,25 +158,23 @@
 
     </LinearLayout>
 
-    <Button
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/btnProceedToPay"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="15dp"
         android:backgroundTint="@null"
-        android:drawableLeft="@drawable/lock_keyhole_minimalistic"
         android:drawablePadding="8dp"
         android:enabled="false"
-        android:fontFamily="@font/roboto_medium"
-        android:paddingLeft="81dp"
-        android:paddingTop="10dp"
-        android:paddingRight="81dp"
-        android:paddingBottom="10dp"
+        android:fontFamily="sans-serif-medium"
         android:text="@string/proceed_to_pay"
         android:textAllCaps="false"
         android:textColor="@android:color/white"
         android:textSize="17sp"
-        android:visibility="gone"
-        app:backgroundTint="@null" />
+        app:backgroundTint="@null"
+        app:icon="@drawable/lock_keyhole_minimalistic"
+        app:iconGravity="textStart"
+        app:iconPadding="10dp"
+        app:iconTint="@color/white" />
 
 </LinearLayout>

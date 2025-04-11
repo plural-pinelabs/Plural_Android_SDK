@@ -19,7 +19,7 @@
         android:layout_height="wrap_content"
         android:drawableLeft="@drawable/lock_keyhole_minimalistic"
         android:drawablePadding="8dp"
-        android:fontFamily="@font/roboto_medium"
+        android:fontFamily="sans-serif-medium"
         android:gravity="center"
         android:paddingLeft="81dp"
         android:paddingTop="10dp"

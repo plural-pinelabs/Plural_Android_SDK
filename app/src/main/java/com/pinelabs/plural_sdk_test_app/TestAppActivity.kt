@@ -8,7 +8,6 @@ import androidx.appcompat.app.AppCompatActivity
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.pinelabs.plural_sdk_test_app.api.ApiService
-import com.pinelabs.plural_sdk_test_app.api.ApiServiceMock
 import com.pinelabs.plural_sdk_test_app.api.RetrofitInstance
 import com.pinelabs.plural_sdk_test_app.api.model.MockData
 import com.pinelabs.plural_sdk_test_app.api.model.OrderFailure
@@ -20,6 +19,7 @@ import com.pinelabs.plural_sdk_test_app.utils.Constants.Companion.ORDER
 import com.pinelabs.plural_sdk_test_app.utils.NetworkUtil
 import com.pinelabs.pluralsdk.PluralSDKManager
 import com.pinelabs.pluralsdk.callback.PaymentResultCallBack
+import com.pinelabs.pluralsdk.data.utils.Utils
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -30,7 +30,7 @@ class TestAppActivity : AppCompatActivity(), PaymentResultCallBack {
     private lateinit var apiInterface: ApiService
 
     private lateinit var btn_startPayment: Button
-    private lateinit var edt_redirectURL: EditText
+    private lateinit var edt_token: EditText
 
     private lateinit var token: String
 
@@ -38,7 +38,7 @@ class TestAppActivity : AppCompatActivity(), PaymentResultCallBack {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_test_app)
 
-        edt_redirectURL = findViewById(R.id.edt_redirect_url)
+        edt_token = findViewById(R.id.edt_redirect_url)
         btn_startPayment = findViewById(R.id.btn_start_sdk)
         btn_startPayment.setOnClickListener {
             /*PluralSDKManager().startPayment(
@@ -48,15 +48,14 @@ class TestAppActivity : AppCompatActivity(), PaymentResultCallBack {
             )}*/
             if (NetworkUtil.isNetworkAvailable(this@TestAppActivity) == true) {
                 //generateToken()
-                if (edt_redirectURL.text.isNotEmpty())
+                if (edt_token.text.isNotEmpty())
                     PluralSDKManager().startPayment(
                         this@TestAppActivity,
-                        edt_redirectURL.text.toString(),
+                        edt_token.text.toString(),
                         this@TestAppActivity
                     )
                 else
                     Toast.makeText(this, "Redirect url is empty", Toast.LENGTH_SHORT).show()
-
             } else {
                 Toast.makeText(this, "Network not available", Toast.LENGTH_SHORT).show()
             }
@@ -75,7 +74,7 @@ class TestAppActivity : AppCompatActivity(), PaymentResultCallBack {
             override fun onResponse(call: Call<TokenResponse>, response: Response<TokenResponse>) {
 
                 if (response.isSuccessful && response.body() != null) {
-                    println("Token response ${response.body()!!.access_token}")
+                    Utils.println("Token response ${response.body()!!.access_token}")
                     getOrderData(response.body()!!.access_token)
                 } else {
                     try {
@@ -83,7 +82,7 @@ class TestAppActivity : AppCompatActivity(), PaymentResultCallBack {
                             val type = object : TypeToken<TokenFailure>() {}.type
                             var errorResponse: TokenFailure? =
                                 Gson().fromJson(response.errorBody()!!.charStream(), type)
-                            println("Error response -> ${errorResponse!!.message}")
+                            Utils.println("Error response -> ${errorResponse!!.message}")
                             Toast.makeText(
                                 this@TestAppActivity,
                                 errorResponse.message,
@@ -131,7 +130,7 @@ class TestAppActivity : AppCompatActivity(), PaymentResultCallBack {
                             val type = object : TypeToken<OrderFailure>() {}.type
                             var errorResponse: OrderFailure? =
                                 Gson().fromJson(response.errorBody()!!.charStream(), type)
-                            println("Error response -> ${errorResponse!!.code}")
+                            Utils.println("Error response -> ${errorResponse!!.code}")
                             Toast.makeText(
                                 this@TestAppActivity,
                                 errorResponse.message,
@@ -162,15 +161,15 @@ class TestAppActivity : AppCompatActivity(), PaymentResultCallBack {
     }
 
     override fun onSuccessOccured(orderId: String?) {
-        Toast.makeText(this@TestAppActivity, "Yay Payment Successful ${orderId}", Toast.LENGTH_SHORT).show()
-    }
-
-    override fun onTransactionResponse() {
-        Toast.makeText(this@TestAppActivity, "Success in app", Toast.LENGTH_SHORT).show()
+        Toast.makeText(
+            this@TestAppActivity,
+            "Payment Successful ${orderId}",
+            Toast.LENGTH_SHORT
+        ).show()
     }
 
     override fun onCancelTransaction() {
-        Toast.makeText(this@TestAppActivity, "Cancel transaction in app", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this@TestAppActivity, "Cancel transaction", Toast.LENGTH_SHORT).show()
     }
 
 }

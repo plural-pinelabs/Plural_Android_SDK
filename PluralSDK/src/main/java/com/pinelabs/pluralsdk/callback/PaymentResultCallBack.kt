@@ -1,8 +1,7 @@
 package com.pinelabs.pluralsdk.callback
 
-public interface PaymentResultCallBack {
+ interface PaymentResultCallBack {
     fun onErrorOccured(orderId: String?, code: String?, message: String?)
     fun onSuccessOccured(orderId: String?)
-    fun onTransactionResponse()
     fun onCancelTransaction()
 }

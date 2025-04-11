@@ -7,10 +7,8 @@ import android.content.IntentFilter
 import android.content.res.ColorStateList
 import android.content.res.Resources
 import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
-import android.graphics.drawable.StateListDrawable
 import android.os.Build
 import android.os.Bundle
 import android.os.CountDownTimer
@@ -26,7 +24,6 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
-import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity.RESULT_OK
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -41,7 +38,6 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.pinelabs.pluralsdk.R
 import com.pinelabs.pluralsdk.activity.AppSignatureHelper
 import com.pinelabs.pluralsdk.activity.LandingActivity
-import com.pinelabs.pluralsdk.activity.SuccessActivity
 import com.pinelabs.pluralsdk.data.model.FetchResponse
 import com.pinelabs.pluralsdk.data.model.OTPRequest
 import com.pinelabs.pluralsdk.data.model.OTPResponse
@@ -49,22 +45,22 @@ import com.pinelabs.pluralsdk.data.model.Palette
 import com.pinelabs.pluralsdk.data.model.ProcessPaymentRequest
 import com.pinelabs.pluralsdk.data.model.ProcessPaymentResponse
 import com.pinelabs.pluralsdk.data.utils.ApiResultHandler
+import com.pinelabs.pluralsdk.data.utils.Utils
+import com.pinelabs.pluralsdk.data.utils.Utils.buttonBackground
 import com.pinelabs.pluralsdk.utils.Constants.Companion.IMAGE_LOGO
 import com.pinelabs.pluralsdk.utils.Constants.Companion.NONE
 import com.pinelabs.pluralsdk.utils.Constants.Companion.ORDER_ID
 import com.pinelabs.pluralsdk.utils.Constants.Companion.OTP_RESEND
-import com.pinelabs.pluralsdk.utils.Constants.Companion.OTP_SUCCESS
 import com.pinelabs.pluralsdk.utils.Constants.Companion.PAYMENT_ID
 import com.pinelabs.pluralsdk.utils.Constants.Companion.PROCESS_PAYMENT_REQUEST
 import com.pinelabs.pluralsdk.utils.Constants.Companion.REDIRECT_URL
-import com.pinelabs.pluralsdk.utils.Constants.Companion.RESEND_TIMER
 import com.pinelabs.pluralsdk.utils.Constants.Companion.START_TIME
 import com.pinelabs.pluralsdk.utils.Constants.Companion.TAG_ACS
-import com.pinelabs.pluralsdk.utils.Constants.Companion.TAG_CARD
 import com.pinelabs.pluralsdk.utils.Constants.Companion.TOKEN
 import com.pinelabs.pluralsdk.utils.SmsBroadcastReceiver
 import com.pinelabs.pluralsdk.utils.SmsBroadcastReceiver.SmsBroadcastReceiverListener
 import com.pinelabs.pluralsdk.viewmodels.FetchDataViewModel
+import com.pinelabs.pluralsdk.viewmodels.RetryViewModel
 import java.util.Timer
 import java.util.regex.Matcher
 import java.util.regex.Pattern
@@ -96,7 +92,7 @@ class OtpFragment : Fragment() {
     private lateinit var orderId: String
     private var resendEnable: Boolean? = false
     private var resendTimer: String? = "180"
-    private lateinit var paymentRequest: ProcessPaymentRequest
+    private var paymentRequest: ProcessPaymentRequest? = null
     private var palette: Palette? = null
 
     var t = Timer()
@@ -110,6 +106,8 @@ class OtpFragment : Fragment() {
     var smsBroadcastReceiver: SmsBroadcastReceiver? = null
 
     private val mainViewModel by activityViewModels<FetchDataViewModel>()
+    private val retryViewModel by activityViewModels<RetryViewModel>()
+
     private var listener: onRetryListener? = null
 
     interface onRetryListener {
@@ -140,7 +138,7 @@ class OtpFragment : Fragment() {
         buttonClicked = false
 
         val appSignatureHelper = AppSignatureHelper(requireActivity())
-        println("Signature ${appSignatureHelper.appSignatures[0]}")
+        Utils.println("Signature ${appSignatureHelper.appSignatures[0]}")
 
         startSmartUserConsent()
 
@@ -150,9 +148,9 @@ class OtpFragment : Fragment() {
         resendEnable = arguments?.getBoolean(OTP_RESEND)
         resendTimer = /*arguments?.getString(RESEND_TIMER)*/"10"
         paymentRequest =
-            arguments?.getSerializable(PROCESS_PAYMENT_REQUEST) as ProcessPaymentRequest
+            arguments?.getParcelable<ProcessPaymentRequest>(PROCESS_PAYMENT_REQUEST)
 
-        val activityButton = requireActivity().findViewById<ConstraintLayout>(R.id.layout_orginal)
+        val activityButton = requireActivity().findViewById<ConstraintLayout>(R.id.header_layout)
         activityButton.visibility = View.VISIBLE
 
         progressBar = view.findViewById<View>(R.id.progress_bar) as ProgressBar
@@ -200,7 +198,7 @@ class OtpFragment : Fragment() {
         textTimer = view.findViewById(R.id.resend_otp_timer)
         linearAutoRead = view.findViewById(R.id.linear_auto_read)
         btnVerifyContinue = view.findViewById(R.id.btnProceedToPay)
-        btnVerifyContinue.background = buttonBackground(requireActivity())
+        btnVerifyContinue.background = buttonBackground(requireActivity(), palette)
         btnVerifyContinue.isEnabled = false
         btnVerifyContinue.alpha = 0.3f
         linearAcsPage = view.findViewById(R.id.linear_bank)
@@ -234,17 +232,17 @@ class OtpFragment : Fragment() {
 
         })
 
-        mainViewModel.fetch_response.observe(viewLifecycleOwner) { response ->
+        mainViewModel.fetch_data_response.observe(viewLifecycleOwner) { response ->
             val fetchResponse =
                 ApiResultHandler<FetchResponse>(
                     requireActivity(),
                     onLoading = {
                     },
                     onSuccess = { fetchResponse ->
-                        btnVerifyContinue.background = buttonBackground(requireActivity())
+                        btnVerifyContinue.background = buttonBackground(requireActivity(), palette)
                         fetchResponse?.merchantBrandingData?.palette?.let { palette ->
                             this.palette = palette
-                            setPaletteColor(Color.parseColor(palette?.C900))
+                            setPaletteColor(Color.parseColor(palette.C900))
                         }
                     },
                     onFailure = {})
@@ -261,13 +259,15 @@ class OtpFragment : Fragment() {
                             },
                             onSuccess = { data ->
                                 bottomSheetDialog.cancel()
-                                if (data?.status?.equals(OTP_SUCCESS) == true) {
-                                    val intent =
-                                        Intent(requireActivity(), SuccessActivity::class.java)
-                                    intent.putExtra(ORDER_ID, orderId)
-                                    startActivity(intent)
-                                    requireActivity().finish()
-                                }
+                                /*if (data?.status?.equals(OTP_SUCCESS) == true) {
+                                    *//* val intent =
+                                         Intent(requireActivity(), SuccessActivity::class.java)
+                                     intent.putExtra(ORDER_ID, orderId)
+                                     startActivity(intent)
+                                     requireActivity().finish()*//*
+
+                                }*/
+                                retryViewModel.getTransactionStatus(token)
                             },
                             onFailure = { data ->
                                 bottomSheetDialog.cancel()
@@ -332,7 +332,9 @@ class OtpFragment : Fragment() {
                         onLoading = {},
                         onSuccess = { data ->
 
-                            LandingActivity().paymentId = data?.payment_id
+                            //LandingActivity().paymentId = data?.payment_id
+                            mainViewModel.paymentId.value = data?.payment_id
+
                             val arguments = Bundle()
                             arguments.putString(TOKEN, token)
                             arguments.putLong(START_TIME, startTime)
@@ -395,7 +397,7 @@ class OtpFragment : Fragment() {
 
         if (requestCode === REQ_USER_CONSENT) {
             if ((resultCode === RESULT_OK) && (data != null)) {
-                val message: String? = data?.getStringExtra(SmsRetriever.EXTRA_SMS_MESSAGE)
+                val message: String? = data.getStringExtra(SmsRetriever.EXTRA_SMS_MESSAGE)
                 getOtpFromMessage(message)
             }
         }
@@ -464,37 +466,16 @@ class OtpFragment : Fragment() {
         }.start()
     }
 
-    public fun buttonBackground(context: Context): Drawable {
-
-        val stateListDrawable = StateListDrawable()
-
-        // Create different drawables for different states
-        val pressedDrawable = GradientDrawable().apply {
-            if (palette != null) {
-                setColor(Color.parseColor(palette?.C900))
-            } else {
-                setColor(context.resources.getColor(R.color.header_color))
-            }
-            cornerRadius = 16f // Normal corner radius
-        }
-
-        // Add states to the StateListDrawable
-        stateListDrawable.addState(intArrayOf(android.R.attr.state_enabled), pressedDrawable)
-        stateListDrawable.addState(intArrayOf(), pressedDrawable) // Default state
-
-        return stateListDrawable
-    }
-
     private fun startSmartUserConsent() {
         val client = SmsRetriever.getClient(requireActivity())
         client.startSmsUserConsent(null)
         val retriever = client.startSmsRetriever()
-        retriever.addOnSuccessListener { message ->
+        /*retriever.addOnSuccessListener { message ->
 
         }
         retriever.addOnFailureListener { message ->
 
-        }
+        }*/
     }
 
     private fun getOtpFromMessage(message: String?) {
@@ -543,7 +524,7 @@ class OtpFragment : Fragment() {
     }
 
     private fun resendOtp(paymentId: String) {
-        val otpRequest = OTPRequest(paymentId, null, null, null,null)
+        val otpRequest = OTPRequest(paymentId, null, null, null, null)
         mainViewModel.resendOtp(token, otpRequest)
     }
 
@@ -557,7 +538,7 @@ class OtpFragment : Fragment() {
         progressBar.progressBackgroundTintList = ColorStateList.valueOf(
             Color.parseColor(palette?.C900)
         )
-        btnVerifyContinue.background = buttonBackground(requireActivity())
+        btnVerifyContinue.background = buttonBackground(requireActivity(), palette)
     }
 
     fun setColor(context: Context): Drawable {
@@ -586,7 +567,7 @@ class OtpFragment : Fragment() {
         val view = LayoutInflater.from(requireActivity())
             .inflate(R.layout.process_payment_bottom_sheet, null)
 
-        var logoAnimation: LottieAnimationView = view.findViewById(R.id.img_logo)
+        var logoAnimation: LottieAnimationView = view.findViewById(R.id.img_process_logo)
         logoAnimation.setAnimationFromUrl(IMAGE_LOGO)
 
         bottomSheetDialog.setCancelable(false)

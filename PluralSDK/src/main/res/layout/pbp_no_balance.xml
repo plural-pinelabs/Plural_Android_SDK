@@ -30,7 +30,7 @@
             android:id="@+id/textView6"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/roboto_medium"
+            android:fontFamily="sans-serif-medium"
             android:text="@string/zero_points"
             android:textColor="@color/black"
             android:textSize="14sp" />
@@ -39,7 +39,7 @@
             android:id="@+id/textView5"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/roboto_medium"
+            android:fontFamily="sans-serif-medium"
             android:text="@string/another_card"
             android:textColor="@color/black"
             android:textSize="14sp" />

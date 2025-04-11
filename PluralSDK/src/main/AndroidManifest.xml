@@ -1,12 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:name="com.clevertap.android.sdk.Application"
-        android:usesCleartextTraffic="true">
+        android:allowBackup="false"
+        android:debuggable="false"
+        android:usesCleartextTraffic="true"
+        tools:replace="android:allowBackup">
 
         <meta-data
             android:name="CLEVERTAP_IDENTIFIER"
@@ -26,35 +30,23 @@
         <activity
             android:name=".activity.SplashActivity"
             android:launchMode="singleInstance"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.MyApp" />
         <activity
             android:name=".activity.LandingActivity"
             android:launchMode="singleInstance"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.MyApp" />
         <activity
             android:name=".activity.FailureActivity"
             android:launchMode="singleInstance"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.MyApp" />
         <activity
             android:name=".activity.SuccessActivity"
             android:launchMode="singleInstance"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".activity.ACSPageActivity"
-            android:launchMode="singleInstance"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".activity.UpiActivity"
-            android:launchMode="singleInstance"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".activity.UpiIntentActivity"
-            android:launchMode="singleInstance"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".activity.TestActivity"
-            android:launchMode="singleInstance"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.MyApp" />
 
         <receiver
             android:name=".utils.SmsBroadcastReceiver"
@@ -64,7 +56,6 @@
                 <action android:name="com.google.android.gms.auth.api.phone.SMS_RETRIEVED" />
             </intent-filter>
         </receiver>
-
 
     </application>
 

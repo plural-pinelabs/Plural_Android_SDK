@@ -29,8 +29,8 @@ interface ApiService {
 
     @POST("process/payment")
     suspend fun processPayment(
-        @Query("token", encoded = true) token: String,
-        @Body request: ProcessPaymentRequest
+        @Query("token", encoded = true) token: String?,
+        @Body request: ProcessPaymentRequest?
     ): Response<ProcessPaymentResponse>
 
     @POST("check/rewards")
@@ -52,7 +52,7 @@ interface ApiService {
         @Query(
             "token",
             encoded = true
-        ) token: String, @Query("cancelPayment") cancelPayment: Boolean
+        ) token: String, @Query("cancelPayment") cancelPayment: Boolean? = true
     ): Response<CancelTransactionResponse>
 
     @POST("getMetaData")

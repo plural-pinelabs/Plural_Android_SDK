@@ -25,6 +25,8 @@ import com.pinelabs.pluralsdk.R
 import com.pinelabs.pluralsdk.data.model.Palette
 import com.pinelabs.pluralsdk.data.model.SavedCardTokens
 import com.pinelabs.pluralsdk.data.utils.AmountUtil
+import com.pinelabs.pluralsdk.data.utils.Utils.buttonBackground
+import com.pinelabs.pluralsdk.utils.Constants.Companion.SPACE
 
 class SavedCardListAdapter(
     val context: Context,
@@ -93,10 +95,10 @@ class SavedCardListAdapter(
             holder.bankName.text = savedCardList?.get(position)?.cardData?.issuerName
             holder.bankImage.setImageResource(cardIcons[savedCardList?.get(position)?.cardData?.networkName]!!)
             holder.last4Digit.text = savedCardList?.get(position)?.cardData?.last4Digit
-            holder.btnProceed.background = buttonBackground(context)
+            holder.btnProceed.background = buttonBackground(context, palette)
             holder.btnProceed.isEnabled = true
             holder.btnProceed.setText(
-                context.getString(R.string.pay) + AmountUtil.convertToRupees(
+                context.getString(R.string.pay) + SPACE + AmountUtil.convertToRupees(
                     context,
                     amount!!
                 )
@@ -160,8 +162,11 @@ class SavedCardListAdapter(
                         layerDrawable.findDrawableByLayerId(R.id.icon_bg) as VectorDrawable
                     gradientDrawable.setTint(Color.parseColor(palette?.C900))
                     holder.cbSelect.background = layerDrawable
+                    /*holder.linearSavedCard.backgroundTintList =
+                        ColorStateList.valueOf(Color.parseColor(palette?.C900))*/
                 } else {
-                    holder.cbSelect.background = context.getDrawable(R.drawable.save_card_check_layer)
+                    holder.cbSelect.background =
+                        context.getDrawable(R.drawable.save_card_check_layer)
                 }
             } else {
                 holder.cbSelect.setChecked(false)
@@ -213,27 +218,6 @@ class SavedCardListAdapter(
         fun OnPaymentClick(item: SavedCardTokens?, cvv: String?)
         fun onAddCard()
         fun onViewAllCards()
-    }
-
-    public fun buttonBackground(context: Context): Drawable {
-
-        val stateListDrawable = StateListDrawable()
-
-        // Create different drawables for different states
-        val pressedDrawable = GradientDrawable().apply {
-            if (palette != null) {
-                setColor(Color.parseColor(palette?.C900))
-            } else {
-                setColor(context.resources.getColor(R.color.header_color))
-            }
-            cornerRadius = 16f // Normal corner radius
-        }
-
-        // Add states to the StateListDrawable
-        stateListDrawable.addState(intArrayOf(android.R.attr.state_enabled), pressedDrawable)
-        stateListDrawable.addState(intArrayOf(), pressedDrawable) // Default state
-
-        return stateListDrawable
     }
 
 }
