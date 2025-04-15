@@ -1,3 +1,12 @@
-install: 
-  - FILE="-Dfile=edgesdk.aar" 
-  - mvn install:install-file $FILE -DgroupId=com.edge.checkout -DartifactId=test -Dversion=0.1.2 -Dpackaging=aar -DgeneratePom=true
+version: 1.0
+jdk:
+  - openjdk8
+android:
+  components:
+    - build-tools-29.0.3
+    - android-29
+    - tools
+    - platform-tools
+build:
+  commands:
+    - ./gradlew clean build
