@@ -10,7 +10,6 @@
   <groupId>com.pinelabs</groupId>
   <artifactId>plural-sdk</artifactId>
   <version>1.0</version>
-  <packaging>aar</packaging>
   <dependencies>
     <dependency>
       <groupId>org.jetbrains.kotlin</groupId>
