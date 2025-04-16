@@ -27,7 +27,7 @@
         android:gravity="center"
         android:hint="Token"
         android:inputType="text"
-        android:text="V3_GGcXutBG3%2Fi2mHcw6NLPxxXTT58VsWpyHGEfqKxrPDVWRoHvIycwlzu%2FkFQ9Eg8U"
+        android:text=""
         android:textColor="@color/black"
         android:visibility="visible"
         app:layout_constraintBottom_toTopOf="@+id/btn_start_sdk"

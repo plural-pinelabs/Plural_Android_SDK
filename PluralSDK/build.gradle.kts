@@ -4,6 +4,10 @@ plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
     id("kotlin-parcelize")
+    `maven-publish`
+    /*id("com.vanniktech.maven.publish") version "0.29.0"
+    id("com.gradleup.nmcp") version "0.0.7" apply false
+*/
 }
 
 android {
@@ -19,7 +23,7 @@ android {
     }
 
     defaultConfig {
-        minSdk = 24
+        minSdk = 26
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("proguard-rules.pro")
@@ -100,3 +104,15 @@ dependencies {
     implementation(files("libs/logging-interceptor-4.10.0.jar"))*/
 }
 
+afterEvaluate {
+    publishing {
+        publications {
+            create<MavenPublication>("maven") {
+                from (components["release"])
+                groupId = "com.pinelabs"
+                artifactId = "plural-sdk"
+                version = "1.0"
+            }
+        }
+    }
+}

@@ -1266,13 +1266,13 @@ class CardFragment : Fragment() {
                                     isPBPEnabled = true
                                 }
 
-                                data?.merchantInfo?.featureFlags?.let { flag ->
-                                    /*if (flag?.isSavedCardEnabled != null && flag?.isSavedCardEnabled!! && mobileNumber != null && data?.customerInfo?.isEditCustomerDetailsAllowed == true) {
+                                /*data?.merchantInfo?.featureFlags?.let { flag ->
+                                    if (flag?.isSavedCardEnabled != null && flag?.isSavedCardEnabled!! && mobileNumber != null && data?.customerInfo?.isEditCustomerDetailsAllowed == true) {
                                         constraintLayoutSavedCard.visibility = View.VISIBLE
                                         isSavedCardEnabled = true
                                     }
-                                    if (flag?.isDCCEnabled == true) isDCCEnabled = true*/
-                                }
+                                    if (flag?.isDCCEnabled == true) isDCCEnabled = true
+                                }*/
                             }, onFailure = {}
                         )
                     fetchDataResponseHandler.handleApiResult(response)

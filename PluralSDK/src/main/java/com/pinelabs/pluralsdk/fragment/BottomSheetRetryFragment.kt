@@ -1,15 +1,24 @@
 package com.pinelabs.pluralsdk.fragment
 
+import android.app.Activity
+import android.content.res.ColorStateList
+import android.content.res.Resources
+import android.graphics.Color
+import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.pinelabs.pluralsdk.PluralSDK
 import com.pinelabs.pluralsdk.R
 import com.pinelabs.pluralsdk.activity.LandingActivity
 import com.pinelabs.pluralsdk.adapter.DividerItemDecorator
@@ -24,6 +33,7 @@ import com.pinelabs.pluralsdk.utils.Constants.Companion.TAG_PAYMENT_LISTING
 import com.pinelabs.pluralsdk.utils.Constants.Companion.TAG_UPI
 import com.pinelabs.pluralsdk.utils.Constants.Companion.TOKEN
 import com.pinelabs.pluralsdk.utils.PaymentModes
+import com.pinelabs.pluralsdk.viewmodels.FetchDataViewModel
 
 class BottomSheetRetryFragment(
     amount: String,
@@ -41,9 +51,12 @@ class BottomSheetRetryFragment(
     var amount = amount
     var palette = palette
     var errorMessage = errorMessage
+    var paymentId: String? = null
 
     private lateinit var txt_payment: TextView
     private lateinit var close_icon: ImageView
+
+    private val viewModel by activityViewModels<FetchDataViewModel>()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -55,6 +68,10 @@ class BottomSheetRetryFragment(
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        viewModel?.paymentId?.observe(this) { response ->
+            paymentId = response
+        }
+
         txt_payment = view.findViewById(R.id.txt_payment)
         txt_payment.text = if (errorMessage?.isBlank() == true)
             context?.getString(R.string.payment_didnt) + " " + amount + " " + context?.getString(
@@ -62,7 +79,7 @@ class BottomSheetRetryFragment(
             ) else errorMessage
         close_icon = view.findViewById(R.id.x_icon)
         close_icon.setOnClickListener {
-            LandingActivity().showCancelConfirmationDialog(requireActivity(), null)
+            showCancelConfirmationDialog(requireActivity(), null)
         }
 
         var recyclerPaymentOptions: RecyclerView = view.findViewById(R.id.recycler_payment_options)
@@ -188,6 +205,49 @@ class BottomSheetRetryFragment(
         val transaction = requireActivity().supportFragmentManager.beginTransaction()
         transaction.replace(R.id.details_fragment, paymentListingFragment, TAG_PAYMENT_LISTING)
         transaction.commit()
+    }
+
+    fun showCancelConfirmationDialog(activity: Activity, tag: String?) {
+        val bottomSheetDialog = BottomSheetDialog(activity)
+        val view =
+            LayoutInflater.from(activity).inflate(R.layout.cancel_confirmation_bottom_sheet, null)
+        bottomSheetDialog.setCancelable(false)
+        bottomSheetDialog.setCanceledOnTouchOutside(false)
+        bottomSheetDialog.setContentView(view)
+
+        val btnYes: Button = view.findViewById(R.id.btn_yes)
+        val btnNo: Button = view.findViewById(R.id.btn_no)
+
+        if (palette != null) {
+            btnYes.backgroundTintList = ColorStateList.valueOf(Color.parseColor(palette?.C900))
+            btnNo.setTextColor(Color.parseColor(palette?.C900))
+            val drawable =
+                ContextCompat.getDrawable(activity, R.drawable.outlined_button) as GradientDrawable
+            drawable.setStroke(convertDpToPx(2), Color.parseColor(palette?.C900))
+            btnNo.background = drawable
+        }
+
+        btnYes.setOnClickListener {
+            bottomSheetDialog.dismiss()
+            token?.let { it1 ->
+                viewModel?.cancelTransaction(
+                    it1,
+                    false
+                )
+            }
+            activity.finish()
+            PluralSDK.getInstance().callback?.onCancelTransaction()
+        }
+
+        btnNo.setOnClickListener {
+            bottomSheetDialog.dismiss()
+        }
+
+        bottomSheetDialog.show()
+    }
+
+    private fun convertDpToPx(dp: Int): Int {
+        return (dp * Resources.getSystem().displayMetrics.density).toInt()
     }
 
 }

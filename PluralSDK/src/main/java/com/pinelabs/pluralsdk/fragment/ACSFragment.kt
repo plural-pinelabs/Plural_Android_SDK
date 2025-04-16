@@ -154,7 +154,7 @@ class ACSFragment : Fragment() {
                 super.onPageStarted(view, url, favicon)
                 Utils.println("URL $url")
                 ("URL $url")
-                if (url!!.contains("responsehandler", ignoreCase = true)) {
+                if (url!!.contains("checkout-bff/responseHandler", ignoreCase = true)) {
                     CleverTapUtil.CT_EVENT_PAYMENT_STATUS_SUCCESS(
                         clevertapDefaultInstance, orderId, paymentId
                     )
