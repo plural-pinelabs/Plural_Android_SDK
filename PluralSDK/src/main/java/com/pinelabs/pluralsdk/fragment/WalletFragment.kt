@@ -503,6 +503,7 @@ class WalletFragment : Fragment(), WalletAllAdapter.OnItemClickListener {
         val linear3 = view?.findViewById<LinearLayout>(R.id.linear_3)
         val linear4 = view?.findViewById<LinearLayout>(R.id.linear_4)
         val linear5 = view?.findViewById<LinearLayout>(R.id.linear_5)
+
         linear1?.setOnClickListener {
             this.onItemClick(bankList[0])
         }
@@ -537,17 +538,11 @@ class WalletFragment : Fragment(), WalletAllAdapter.OnItemClickListener {
         img4?.setImageResource(bankList?.get(3)!!.bankImage)
         img5?.setImageResource(bankList?.get(4)!!.bankImage)
 
-        /*img1?.setImageResource(bankList?.get(0)!!.bankImage)
-        img2?.setImageResource(bankList?.get(1)!!.bankImage)
-        img3?.setImageResource(bankList?.get(2)!!.bankImage)
-        img4?.setImageResource(bankList?.get(3)!!.bankImage)
-        img5?.setImageResource(bankList?.get(4)!!.bankImage)*/
-
-        name1?.setText(bankList?.get(0)!!.bankName)
-        name2?.setText(bankList?.get(1)!!.bankName)
-        name3?.setText(bankList?.get(2)!!.bankName)
-        name4?.setText(bankList?.get(3)!!.bankName)
-        name5?.setText(bankList?.get(4)!!.bankName)
+        name1?.setText(bankList?.get(0)!!.bankName?.replace("_", " "))
+        name2?.setText(bankList?.get(1)!!.bankName?.replace("_", " "))
+        name3?.setText(bankList?.get(2)!!.bankName?.replace("_", " "))
+        name4?.setText(bankList?.get(3)!!.bankName?.replace("_", " "))
+        name5?.setText(bankList?.get(4)!!.bankName?.replace("_", " "))
     }
 
     override fun onDestroyView() {

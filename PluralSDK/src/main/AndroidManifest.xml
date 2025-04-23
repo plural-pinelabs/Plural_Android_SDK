@@ -29,22 +29,22 @@
 
         <activity
             android:name=".activity.SplashActivity"
-            android:launchMode="singleInstance"
+            android:launchMode="singleTask"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.MyApp" />
         <activity
             android:name=".activity.LandingActivity"
-            android:launchMode="singleInstance"
+            android:launchMode="singleTask"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.MyApp" />
         <activity
             android:name=".activity.FailureActivity"
-            android:launchMode="singleInstance"
+            android:launchMode="singleTask"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.MyApp" />
         <activity
             android:name=".activity.SuccessActivity"
-            android:launchMode="singleInstance"
+            android:launchMode="singleTask"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.MyApp" />
 

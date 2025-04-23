@@ -28,7 +28,7 @@ class WalletAllAdapter(
     override fun onBindViewHolder(holder: WalletAllDataHolder, position: Int) {
         val currentItem: WalletBank? = bankList?.get(position)
 
-        holder.bankName.text = bankList?.get(position)?.bankName.toString()
+        holder.bankName.text = bankList?.get(position)?.bankName?.replace("_", " ")
 
         //bankList?.get(position)?.bankImage?.let { holder.bankImage.setImageResource(it) }
         holder.bankImage.setImageResource(currentItem?.bankImage!!)
