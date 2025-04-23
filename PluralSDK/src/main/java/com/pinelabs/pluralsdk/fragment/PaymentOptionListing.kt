@@ -27,6 +27,7 @@ import com.pinelabs.pluralsdk.utils.Constants.Companion.PAYBYPOINTS_ID
 import com.pinelabs.pluralsdk.utils.Constants.Companion.TAG_CARD
 import com.pinelabs.pluralsdk.utils.Constants.Companion.TAG_NETBANKING
 import com.pinelabs.pluralsdk.utils.Constants.Companion.TAG_UPI
+import com.pinelabs.pluralsdk.utils.Constants.Companion.TAG_WALLET
 import com.pinelabs.pluralsdk.utils.Constants.Companion.TOKEN
 import com.pinelabs.pluralsdk.utils.PaymentModes
 import com.pinelabs.pluralsdk.viewmodels.FetchDataViewModel
@@ -109,6 +110,10 @@ class PaymentOptionListing : Fragment(), PaymentOptionsAdapter.OnItemClickListen
                 PaymentModes.UPI.toString() -> paymentModeData = RecyclerViewPaymentOptionData(
                     PaymentModes.UPI.paymentModeImage, PaymentModes.UPI.paymentModeName
                 )
+
+                PaymentModes.WALLET.toString() -> paymentModeData = RecyclerViewPaymentOptionData(
+                    PaymentModes.WALLET.paymentModeImage, PaymentModes.WALLET.paymentModeName
+                )
             }
             if (!paymentModeData.payment_option.isEmpty())
                 paymentModeMap.add(paymentModeData)
@@ -131,6 +136,7 @@ class PaymentOptionListing : Fragment(), PaymentOptionsAdapter.OnItemClickListen
             PaymentModes.CREDIT_DEBIT.paymentModeName -> CardFragment()
             PaymentModes.UPI.paymentModeName -> UPICollectFragment()
             PaymentModes.NET_BANKING.paymentModeName -> NetBankingFragmentNew()
+            PaymentModes.WALLET.paymentModeName -> WalletFragment()
             else -> null
         }
 
@@ -138,6 +144,7 @@ class PaymentOptionListing : Fragment(), PaymentOptionsAdapter.OnItemClickListen
             PaymentModes.CREDIT_DEBIT.paymentModeName -> TAG_CARD
             PaymentModes.UPI.paymentModeName -> TAG_UPI
             PaymentModes.NET_BANKING.paymentModeName -> TAG_NETBANKING
+            PaymentModes.WALLET.paymentModeName -> TAG_WALLET
             else -> null
         }
 

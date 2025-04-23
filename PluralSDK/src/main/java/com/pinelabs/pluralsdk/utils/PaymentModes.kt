@@ -19,7 +19,7 @@ enum class PaymentModes(
     CREDIT_DEBIT(R.drawable.card, CREDIT_DEBIT_LABEL, CREDIT_DEBIT_ID),
     NET_BANKING(R.drawable.net_banking, NET_BANKING_LABEL, NET_BANKING_ID),
     UPI(R.drawable.upi, UPI_LABEL, UPI_ID),
-    WALLET(R.drawable.upi, WALLET_LABEL, WALLET_ID),
+    WALLET(R.drawable.wallet, WALLET_LABEL, WALLET_ID),
     ALL_PAYMENT(R.drawable.all_payment_modes, ALL_PAYMENT_METHODS_LABEL, "")
 }
 

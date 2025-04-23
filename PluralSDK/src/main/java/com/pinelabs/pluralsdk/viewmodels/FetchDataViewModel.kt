@@ -5,9 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import com.pinelabs.pluralsdk.data.model.BinResponse
 import com.pinelabs.pluralsdk.data.model.CancelTransactionResponse
-import com.pinelabs.pluralsdk.data.model.CardBinMetaDataRequest
 import com.pinelabs.pluralsdk.data.model.CardBinMetaDataRequestList
 import com.pinelabs.pluralsdk.data.model.CardBinMetaDataResponse
 import com.pinelabs.pluralsdk.data.model.CustomerInfo

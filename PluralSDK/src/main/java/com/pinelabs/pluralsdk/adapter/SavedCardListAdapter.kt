@@ -3,10 +3,7 @@ package com.pinelabs.pluralsdk.adapter
 import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.Color
-import android.graphics.drawable.Drawable
-import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.LayerDrawable
-import android.graphics.drawable.StateListDrawable
 import android.graphics.drawable.VectorDrawable
 import android.view.LayoutInflater
 import android.view.View
@@ -24,7 +21,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.pinelabs.pluralsdk.R
 import com.pinelabs.pluralsdk.data.model.Palette
 import com.pinelabs.pluralsdk.data.model.SavedCardTokens
-import com.pinelabs.pluralsdk.data.utils.AmountUtil
+import com.pinelabs.pluralsdk.utils.AmountUtil
 import com.pinelabs.pluralsdk.data.utils.Utils.buttonBackground
 import com.pinelabs.pluralsdk.utils.Constants.Companion.SPACE
 

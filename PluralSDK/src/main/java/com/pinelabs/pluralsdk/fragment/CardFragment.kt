@@ -1,15 +1,12 @@
 package com.pinelabs.pluralsdk.fragment
 
 import android.animation.Animator
-import android.app.Activity
 import android.content.Context
-import android.content.res.ColorStateList
 import android.content.res.Resources
 import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.LayerDrawable
-import android.graphics.drawable.StateListDrawable
 import android.graphics.drawable.VectorDrawable
 import android.os.Bundle
 import android.text.Editable
@@ -53,9 +50,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.gson.Gson
-import com.pinelabs.pluralsdk.BuildConfig
 import com.pinelabs.pluralsdk.R
-import com.pinelabs.pluralsdk.activity.LandingActivity
 import com.pinelabs.pluralsdk.adapter.FlexAdapter
 import com.pinelabs.pluralsdk.adapter.PBPBanksAdapter
 import com.pinelabs.pluralsdk.data.model.CardBinMetaDataRequest
@@ -79,11 +74,10 @@ import com.pinelabs.pluralsdk.data.model.RewardPaymentOption
 import com.pinelabs.pluralsdk.data.model.RewardPointsCardDetails
 import com.pinelabs.pluralsdk.data.model.RewardRequest
 import com.pinelabs.pluralsdk.data.model.RewardResponse
-import com.pinelabs.pluralsdk.data.model.SDKData
 import com.pinelabs.pluralsdk.data.model.SavedCardResponse
-import com.pinelabs.pluralsdk.data.utils.AmountUtil.convertToRupees
+import com.pinelabs.pluralsdk.utils.AmountUtil.convertToRupees
 import com.pinelabs.pluralsdk.data.utils.ApiResultHandler
-import com.pinelabs.pluralsdk.data.utils.ColumnUtil
+import com.pinelabs.pluralsdk.utils.ColumnUtil
 import com.pinelabs.pluralsdk.data.utils.Utils
 import com.pinelabs.pluralsdk.data.utils.Utils.buttonBackground
 import com.pinelabs.pluralsdk.data.utils.Utils.cleverTapLog
@@ -105,7 +99,6 @@ import com.pinelabs.pluralsdk.utils.BankConstant.Companion.UNION_BANK
 import com.pinelabs.pluralsdk.utils.BankConstant.Companion.YES
 import com.pinelabs.pluralsdk.utils.CleverTapUtil
 import com.pinelabs.pluralsdk.utils.Constants.Companion.AMOUNT
-import com.pinelabs.pluralsdk.utils.Constants.Companion.APP_VERSION
 import com.pinelabs.pluralsdk.utils.Constants.Companion.BANK_ALLAHABAD
 import com.pinelabs.pluralsdk.utils.Constants.Companion.BANK_ANDHRA
 import com.pinelabs.pluralsdk.utils.Constants.Companion.BANK_AU_SMALL
@@ -127,7 +120,6 @@ import com.pinelabs.pluralsdk.utils.Constants.Companion.BANK_YES
 import com.pinelabs.pluralsdk.utils.Constants.Companion.BANK_YES_BANK
 import com.pinelabs.pluralsdk.utils.Constants.Companion.BIN_DATA
 import com.pinelabs.pluralsdk.utils.Constants.Companion.BROWSER_ACCEPT_ALL
-import com.pinelabs.pluralsdk.utils.Constants.Companion.BROWSER_DEVICE_CHANNEL
 import com.pinelabs.pluralsdk.utils.Constants.Companion.BROWSER_USER_AGENT_ANDROID
 import com.pinelabs.pluralsdk.utils.Constants.Companion.CREDIT_DEBIT_ID
 import com.pinelabs.pluralsdk.utils.Constants.Companion.CT_CARDS
@@ -136,7 +128,6 @@ import com.pinelabs.pluralsdk.utils.Constants.Companion.DCC_DATA
 import com.pinelabs.pluralsdk.utils.Constants.Companion.IMAGE_LOGO
 import com.pinelabs.pluralsdk.utils.Constants.Companion.MOBILE
 import com.pinelabs.pluralsdk.utils.Constants.Companion.ORDER_ID
-import com.pinelabs.pluralsdk.utils.Constants.Companion.OS
 import com.pinelabs.pluralsdk.utils.Constants.Companion.OTP_ID
 import com.pinelabs.pluralsdk.utils.Constants.Companion.OTP_RESEND
 import com.pinelabs.pluralsdk.utils.Constants.Companion.PALETTE
@@ -152,17 +143,13 @@ import com.pinelabs.pluralsdk.utils.Constants.Companion.PBP_CHECK_POINTS
 import com.pinelabs.pluralsdk.utils.Constants.Companion.PBP_LOADING
 import com.pinelabs.pluralsdk.utils.Constants.Companion.PBP_POINTS
 import com.pinelabs.pluralsdk.utils.Constants.Companion.PBP_ZERO_POINTS
-import com.pinelabs.pluralsdk.utils.Constants.Companion.PLATFORM_TYPE
-import com.pinelabs.pluralsdk.utils.Constants.Companion.PLATFORM_VERSION
 import com.pinelabs.pluralsdk.utils.Constants.Companion.PROCESS_PAYMENT_REQUEST
 import com.pinelabs.pluralsdk.utils.Constants.Companion.REDIRECT_URL
 import com.pinelabs.pluralsdk.utils.Constants.Companion.RESEND_TIMER
-import com.pinelabs.pluralsdk.utils.Constants.Companion.SDK_TYPE
 import com.pinelabs.pluralsdk.utils.Constants.Companion.START_TIME
 import com.pinelabs.pluralsdk.utils.Constants.Companion.TAG_ACS
 import com.pinelabs.pluralsdk.utils.Constants.Companion.TAG_OTP
 import com.pinelabs.pluralsdk.utils.Constants.Companion.TOKEN
-import com.pinelabs.pluralsdk.utils.Constants.Companion.TRANSACTION_TYPE_SDK
 import com.pinelabs.pluralsdk.utils.DCC_STATUS
 import com.pinelabs.pluralsdk.utils.DeviceUtil
 import com.pinelabs.pluralsdk.viewmodels.FetchDataViewModel
@@ -1735,6 +1722,7 @@ class CardFragment : Fragment() {
                 null,
                 cardData,
                 upi_data = null,
+                null,
                 null,
                 cardDataExtra,
                 null,

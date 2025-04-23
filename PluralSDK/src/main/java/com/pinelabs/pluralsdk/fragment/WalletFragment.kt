@@ -30,14 +30,14 @@ import com.clevertap.android.sdk.CleverTapAPI
 import com.google.android.flexbox.FlexboxLayout
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.gson.Gson
-import com.google.gson.JsonObject
-import com.google.gson.internal.LinkedTreeMap
+import com.google.gson.reflect.TypeToken
 import com.pinelabs.pluralsdk.R
-import com.pinelabs.pluralsdk.activity.LandingActivity
 import com.pinelabs.pluralsdk.adapter.DividerItemDecorator
 import com.pinelabs.pluralsdk.adapter.GridDividerItemDecoration
 import com.pinelabs.pluralsdk.adapter.NetBankAllAdapterNew
 import com.pinelabs.pluralsdk.adapter.NetBanksAdapterNew
+import com.pinelabs.pluralsdk.adapter.WalletAdapter
+import com.pinelabs.pluralsdk.adapter.WalletAllAdapter
 import com.pinelabs.pluralsdk.adapter.loadSvgOrOther
 import com.pinelabs.pluralsdk.data.model.AcquirerWisePaymentData
 import com.pinelabs.pluralsdk.data.model.DeviceInfo
@@ -47,10 +47,12 @@ import com.pinelabs.pluralsdk.data.model.NetBank
 import com.pinelabs.pluralsdk.data.model.NetBankingData
 import com.pinelabs.pluralsdk.data.model.Palette
 import com.pinelabs.pluralsdk.data.model.PaymentMode
-import com.pinelabs.pluralsdk.data.model.PaymentModeData
 import com.pinelabs.pluralsdk.data.model.PaymentOption
 import com.pinelabs.pluralsdk.data.model.ProcessPaymentRequest
 import com.pinelabs.pluralsdk.data.model.ProcessPaymentResponse
+import com.pinelabs.pluralsdk.data.model.Wallet
+import com.pinelabs.pluralsdk.data.model.WalletBank
+import com.pinelabs.pluralsdk.data.model.WalletData
 import com.pinelabs.pluralsdk.data.model.issuerDataList
 import com.pinelabs.pluralsdk.data.utils.ApiResultHandler
 import com.pinelabs.pluralsdk.data.utils.Utils
@@ -67,27 +69,30 @@ import com.pinelabs.pluralsdk.utils.Constants.Companion.REDIRECT_URL
 import com.pinelabs.pluralsdk.utils.Constants.Companion.START_TIME
 import com.pinelabs.pluralsdk.utils.Constants.Companion.TAG_ACS
 import com.pinelabs.pluralsdk.utils.Constants.Companion.TOKEN
+import com.pinelabs.pluralsdk.utils.Constants.Companion.WALLET_PAYMENT_METHOD
 import com.pinelabs.pluralsdk.utils.DeviceType
-import com.pinelabs.pluralsdk.utils.NBBANKS
 import com.pinelabs.pluralsdk.utils.PaymentModes
 import com.pinelabs.pluralsdk.utils.TransactionMode
+import com.pinelabs.pluralsdk.utils.WALLET
 import com.pinelabs.pluralsdk.viewmodels.FetchDataViewModel
+import java.lang.reflect.Type
 import java.util.EnumSet
 
-class NetBankingFragmentNew : Fragment(), NetBankAllAdapterNew.OnItemClickListener {
+
+class WalletFragment : Fragment(), WalletAllAdapter.OnItemClickListener {
 
     private lateinit var imgBack: ImageButton
     private lateinit var flexNetBanks: FlexboxLayout
     private lateinit var recyclerNetBanks: RecyclerView
     private lateinit var linearMoreBanks: LinearLayout
-    private lateinit var moreBankAdapter: NetBankAllAdapterNew
+    private lateinit var moreBankAdapter: WalletAllAdapter
     private lateinit var bottomSheetDialog: BottomSheetDialog
     private lateinit var moreBanksBottomSheetDialog: BottomSheetDialog
 
     private lateinit var token: String
     private var amount: Int? = 0
     private lateinit var currency: String
-    private var bankList: List<NetBank?> = mutableListOf()
+    private var bankList: List<WalletBank?> = mutableListOf()
 
     private var palette: Palette? = null
     private var orderId: String? = null
@@ -119,7 +124,7 @@ class NetBankingFragmentNew : Fragment(), NetBankAllAdapterNew.OnItemClickListen
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.netbanking_landing, container, false)
+        return inflater.inflate(R.layout.wallet_landing, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -146,14 +151,14 @@ class NetBankingFragmentNew : Fragment(), NetBankAllAdapterNew.OnItemClickListen
             requireActivity().onBackPressed()
         }
 
-        flexNetBanks = view.findViewById(R.id.flex_net_banks_grid)
+        flexNetBanks = view.findViewById(R.id.flex_wallet_banks_grid)
         //Setting Banks in Grid
-        recyclerNetBanks = view.findViewById(R.id.recycler_net_banks_grid)
+        recyclerNetBanks = view.findViewById(R.id.recycler_wallet_banks_grid)
         setNetBankingGrid()
 
 
         //More bank button
-        linearMoreBanks = view.findViewById(R.id.linear_more_banks)
+        linearMoreBanks = view.findViewById(R.id.linear_more_wallets)
         linearMoreBanks.setOnClickListener {
             showMoreBanks()
         }
@@ -244,7 +249,7 @@ class NetBankingFragmentNew : Fragment(), NetBankAllAdapterNew.OnItemClickListen
 
     }
 
-    override fun onItemClick(item: NetBank?) {
+    override fun onItemClick(item: WalletBank?) {
         buttonClicked = true
         val bankCode = item?.bankCode
         val processPaymentRequest =
@@ -264,8 +269,8 @@ class NetBankingFragmentNew : Fragment(), NetBankAllAdapterNew.OnItemClickListen
             null, null, bankName
         )
 
-        val paymentMode = arrayListOf(NET_BANKING_PAYMENT_METHOD)
-        val netBankingData = NetBankingData(payCode)
+        val paymentMode = arrayListOf(WALLET_PAYMENT_METHOD)
+        val walletData = WalletData(payCode)
         //val convenienceFeesData = ConvenienceFeesData(131040, 23785, 1100, 655925, 500000, 99999999, 155925, "INR")
         val deviceInfo = DeviceInfo(
             DeviceType.MOBILE.name,
@@ -285,7 +290,18 @@ class NetBankingFragmentNew : Fragment(), NetBankAllAdapterNew.OnItemClickListen
             null
         )
         val processPaymentRequest =
-            ProcessPaymentRequest(null, null, null, null, null,netBankingData, extras, null, null, Utils.createSDKData(requireActivity()))
+            ProcessPaymentRequest(
+                null,
+                null,
+                null,
+                null,
+                walletData,
+                null,
+                extras,
+                null,
+                null,
+                Utils.createSDKData(requireActivity())
+            )
         return processPaymentRequest;
     }
 
@@ -304,18 +320,14 @@ class NetBankingFragmentNew : Fragment(), NetBankAllAdapterNew.OnItemClickListen
                         palette = data?.merchantBrandingData?.palette
                         orderId = data?.transactionInfo?.orderId
 
-                        data?.paymentModes?.filter { paymentMode -> paymentMode.paymentModeId == PaymentModes.NET_BANKING.paymentModeID }
+                        data?.paymentModes?.filter { paymentMode -> paymentMode.paymentModeId == PaymentModes.WALLET.paymentModeID }
                             ?.forEach { paymentMode ->
                                 when (val pm = paymentMode?.paymentModeData) {
-                                    is LinkedTreeMap<*, *> -> {
-                                        val paymentModeData = convertMapToJsonObject(pm)
+                                    is List<*> -> {
+                                        val walletData = convertMapToJsonObject(pm)
                                         bankList = mapBankList(
-                                            paymentModeData?.IssersUIDataList,
-                                            paymentModeData?.acquirerWisePaymentData
+                                            walletData
                                         )
-                                        bankList?.forEach { bankName ->
-                                            //println("Bank name" + bankName.bankName)
-                                        }
                                         setNetBankingGrid()
                                     }
                                 }
@@ -333,72 +345,31 @@ class NetBankingFragmentNew : Fragment(), NetBankAllAdapterNew.OnItemClickListen
 
     }
 
-    private fun getNBBankList(): List<NBBANKS> {
-        return ArrayList<NBBANKS>(EnumSet.allOf(NBBANKS::class.java)).toList()
+    private fun getWalletList(): List<WALLET> {
+        return ArrayList<WALLET>(EnumSet.allOf(WALLET::class.java)).toList()
     }
 
     private fun mapBankList(
-        issuerDataList: List<issuerDataList>?,
-        acquirerWisePaymentData: List<AcquirerWisePaymentData>?
-    ): List<NetBank?> {
-        val netBankList = mutableListOf<NetBank?>()
-        val acquirewisePaymentOpton = mutableListOf<PaymentOption>()
-        val acquirerBankList = mutableListOf<NetBank?>()
-        var combinedList = listOf<NetBank>()
+        walletList: List<Wallet>?,
+    ): List<WalletBank?> {
+        val netBankList = mutableListOf<WalletBank?>()
+        walletList?.forEachIndexed() { index, wallet ->
 
-        acquirerWisePaymentData?.forEach { acquirerWisePaymentData ->
-            acquirewisePaymentOpton.addAll(acquirerWisePaymentData.PaymentOption)
-        }
-
-        issuerDataList?.forEachIndexed() { index, issuerBank ->
-
-            var nbbanks = getNBBankList().singleOrNull { bankList ->
-                resources.getString(bankList.bankCode) == issuerBank.merchantPaymentCode
+            var nbbanks = getWalletList().singleOrNull { allWalletList ->
+                allWalletList.walletName == wallet.bankName
             }
 
             var bank = if (nbbanks == null) {
-                NetBank(issuerBank.merchantPaymentCode, issuerBank.bankName, "")
+                WalletBank(wallet.merchantPaymentCode, wallet.bankName, R.drawable.generic_wallet)
             } else {
-                NetBank(
-                    resources.getString(nbbanks.bankCode),
-                    issuerBank.bankName,
-                    nbbanks.bankImage
+                WalletBank(
+                    wallet.merchantPaymentCode,
+                    nbbanks.walletName,
+                    nbbanks.walletImage
                 )
             }
             netBankList.add(bank)
         }
-
-        acquirewisePaymentOpton?.forEachIndexed { index, issuerBank ->
-
-            var nbAcquirerbanks = getNBBankList().singleOrNull { bankList ->
-                resources.getString(bankList.bankCode) == issuerBank.merchantPaymentCode
-            }
-
-            var bank = if (nbAcquirerbanks == null) {
-                NetBank(issuerBank.merchantPaymentCode, issuerBank.Name, "")
-            } else {
-                NetBank(
-                    resources.getString(nbAcquirerbanks.bankCode),
-                    issuerBank.Name,
-                    nbAcquirerbanks.bankImage
-                )
-            }
-            if(!netBankList.contains(bank))
-            acquirerBankList.add(bank)
-        }
-
-        /*netBankList.forEach { bankList ->
-            println("Before Combined bank ->" + bankList.bankName+":"+bankList.bankCode)
-        }
-        acquirerBankList.forEach { bankList ->
-            println("Before Combined bank ->" + bankList.bankName+":"+bankList.bankCode)
-        }*/
-
-        /*combinedList = netBankList + acquirerBankList
-        combinedList.forEach { bankList ->
-            println("After Combined bank ->" + bankList.bankName)
-        }*/
-        netBankList.addAll(acquirerBankList)
         return netBankList
     }
 
@@ -408,19 +379,6 @@ class NetBankingFragmentNew : Fragment(), NetBankAllAdapterNew.OnItemClickListen
 
             recyclerNetBanks.visibility = View.GONE
             flexNetBanks.visibility = View.VISIBLE
-
-            /*val flexLayoutManager = FlexboxLayoutManager(
-                requireContext()
-            ).apply {
-                flexWrap = FlexWrap.WRAP
-                flexDirection = FlexDirection.ROW
-                justifyContent = JustifyContent.SPACE_EVENLY
-            }
-
-            val decor = FlexboxItemDecoration(requireContext())
-            decor.setOrientation(FlexboxItemDecoration.BOTH)
-            decor.setDrawable(resources.getDrawable(R.drawable.divider))
-            recyclerNetBanks.addItemDecoration(decor)*/
 
             setBankGrid(view, bankList)
 
@@ -434,9 +392,9 @@ class NetBankingFragmentNew : Fragment(), NetBankAllAdapterNew.OnItemClickListen
             recyclerNetBanks.addItemDecoration(dividerItemDecoration)
 
             val gridBankAdapter =
-                NetBanksAdapterNew(
+                WalletAdapter(
                     bankList?.subList(0, if (bankList!!.size > 6) 6 else bankList!!.size)!!,
-                    this@NetBankingFragmentNew
+                    this@WalletFragment
                 )
 
             val gridLayoutManager =
@@ -510,15 +468,15 @@ class NetBankingFragmentNew : Fragment(), NetBankAllAdapterNew.OnItemClickListen
         val layoutManager =
             LinearLayoutManager(requireActivity(), LinearLayoutManager.VERTICAL, false)
         recyclerView.layoutManager = layoutManager
-        moreBankAdapter = NetBankAllAdapterNew(
+        moreBankAdapter = WalletAllAdapter(
             bankList!!,
-            this@NetBankingFragmentNew
+            this@WalletFragment
         )
         recyclerView.adapter = moreBankAdapter
     }
 
     private fun filter(text: String) {
-        val filteredlist = mutableListOf<NetBank>()
+        val filteredlist = mutableListOf<WalletBank>()
 
         bankList?.let { bankList ->
             for (item in bankList) {
@@ -539,8 +497,7 @@ class NetBankingFragmentNew : Fragment(), NetBankAllAdapterNew.OnItemClickListen
         return if (count == 1) 1 else if (count == 2 || count == 4) 2 else 3
     }
 
-    fun setBankGrid(view: View?, bankList: List<NetBank?>) {
-
+    fun setBankGrid(view: View?, bankList: List<WalletBank?>) {
         val linear1 = view?.findViewById<LinearLayout>(R.id.linear_1)
         val linear2 = view?.findViewById<LinearLayout>(R.id.linear_2)
         val linear3 = view?.findViewById<LinearLayout>(R.id.linear_3)
@@ -574,11 +531,11 @@ class NetBankingFragmentNew : Fragment(), NetBankAllAdapterNew.OnItemClickListen
         val name4 = view?.findViewById<TextView>(R.id.txt_bank_name_4)
         val name5 = view?.findViewById<TextView>(R.id.txt_bank_name_5)
 
-        img1?.loadSvgOrOther(bankList?.get(0)!!.bankImage)
-        img2?.loadSvgOrOther(bankList?.get(1)!!.bankImage)
-        img3?.loadSvgOrOther(bankList?.get(2)!!.bankImage)
-        img4?.loadSvgOrOther(bankList?.get(3)!!.bankImage)
-        img5?.loadSvgOrOther(bankList?.get(4)!!.bankImage)
+        img1?.setImageResource(bankList?.get(0)!!.bankImage)
+        img2?.setImageResource(bankList?.get(1)!!.bankImage)
+        img3?.setImageResource(bankList?.get(2)!!.bankImage)
+        img4?.setImageResource(bankList?.get(3)!!.bankImage)
+        img5?.setImageResource(bankList?.get(4)!!.bankImage)
 
         /*img1?.setImageResource(bankList?.get(0)!!.bankImage)
         img2?.setImageResource(bankList?.get(1)!!.bankImage)
@@ -611,9 +568,10 @@ class NetBankingFragmentNew : Fragment(), NetBankAllAdapterNew.OnItemClickListen
         bottomSheetDialog.show()
     }
 
-    fun convertMapToJsonObject(yourMap: Map<*, *>): PaymentModeData {
-        val gson = Gson().toJsonTree(yourMap).asJsonObject
-        return Gson().fromJson(gson.toString(), PaymentModeData::class.java)
+    fun convertMapToJsonObject(yourMap: List<*>): List<Wallet> {
+        val gson = Gson().toJsonTree(yourMap).asJsonArray
+        val listType: Type = object : TypeToken<ArrayList<Wallet?>?>() {}.type
+        return Gson().fromJson(gson.toString(), listType)
 
     }
 }

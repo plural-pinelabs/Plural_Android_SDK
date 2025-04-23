@@ -1,4 +1,4 @@
-package com.pinelabs.pluralsdk.data.utils
+package com.pinelabs.pluralsdk.utils
 
 import android.content.Context
 

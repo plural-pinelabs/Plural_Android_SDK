@@ -32,7 +32,7 @@ data class DccData(
 @Parcelize
 data class Currency(
     val symbol: String?, val flag: String?, val transformation_ratio: Int?
-): Parcelable
+) : Parcelable
 
 @Parcelize
 data class Address(
@@ -123,7 +123,7 @@ data class Palette(
     @SerializedName("400") val C400: String, @SerializedName("500") val C500: String,
     @SerializedName("600") val C600: String, @SerializedName("700") val C700: String,
     @SerializedName("800") val C800: String, @SerializedName("900") var C900: String
-): Parcelable
+) : Parcelable
 
 data class RecyclerViewPaymentOptionData(
     val payment_image: Int = -1,
@@ -171,6 +171,7 @@ data class ProcessPaymentRequest(
     val customer_data: CustomerData?,
     val card_data: CardData?,
     val upi_data: UpiData?,
+    val wallet_data: WalletData?,
     val netbanking_data: NetBankingData?,
     val extras: Extra?,
     val txn_data: UpiTransactionData?,
@@ -194,6 +195,11 @@ data class ConvenienceFeesData(
 data class NetBankingData(
     val pay_code: String?
 ) : Parcelable
+
+@Parcelize
+data class WalletData(
+    val wallet_code: String?
+): Parcelable
 
 data class ProcessPaymentResponse(
     val redirect_url: String?,
@@ -441,7 +447,7 @@ data class SDKData(
     val browser_version: String?,*/
     val timestamp: String?,
     val version: String
-): Parcelable
+) : Parcelable
 
 class PaymentModeDeserialiser : JsonDeserializer<Any> {
     override fun deserialize(
@@ -489,6 +495,8 @@ sealed class PaymentModeDataType {
 }
 
 data class NetBank(var bankCode: String?, var bankName: String?, var bankImage: String)
+
+data class WalletBank(var bankCode: String?, var bankName: String?, var bankImage: Int)
 
 @Parcelize
 data class DCCDetails(

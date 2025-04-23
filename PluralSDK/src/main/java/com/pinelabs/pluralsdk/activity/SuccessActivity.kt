@@ -15,7 +15,7 @@ import com.pinelabs.pluralsdk.R
 import com.pinelabs.pluralsdk.data.model.DCCDetails
 import com.pinelabs.pluralsdk.data.model.FetchResponse
 import com.pinelabs.pluralsdk.data.model.Palette
-import com.pinelabs.pluralsdk.data.utils.AmountUtil
+import com.pinelabs.pluralsdk.utils.AmountUtil
 import com.pinelabs.pluralsdk.data.utils.ApiResultHandler
 import com.pinelabs.pluralsdk.utils.Constants.Companion.DCC_DATA
 import com.pinelabs.pluralsdk.utils.Constants.Companion.ORDER_ID

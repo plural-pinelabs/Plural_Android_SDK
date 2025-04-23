@@ -23,7 +23,7 @@ import com.pinelabs.pluralsdk.data.model.DCCDetails
 import com.pinelabs.pluralsdk.data.model.DccData
 import com.pinelabs.pluralsdk.data.model.Palette
 import com.pinelabs.pluralsdk.data.model.ProcessPaymentRequest
-import com.pinelabs.pluralsdk.data.utils.AmountUtil
+import com.pinelabs.pluralsdk.utils.AmountUtil
 import com.pinelabs.pluralsdk.data.utils.Utils
 import com.pinelabs.pluralsdk.utils.Constants.Companion.AMOUNT
 import com.pinelabs.pluralsdk.utils.Constants.Companion.BIN_DATA

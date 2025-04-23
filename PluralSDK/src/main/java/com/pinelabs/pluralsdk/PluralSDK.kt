@@ -8,9 +8,7 @@ class PluralSDK {
 
         lateinit var pluralSDKObject: PluralSDKObject
 
-        //@Synchronized
         fun initializePluralSDK(context: Context?, callback: PaymentResultCallBack) {
-            //val callback: PaymentResultCallBack =   activity as PaymentResultCallBack
             pluralSDKObject = PluralSDKObject(context, callback)
         }
 

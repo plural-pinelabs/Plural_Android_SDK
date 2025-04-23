@@ -51,7 +51,7 @@ class Constants {
         const val CREDIT_DEBIT_LABEL = "Cards"
         const val NET_BANKING_LABEL = "Netbanking"
         const val UPI_LABEL = "UPI"
-        const val WALLET_LABEL = "WALLET"
+        const val WALLET_LABEL = "Wallet"
         const val ALL_PAYMENT_METHODS_LABEL = "All Payment Methods"
 
         const val CREDIT_DEBIT_ID = "CREDIT_DEBIT"
@@ -61,6 +61,7 @@ class Constants {
         const val WALLET_ID = "WALLET"
 
         const val NET_BANKING_PAYMENT_METHOD = "NETBANKING"
+        const val WALLET_PAYMENT_METHOD = "WALLET"
 
         const val START_BOLD = "<b>"
         const val END_BOLD = "</b>"
@@ -120,6 +121,7 @@ class Constants {
         const val TAG_CARD = "TAG_CARD"
         const val TAG_UPI = "TAG_UPI"
         const val TAG_NETBANKING = "TAG_NETBANKING"
+        const val TAG_WALLET = "TAG_WALLET"
         const val TAG_OTP = "TAG_OTP"
         const val TAG_ACS = "TAG_ACS"
         const val TAG_BOTTOM_SHEET_OTP = "TAG_BOTTOM_SHEET_OTP"

@@ -1,4 +1,4 @@
-package com.pinelabs.pluralsdk.activity
+package com.pinelabs.pluralsdk.utils
 
 import android.content.Context
 import android.content.ContextWrapper

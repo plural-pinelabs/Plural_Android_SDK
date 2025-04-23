@@ -36,8 +36,7 @@ import com.airbnb.lottie.LottieAnimationView
 import com.google.android.gms.auth.api.phone.SmsRetriever
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.pinelabs.pluralsdk.R
-import com.pinelabs.pluralsdk.activity.AppSignatureHelper
-import com.pinelabs.pluralsdk.activity.LandingActivity
+import com.pinelabs.pluralsdk.utils.AppSignatureHelper
 import com.pinelabs.pluralsdk.data.model.FetchResponse
 import com.pinelabs.pluralsdk.data.model.OTPRequest
 import com.pinelabs.pluralsdk.data.model.OTPResponse
