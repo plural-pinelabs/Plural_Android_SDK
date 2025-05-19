@@ -7,9 +7,7 @@ import com.google.gson.JsonElement
 import com.google.gson.JsonParseException
 import com.google.gson.annotations.SerializedName
 import com.google.gson.reflect.TypeToken
-import com.pinelabs.pluralsdk.utils.NBBANKS
 import kotlinx.parcelize.Parcelize
-import java.io.Serializable
 import java.lang.reflect.Type
 
 data class FetchResponse(
@@ -176,7 +174,6 @@ data class ProcessPaymentRequest(
     val extras: Extra?,
     val txn_data: UpiTransactionData?,
     val convenience_fee_data: ConvenienceFeesData?,
-    val sdk_data: SDKData
 ) : Parcelable
 
 @Parcelize
@@ -199,7 +196,7 @@ data class NetBankingData(
 @Parcelize
 data class WalletData(
     val wallet_code: String?
-): Parcelable
+) : Parcelable
 
 data class ProcessPaymentResponse(
     val redirect_url: String?,
@@ -278,7 +275,8 @@ data class Extra(
     val txn_mode: String?,
     val device_info: DeviceInfo?,
     var risk_validation_details: RiskValidationDetails?,
-    var dcc_status: String? = null
+    var dcc_status: String? = null,
+    val sdk_data: SDKData? = null
 ) : Parcelable
 
 data class PBPBank(

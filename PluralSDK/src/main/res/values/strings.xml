@@ -32,7 +32,7 @@
     <string name="unable_to_check_point">Unable to check points at the moment. </string>
     <string name="please_try_after_some_time">Please try again later or proceed to payment.</string>
     <string name="card_not_eligible">The entered card is not eligible for points redemption. Try another card or proceed to pay.</string>
-    <string name="no_points">No points available on the entered card and phone number.<font color='#500080'>Try another number</font></string>
+    <string name="no_points">No points available on the entered card and phone number.<font color='#003323'>Try another number</font></string>
     <string name="try_another">Try another number</string>
     <string name="pay_by_upi">Pay by any UPI app</string>
     <string name="required">(Required)</string>

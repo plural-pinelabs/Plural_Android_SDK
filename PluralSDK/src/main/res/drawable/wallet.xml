@@ -7,18 +7,18 @@
       android:pathData="M3,7.002H20V4.264C20,3.619 19.399,3.143 18.771,3.291L3,7.002Z"
       android:strokeLineJoin="round"
       android:strokeWidth="1.5"
-      android:strokeColor="#500080"
+      android:strokeColor="#003323"
       android:strokeLineCap="round"/>
   <path
       android:pathData="M21.001,21.002H3.001C2.451,21.002 2.001,20.552 2.001,20.002V8.002C2.001,7.452 2.451,7.002 3.001,7.002H21.001C21.551,7.002 22.001,7.452 22.001,8.002V20.002C22.001,20.552 21.551,21.002 21.001,21.002Z"
       android:strokeLineJoin="round"
       android:strokeWidth="1.5"
-      android:strokeColor="#500080"
+      android:strokeColor="#003323"
       android:strokeLineCap="round"/>
   <path
       android:pathData="M21.999,16H17.999C16.899,16 15.999,15.1 15.999,14C15.999,12.9 16.899,12 17.999,12H21.999V16Z"
       android:strokeLineJoin="round"
       android:strokeWidth="1.5"
-      android:strokeColor="#500080"
+      android:strokeColor="#003323"
       android:strokeLineCap="round"/>
 </vector>

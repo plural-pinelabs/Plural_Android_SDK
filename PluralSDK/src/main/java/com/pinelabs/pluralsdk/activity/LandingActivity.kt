@@ -106,7 +106,6 @@ class LandingActivity : AppCompatActivity(), Thread.UncaughtExceptionHandler,
     lateinit var layoutShimmer: View
 
     private lateinit var token: String
-
     private lateinit var imgMerchantimage: ImageView
     private lateinit var txtMerchantname: TextView
     private lateinit var txtTransactionamount: TextView

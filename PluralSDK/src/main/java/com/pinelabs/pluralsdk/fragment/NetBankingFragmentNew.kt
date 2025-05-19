@@ -282,10 +282,12 @@ class NetBankingFragmentNew : Fragment(), NetBankAllAdapterNew.OnItemClickListen
             null,
             TransactionMode.REDIRECT.name,
             deviceInfo,
-            null
+            null,
+            null,
+            Utils.createSDKData(requireActivity())
         )
         val processPaymentRequest =
-            ProcessPaymentRequest(null, null, null, null, null,netBankingData, extras, null, null, Utils.createSDKData(requireActivity()))
+            ProcessPaymentRequest(null, null, null, null, null,netBankingData, extras, null, null)
         return processPaymentRequest;
     }
 

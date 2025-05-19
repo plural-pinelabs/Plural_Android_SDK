@@ -287,7 +287,9 @@ class WalletFragment : Fragment(), WalletAllAdapter.OnItemClickListener {
             null,
             TransactionMode.REDIRECT.name,
             deviceInfo,
-            null
+            null,
+            null,
+            Utils.createSDKData(requireActivity())
         )
         val processPaymentRequest =
             ProcessPaymentRequest(
@@ -299,8 +301,7 @@ class WalletFragment : Fragment(), WalletAllAdapter.OnItemClickListener {
                 null,
                 extras,
                 null,
-                null,
-                Utils.createSDKData(requireActivity())
+                null
             )
         return processPaymentRequest;
     }

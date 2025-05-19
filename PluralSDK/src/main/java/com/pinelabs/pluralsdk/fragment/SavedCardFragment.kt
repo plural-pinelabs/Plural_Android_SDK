@@ -213,7 +213,9 @@ class SavedCardFragment(isLanding: Boolean, mobile: String?, email: String?, tok
                 null,
                 null,
                 null,
-                null
+                null,
+                null,
+                Utils.createSDKData(requireActivity())
             )
         val processPaymentRequest =
             ProcessPaymentRequest(
@@ -226,7 +228,6 @@ class SavedCardFragment(isLanding: Boolean, mobile: String?, email: String?, tok
                 cardDataExtra,
                 null,
                 null,
-                Utils.createSDKData(requireActivity())
             )
         Utils.println("Process payment request ${Gson().toJson(processPaymentRequest)}")
         mainViewModel.processPayment(

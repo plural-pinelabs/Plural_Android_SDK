@@ -39,9 +39,21 @@ android {
             "SHA256_PROD",
             "\"c2hhMjU2L2dmVUJRQzB1WWNmQ2k3d21CdWllcnZjNWlNWGZnSXE3U2JQcVNyeU1LZDA9\""
         )
+// Important:  Add this packagingOptions block.  It prevents
+        // potential duplicate file errors if the consuming app
+        // also uses these libraries.
+//        packagingOptions {
+//            pickFirst("META-INF/LICENSE.md")
+//            pickFirst("META-INF/LICENSE-notice.md")
+//            pickFirst("META-INF/NOTICE.md")
+//            pickFirst("META-INF/NOTICE")
+//            pickFirst("META-INF/LICENSE")
+//        }
+//    }
 
-    }
-
+//    configurations {
+//        create("embedded")
+//    }
     fun Packaging.() {
         resources.excludes.add("proguard-rules.pro")
         resources.excludes.add("proguard.txt")
@@ -97,11 +109,30 @@ dependencies {
     implementation(libs.coil.svg)
 
     implementation(libs.play.service.phone)
+    implementation(libs.clevertap)
 
     //implementation(files("libs/flexbox-3.0.0.aar"))
     /*implementation(files("libs/retrofit-2.9.0.jar"))
     implementation(files("libs/converter-gson-2.9.0.jar"))
     implementation(files("libs/logging-interceptor-4.10.0.jar"))*/
+}
+//val copyDependencies = tasks.register("copyDependencies", Copy::class) {
+//    from(configurations.getByName("embedded"))
+//    into(file("$buildDir/libs/embedded")) //  Output directory
+//}
+//
+//android.libraryVariants.all {
+//    val variant = this
+//    val packageLibraryProvider = variant.packageLibraryProvider // Changed
+//    val packageLibrary = packageLibraryProvider.get() // Changed
+//    packageLibrary.dependsOn(copyDependencies) // Ensure copyDependencies runs first
+//
+//    //  Add the files to the AAR.  This is the corrected way to add to the AAR.
+//    packageLibrary.from {
+//        from("$buildDir/libs/embedded") {
+//            into("libs") // Put them in a 'libs' folder inside the AAR.  Standard location.
+//        }
+//    }
 }
 
 afterEvaluate {
@@ -111,8 +142,12 @@ afterEvaluate {
                 from (components["release"])
                 groupId = "com.pinelabs"
                 artifactId = "plural-sdk"
-                version = "1.0"
+                version = "1.1"
             }
         }
     }
 }
+
+
+
+

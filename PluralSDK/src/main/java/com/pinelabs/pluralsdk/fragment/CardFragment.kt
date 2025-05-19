@@ -1704,7 +1704,8 @@ class CardFragment : Fragment() {
                 null,
                 deviceInfo,
                 null,
-                dccStatus
+                dccStatus,
+                Utils.createSDKData(requireActivity())
             )
         val cardData =
             CardData(
@@ -1726,8 +1727,7 @@ class CardFragment : Fragment() {
                 null,
                 cardDataExtra,
                 null,
-                null,
-                Utils.createSDKData(requireActivity())
+                null
             )
         return processPaymentRequest
     }
