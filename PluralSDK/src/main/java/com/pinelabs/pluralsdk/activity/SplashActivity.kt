@@ -12,6 +12,7 @@ import com.pinelabs.pluralsdk.utils.Constants.Companion.SPLASH_TIMER
 import com.pinelabs.pluralsdk.utils.Constants.Companion.TOKEN
 import java.util.Timer
 import java.util.TimerTask
+import com.clevertap.android.sdk.ActivityLifecycleCallback
 
 class SplashActivity : AppCompatActivity() {
 
