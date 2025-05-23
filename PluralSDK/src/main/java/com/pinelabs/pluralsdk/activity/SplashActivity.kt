@@ -22,6 +22,7 @@ class SplashActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.splash)
+        ActivityLifecycleCallback.register(this.application)
 
         val clevertapDefaultInstance = CleverTapAPI.getDefaultInstance(this@SplashActivity)
         CleverTapUtil.CT_EVENT_SDK_INITIALISED(clevertapDefaultInstance, this@SplashActivity)
