@@ -52,8 +52,6 @@ import com.pinelabs.pluralsdk.data.model.Palette
 import com.pinelabs.pluralsdk.data.model.PaymentMode
 import com.pinelabs.pluralsdk.data.model.SavedCardResponse
 import com.pinelabs.pluralsdk.data.model.TransactionStatusResponse
-import com.pinelabs.pluralsdk.utils.AmountUtil.convertToRupees
-import com.pinelabs.pluralsdk.utils.AmountUtil.roundToDecimal
 import com.pinelabs.pluralsdk.data.utils.ApiResultHandler
 import com.pinelabs.pluralsdk.data.utils.Utils
 import com.pinelabs.pluralsdk.fragment.ACSFragment
@@ -68,6 +66,8 @@ import com.pinelabs.pluralsdk.fragment.PaymentOptionListing
 import com.pinelabs.pluralsdk.fragment.SavedCardFragment
 import com.pinelabs.pluralsdk.fragment.UPICollectFragment
 import com.pinelabs.pluralsdk.fragment.WalletFragment
+import com.pinelabs.pluralsdk.utils.AmountUtil.convertToRupees
+import com.pinelabs.pluralsdk.utils.AmountUtil.roundToDecimal
 import com.pinelabs.pluralsdk.utils.CleverTapUtil
 import com.pinelabs.pluralsdk.utils.CleverTapUtil.Companion.CT_EVENT_PAYMENT_CANCELLED
 import com.pinelabs.pluralsdk.utils.Constants.Companion.CUSTOMER_DETAILS

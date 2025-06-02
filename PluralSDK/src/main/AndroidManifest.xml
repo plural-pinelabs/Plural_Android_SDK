@@ -6,6 +6,7 @@
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
+        android:name="com.clevertap.android.sdk.Application"
         android:allowBackup="false"
         android:debuggable="false"
         android:usesCleartextTraffic="true"
@@ -30,25 +31,21 @@
             android:name=".activity.SplashActivity"
             android:launchMode="singleTask"
             android:screenOrientation="portrait"
-            android:excludeFromRecents="true"
             android:theme="@style/Theme.MyApp" />
         <activity
             android:name=".activity.LandingActivity"
             android:launchMode="singleTask"
             android:screenOrientation="portrait"
-            android:excludeFromRecents="true"
             android:theme="@style/Theme.MyApp" />
         <activity
             android:name=".activity.FailureActivity"
             android:launchMode="singleTask"
             android:screenOrientation="portrait"
-            android:excludeFromRecents="true"
             android:theme="@style/Theme.MyApp" />
         <activity
             android:name=".activity.SuccessActivity"
             android:launchMode="singleTask"
             android:screenOrientation="portrait"
-            android:excludeFromRecents="true"
             android:theme="@style/Theme.MyApp" />
 
         <receiver
