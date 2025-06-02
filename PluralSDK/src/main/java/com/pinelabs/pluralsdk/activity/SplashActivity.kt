@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.airbnb.lottie.LottieAnimationView
+import com.clevertap.android.sdk.ActivityLifecycleCallback
 import com.clevertap.android.sdk.CleverTapAPI
 import com.pinelabs.pluralsdk.R
 import com.pinelabs.pluralsdk.utils.CleverTapUtil
@@ -23,7 +24,6 @@ class SplashActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.splash)
         ActivityLifecycleCallback.register(this.application)
-
         val clevertapDefaultInstance = CleverTapAPI.getDefaultInstance(this@SplashActivity)
         CleverTapUtil.CT_EVENT_SDK_INITIALISED(clevertapDefaultInstance, this@SplashActivity)
 
