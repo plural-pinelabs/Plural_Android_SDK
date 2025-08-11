@@ -256,6 +256,7 @@ class UPICollectFragment : Fragment(), UpiIntentAdapter.OnItemClickListener {
                             /*bottomSheetDialog.dismiss()
                             listener?.onRetry(false)*/
                             val intent = Intent(requireActivity(), FailureActivity::class.java)
+                            intent.putExtra(ORDER_ID, orderId)
                             intent.putExtra(ERROR_CODE, errorMessage?.error_code)
                             intent.putExtra(ERROR_MESSAGE, errorMessage?.error_message)
                             startActivity(intent)
