@@ -7,6 +7,7 @@ class PluralSDK {
     companion object {
 
         lateinit var pluralSDKObject: PluralSDKObject
+        private var orderID:String? = null
 
         fun initializePluralSDK(context: Context?, callback: PaymentResultCallBack) {
             pluralSDKObject = PluralSDKObject(context, callback)
@@ -18,6 +19,14 @@ class PluralSDK {
 
         fun destroyInstance() {
             pluralSDKObject = PluralSDKObject(null, null)
+        }
+
+        fun setOrderID(orderId: String?) {
+           orderID = orderId
+        }
+        
+        fun getOrderID(): String? {
+         return orderID
         }
 
         data class PluralSDKObject(val context: Context?, val callback: PaymentResultCallBack?)
