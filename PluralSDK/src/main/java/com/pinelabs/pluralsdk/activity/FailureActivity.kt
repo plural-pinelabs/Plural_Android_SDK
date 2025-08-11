@@ -76,7 +76,7 @@ class FailureActivity : AppCompatActivity() {
     }
 
     private fun getIntentValues() {
-        orderId = intent.getStringExtra(ORDER_ID)
+        orderId = PluralSDK.getOrderID()?: intent.getStringExtra(ORDER_ID)
         paymentId = intent.getStringExtra(PAYMENT_ID)
         error_code = intent.getStringExtra(ERROR_CODE).toString()
         error_message = intent.getStringExtra(ERROR_MESSAGE).toString()
