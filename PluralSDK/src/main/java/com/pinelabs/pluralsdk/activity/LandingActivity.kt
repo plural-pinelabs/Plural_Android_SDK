@@ -139,6 +139,7 @@ class LandingActivity : AppCompatActivity(), Thread.UncaughtExceptionHandler,
     private var customerInfo: CustomerInfo? = null
     private var dccAmountMessage: DCCDetails? = null
     private var merchantName: String? = null
+    private var orderId: String? = null
 
     private lateinit var bottomSheetDialogOtp: BottomSheetDialogFragment
     lateinit var bottomSheetDialogMobile: BottomSheetDialogFragment
@@ -393,7 +394,7 @@ class LandingActivity : AppCompatActivity(), Thread.UncaughtExceptionHandler,
                                     //mainViewModel.clearTransactionStatus()
                                 } else {
                                     val intent = Intent(this, FailureActivity::class.java)
-                                    //intent.putExtra(ORDER_ID, orderId)
+                                    intent.putExtra(ORDER_ID, orderId)
                                     intent.putExtra(ERROR_CODE, errorCode)
                                     intent.putExtra(ERROR_MESSAGE, errorMessage)
                                     startActivity(intent)
@@ -404,7 +405,7 @@ class LandingActivity : AppCompatActivity(), Thread.UncaughtExceptionHandler,
                         }
                     }, onFailure = { error ->
                         val intent = Intent(this, FailureActivity::class.java)
-                        //intent.putExtra(ORDER_ID, orderId)
+                        intent.putExtra(ORDER_ID, orderId)
                         intent.putExtra(ERROR_CODE, error?.error_code)
                         intent.putExtra(ERROR_MESSAGE, error?.error_message)
                         startActivity(intent)
@@ -507,7 +508,7 @@ class LandingActivity : AppCompatActivity(), Thread.UncaughtExceptionHandler,
                         startShimmer()
                     }, onSuccess = { data ->
                         merchantName = data?.merchantInfo?.merchantName
-                        //orderId = response.order_id
+                        orderId = data?.transactionInfo?.orderId
                         Utils.println("Fetch data " + Gson().toJson(data))
                         setView(data)
 
@@ -517,6 +518,7 @@ class LandingActivity : AppCompatActivity(), Thread.UncaughtExceptionHandler,
 
                     }, onFailure = { errorMessage ->
                         val i = Intent(applicationContext, FailureActivity::class.java)
+                        intent.putExtra(ORDER_ID, orderId)
                         i.putExtra(ERROR_CODE, errorMessage?.error_code)
                         i.putExtra(ERROR_MESSAGE, errorMessage?.error_message)
                         startActivity(i)
