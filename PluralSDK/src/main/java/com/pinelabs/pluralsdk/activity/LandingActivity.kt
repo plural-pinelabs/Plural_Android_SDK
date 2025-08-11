@@ -508,6 +508,7 @@ class LandingActivity : AppCompatActivity(), Thread.UncaughtExceptionHandler,
                         startShimmer()
                     }, onSuccess = { data ->
                         merchantName = data?.merchantInfo?.merchantName
+                        PluralSDK.setOrderID(orderId)
                         orderId = data?.transactionInfo?.orderId
                         Utils.println("Fetch data " + Gson().toJson(data))
                         setView(data)
