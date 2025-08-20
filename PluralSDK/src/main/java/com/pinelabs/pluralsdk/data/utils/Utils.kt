@@ -137,7 +137,8 @@ object Utils {
     }
 
     fun println(message: String) {
-        if (BuildConfig.DEBUG) kotlin.io.println(message)
+        Log.d("PluralSDK", message)
+        kotlin.io.println(message)
 
     }
 
