@@ -13,6 +13,8 @@ import com.pinelabs.pluralsdk.utils.Constants.Companion.SPLASH_TIMER
 import com.pinelabs.pluralsdk.utils.Constants.Companion.TOKEN
 import java.util.Timer
 import java.util.TimerTask
+import android.util.Log
+import com.pinelabs.pluralsdk.data.utils.Utils
 
 class SplashActivity : AppCompatActivity() {
 
@@ -23,6 +25,8 @@ class SplashActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.splash)
+        Utils.println("Inside Splash oncreate")
+        Log.v("Plural", "onCreate called")
         ActivityLifecycleCallback.register(this.application)
         val clevertapDefaultInstance = CleverTapAPI.getDefaultInstance(this@SplashActivity)
         CleverTapUtil.CT_EVENT_SDK_INITIALISED(clevertapDefaultInstance, this@SplashActivity)
@@ -37,6 +41,7 @@ class SplashActivity : AppCompatActivity() {
 
         Timer().schedule(object : TimerTask() {
             override fun run() {
+                Log.v("Plural", "calling landing activity")
                 val i = Intent(applicationContext, LandingActivity::class.java)
                 i.putExtra(TOKEN, token)
                 startActivity(i)
