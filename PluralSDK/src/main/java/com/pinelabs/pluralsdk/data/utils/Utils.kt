@@ -27,6 +27,7 @@ import com.pinelabs.pluralsdk.utils.Constants.Companion.PLATFORM_VERSION
 import com.pinelabs.pluralsdk.utils.Constants.Companion.SDK_TYPE
 import com.pinelabs.pluralsdk.utils.Constants.Companion.TRANSACTION_TYPE_SDK
 import com.pinelabs.pluralsdk.utils.DeviceUtil
+import android.util.Log
 
 object Utils {
 
