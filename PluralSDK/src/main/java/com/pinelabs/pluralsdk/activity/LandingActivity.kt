@@ -93,6 +93,8 @@ import com.pinelabs.pluralsdk.viewmodels.SavedCardViewModel
 import com.pinelabs.pluralsdk.viewmodels.ViewModelFactory
 import com.pinelabs.pluralsdk.viewmodels.ViewModelFactoryRetry
 import com.pinelabs.pluralsdk.viewmodels.ViewModelFactorySavedCard
+import android.util.Log
+import com.pinelabs.pluralsdk.data.utils.Utils
 
 
 class LandingActivity : AppCompatActivity(), Thread.UncaughtExceptionHandler,
@@ -148,6 +150,7 @@ class LandingActivity : AppCompatActivity(), Thread.UncaughtExceptionHandler,
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.landing)
+        Log.v("Plural", "onCreate called Landing activity")
 
         clevertapDefaultInstance = CleverTapAPI.getDefaultInstance(applicationContext)
         startTime = System.currentTimeMillis()
@@ -164,6 +167,7 @@ class LandingActivity : AppCompatActivity(), Thread.UncaughtExceptionHandler,
             ViewModelProvider(this, viewModelFactorySavedCard)[SavedCardViewModel::class.java]
 
         token = intent.getStringExtra(TOKEN).toString()
+        Utils.println("Token in landing activity $token")
 
         initializeViews()
         fetchData(token)
@@ -240,6 +244,7 @@ class LandingActivity : AppCompatActivity(), Thread.UncaughtExceptionHandler,
     }
 
     private fun fetchData(token: String) {
+        Utils.println("Fetch data token $token")
         viewModel.fetchData(token)
     }
 
@@ -507,6 +512,7 @@ class LandingActivity : AppCompatActivity(), Thread.UncaughtExceptionHandler,
                     ApiResultHandler<FetchResponse>(this@LandingActivity, onLoading = {
                         startShimmer()
                     }, onSuccess = { data ->
+                        Utils.println("Fetch data response ${data}")
                         merchantName = data?.merchantInfo?.merchantName
                         PluralSDK.setOrderID(orderId)
                         orderId = data?.transactionInfo?.orderId
@@ -518,6 +524,7 @@ class LandingActivity : AppCompatActivity(), Thread.UncaughtExceptionHandler,
                         }
 
                     }, onFailure = { errorMessage ->
+                        Utils.println("Fetch data response")
                         val i = Intent(applicationContext, FailureActivity::class.java)
                         intent.putExtra(ORDER_ID, orderId)
                         i.putExtra(ERROR_CODE, errorMessage?.error_code)
@@ -528,6 +535,7 @@ class LandingActivity : AppCompatActivity(), Thread.UncaughtExceptionHandler,
                 fetchDataResponseHandler.handleApiResult(response)
             }
         } catch (e: Exception) {
+            Utils.println("Exception caught ${e.message}")
             e.printStackTrace()
         }
         try {
@@ -559,12 +567,14 @@ class LandingActivity : AppCompatActivity(), Thread.UncaughtExceptionHandler,
                 cancelTransactionResultHandler.handleApiResult(response)
             }
         } catch (e: Exception) {
+            Utils.println("Exception in ObserveFetchData ${e.message}")
             e.printStackTrace()
         }
 
     }
 
     fun setView(fetchResponse: FetchResponse?) {
+         Utils.println(" setView Fetch response ${fetchResponse}")
         //constraintLayout = layoutOrginal.findViewById(R.id.constrain_layout)
 
         fetchResponse?.customerInfo?.let { info ->
@@ -732,6 +742,7 @@ class LandingActivity : AppCompatActivity(), Thread.UncaughtExceptionHandler,
     }
 
     override fun uncaughtException(t: Thread, e: Throwable) {
+         Utils.println(" Exception Caught ${e.message}")
         Utils.println("Exception caught")
         clevertapDefaultInstance = CleverTapAPI.getDefaultInstance(applicationContext)
         CleverTapUtil.CT_EVENT_SDK_ERROR(
@@ -742,6 +753,7 @@ class LandingActivity : AppCompatActivity(), Thread.UncaughtExceptionHandler,
     }
 
     override fun onRetry(isAcs: Boolean, errorCode: String?, errorMessage: String?) {
+        Utils.println("Retry called with isAcs: $isAcs, errorCode: $errorCode, errorMessage: $errorMessage")
         this.isAcs = isAcs
         this.errorCode = errorCode
         this.errorMessage = errorMessage
