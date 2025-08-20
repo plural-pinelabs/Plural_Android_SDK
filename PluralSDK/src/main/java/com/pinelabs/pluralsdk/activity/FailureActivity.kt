@@ -26,6 +26,7 @@ import com.pinelabs.pluralsdk.utils.Constants.Companion.SPACE
 import com.pinelabs.pluralsdk.utils.Constants.Companion.START_BOLD
 import com.pinelabs.pluralsdk.viewmodels.FetchDataViewModel
 import com.pinelabs.pluralsdk.viewmodels.ViewModelFactory
+import com.pinelabs.pluralsdk.data.utils.Utils
 
 class FailureActivity : AppCompatActivity() {
 
@@ -44,6 +45,7 @@ class FailureActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.payment_failed)
+        Utils.println("Inside failure oncreate")
 
         setStatusBarColor(this, null)
 
