@@ -255,6 +255,9 @@ class UPICollectFragment : Fragment(), UpiIntentAdapter.OnItemClickListener {
                         }, onFailure = { errorMessage ->
                             /*bottomSheetDialog.dismiss()
                             listener?.onRetry(false)*/
+                            if(errorMessage?.error_message?.contains(API_INTERNET_MESSAGE,true)==true){
+                                return@ApiResultHandler
+                            }
                             val intent = Intent(requireActivity(), FailureActivity::class.java)
                             intent.putExtra(ORDER_ID, orderId)
                             intent.putExtra(ERROR_CODE, errorMessage?.error_code)
