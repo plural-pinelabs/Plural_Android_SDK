@@ -31,7 +31,7 @@ object RetrofitBuilder {
 
     private fun getRetrofit(): Retrofit {
         return Retrofit.Builder()
-            .baseUrl(HTTPS + BASE_URL_UAT + BASE_CHECKOUTBFF)
+            .baseUrl(HTTPS + BASE_URL_PROD + BASE_CHECKOUTBFF)
             .addConverterFactory(GsonConverterFactory.create())
             .addConverterFactory(GsonConverterFactory.create(gson))
             .client(clientBuilder.build())
