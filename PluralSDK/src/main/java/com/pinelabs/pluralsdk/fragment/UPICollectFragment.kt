@@ -89,6 +89,7 @@ import com.pinelabs.pluralsdk.utils.PaymentModeId
 import com.pinelabs.pluralsdk.utils.PaymentModes
 import java.util.Timer
 import java.util.TimerTask
+import com.pinelabs.pluralsdk.utils.Constants.Companion.API_INTERNET_MESSAGE
 
 class UPICollectFragment : Fragment(), UpiIntentAdapter.OnItemClickListener {
 
